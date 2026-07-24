@@ -1,7 +1,7 @@
 {
-  "name": "My Command Center — Operation Arete",
+  "name": "My Command Center – Operation Arete",
   "short_name": "Command Center",
-  "description": "A tactical personal development dashboard for Operation Arete.",
+  "description": "A tactical personal development dashboard.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -9,5 +9,28 @@
   "theme_color": "#060608",
   "orientation": "portrait-primary",
   "lang": "en-US",
-  "categories": ["productivity", "health", "lifestyle"]
+  "icons": [
+    {
+      "src": "./IMG_1462.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./IMG_1462.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": [
+    "productivity",
+    "health",
+    "lifestyle"
+  ]
 }
