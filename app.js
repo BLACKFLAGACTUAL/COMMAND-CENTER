@@ -40,7 +40,7 @@
     ]
   };
 
-  const TRAINING_DETAILS = {
+  const DEFAULT_WORKOUTS = {
     "Strength A": ["Zercher squat", "Incline bench", "Weighted pull-ups"],
     "Strength B": ["Trap-bar deadlift", "Overhead press", "Chest-supported row"],
     "HIC": ["Assault bike", "Intervals", "Kettlebell swings", "Burpees"],
@@ -53,6 +53,7 @@
   let activeView = "today";
   let taskDialogCategory = null;
   let scheduleDialogIndex = null;
+  let editingWorkoutName = null;
   let lastRenderedDateKey = getTodayKey();
 
   const elements = {};
@@ -85,7 +86,10 @@
       "spiritTemplateEditor", "exportDataButton", "importDataInput",
       "resetTodayButton", "deleteAllDataButton", "taskDialog",
       "taskDialogForm", "taskDialogTitle", "taskDialogInput",
-      "scheduleDialog", "scheduleDialogForm", "scheduleDialogInput"
+      "scheduleDialog", "scheduleDialogForm", "scheduleDialogInput",
+      "workoutLibrary", "addWorkoutButton", "workoutDialog",
+      "workoutDialogForm", "workoutDialogTitle", "workoutNameInput",
+      "exerciseEditor", "addExerciseRowButton", "workoutDialogStatus"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
@@ -132,6 +136,9 @@
 
     elements.taskDialogForm.addEventListener("submit", handleTaskDialogSubmit);
     elements.scheduleDialogForm.addEventListener("submit", handleScheduleDialogSubmit);
+    elements.addWorkoutButton.addEventListener("click", () => openWorkoutDialog());
+    elements.addExerciseRowButton.addEventListener("click", () => addExerciseEditorRow(""));
+    elements.workoutDialogForm.addEventListener("submit", handleWorkoutDialogSubmit);
 
     elements.aarRating.addEventListener("input", () => {
       elements.aarRatingOutput.value = elements.aarRating.value;
@@ -171,7 +178,7 @@
 
   function ensureStateShape() {
     if (!state || typeof state !== "object") state = createInitialState();
-    state.version = 1;
+    state.version = 2;
     state.settings = { ...DEFAULT_SETTINGS, ...(state.settings || {}) };
 
     if (!Array.isArray(state.settings.mindTemplates)) {
@@ -186,6 +193,9 @@
 
     if (!state.daily || typeof state.daily !== "object") state.daily = {};
     if (!state.quotes || typeof state.quotes !== "object") state.quotes = {};
+    if (!state.customWorkouts || typeof state.customWorkouts !== "object" || Array.isArray(state.customWorkouts)) {
+      state.customWorkouts = {};
+    }
 
     getTodayRecord();
     saveState();
@@ -193,10 +203,11 @@
 
   function createInitialState() {
     return {
-      version: 1,
+      version: 2,
       settings: structuredCloneSafe(DEFAULT_SETTINGS),
       daily: {},
-      quotes: {}
+      quotes: {},
+      customWorkouts: {}
     };
   }
 
@@ -346,7 +357,7 @@
   }
 
   function renderWorkoutDetails(workoutName) {
-    const details = TRAINING_DETAILS[workoutName] || ["Follow today’s programmed session."];
+    const details = getWorkoutDetails(workoutName);
     elements.workoutDetails.replaceChildren();
 
     const list = document.createElement("ul");
@@ -406,8 +417,10 @@
       elements.scheduleList.appendChild(item);
     });
 
+    renderWorkoutLibrary();
+
     elements.trainingReference.innerHTML = "";
-    Object.entries(TRAINING_DETAILS).forEach(([name, details]) => {
+    Object.entries(getWorkoutLibrary()).forEach(([name, details]) => {
       const disclosure = document.createElement("details");
       const summary = document.createElement("summary");
       summary.textContent = name;
@@ -420,6 +433,178 @@
       disclosure.append(summary, list);
       elements.trainingReference.appendChild(disclosure);
     });
+  }
+
+  function getWorkoutLibrary() {
+    return { ...DEFAULT_WORKOUTS, ...(state.customWorkouts || {}) };
+  }
+
+  function getWorkoutDetails(workoutName) {
+    const library = getWorkoutLibrary();
+    return Array.isArray(library[workoutName]) && library[workoutName].length
+      ? library[workoutName]
+      : ["Follow today’s programmed session."];
+  }
+
+  function renderWorkoutLibrary() {
+    elements.workoutLibrary.replaceChildren();
+
+    const originalHeading = document.createElement("p");
+    originalHeading.className = "category-kicker library-heading";
+    originalHeading.textContent = "ORIGINAL TEMPLATES";
+    elements.workoutLibrary.appendChild(originalHeading);
+
+    Object.entries(DEFAULT_WORKOUTS).forEach(([name, exercises]) => {
+      elements.workoutLibrary.appendChild(createWorkoutLibraryItem(name, exercises, true));
+    });
+
+    const customHeading = document.createElement("p");
+    customHeading.className = "category-kicker library-heading custom-heading";
+    customHeading.textContent = "CUSTOM PROTOCOLS";
+    elements.workoutLibrary.appendChild(customHeading);
+
+    const customEntries = Object.entries(state.customWorkouts || {});
+    if (!customEntries.length) {
+      const empty = document.createElement("p");
+      empty.className = "empty-state";
+      empty.textContent = "No custom workouts yet.";
+      elements.workoutLibrary.appendChild(empty);
+      return;
+    }
+
+    customEntries.forEach(([name, exercises]) => {
+      elements.workoutLibrary.appendChild(createWorkoutLibraryItem(name, exercises, false));
+    });
+  }
+
+  function createWorkoutLibraryItem(name, exercises, isOriginal) {
+    const item = document.createElement("article");
+    item.className = "workout-library-item";
+
+    const info = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = name;
+    const count = document.createElement("span");
+    count.className = "helper-text";
+    count.textContent = `${exercises.length} exercise${exercises.length === 1 ? "" : "s"}`;
+    info.append(title, count);
+
+    const actions = document.createElement("div");
+    actions.className = "library-actions";
+
+    const duplicate = document.createElement("button");
+    duplicate.className = "schedule-edit";
+    duplicate.type = "button";
+    duplicate.textContent = "Duplicate";
+    duplicate.addEventListener("click", () => duplicateWorkout(name));
+    actions.appendChild(duplicate);
+
+    if (!isOriginal) {
+      const edit = document.createElement("button");
+      edit.className = "schedule-edit";
+      edit.type = "button";
+      edit.textContent = "Edit";
+      edit.addEventListener("click", () => openWorkoutDialog(name));
+
+      const remove = document.createElement("button");
+      remove.className = "schedule-edit danger-edit";
+      remove.type = "button";
+      remove.textContent = "Delete";
+      remove.addEventListener("click", () => deleteCustomWorkout(name));
+      actions.append(edit, remove);
+    }
+
+    item.append(info, actions);
+    return item;
+  }
+
+  function openWorkoutDialog(workoutName = null) {
+    editingWorkoutName = workoutName;
+    const exercises = workoutName ? [...getWorkoutDetails(workoutName)] : [""];
+    elements.workoutDialogTitle.textContent = workoutName ? "Edit workout" : "Create workout";
+    elements.workoutNameInput.value = workoutName || "";
+    elements.workoutNameInput.disabled = Boolean(workoutName);
+    elements.workoutDialogStatus.textContent = "";
+    elements.exerciseEditor.replaceChildren();
+    exercises.forEach(addExerciseEditorRow);
+    elements.workoutDialog.showModal();
+    setTimeout(() => (workoutName ? elements.exerciseEditor.querySelector("input") : elements.workoutNameInput)?.focus(), 0);
+  }
+
+  function addExerciseEditorRow(value = "") {
+    const row = document.createElement("div");
+    row.className = "exercise-editor-row";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 120;
+    input.placeholder = "Exercise name";
+    input.value = value;
+    input.required = true;
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.setAttribute("aria-label", "Remove exercise");
+    remove.addEventListener("click", () => {
+      if (elements.exerciseEditor.children.length === 1) {
+        input.value = "";
+        input.focus();
+      } else {
+        row.remove();
+      }
+    });
+    row.append(input, remove);
+    elements.exerciseEditor.appendChild(row);
+  }
+
+  function handleWorkoutDialogSubmit(event) {
+    event.preventDefault();
+    if (event.submitter?.value !== "save") {
+      elements.workoutDialog.close();
+      return;
+    }
+
+    const name = elements.workoutNameInput.value.trim();
+    const exercises = [...elements.exerciseEditor.querySelectorAll("input")]
+      .map((input) => input.value.trim())
+      .filter(Boolean);
+
+    if (!name || !exercises.length) {
+      elements.workoutDialogStatus.textContent = "Enter a name and at least one exercise.";
+      return;
+    }
+    if (!editingWorkoutName && (DEFAULT_WORKOUTS[name] || state.customWorkouts[name])) {
+      elements.workoutDialogStatus.textContent = "That workout name already exists.";
+      return;
+    }
+
+    state.customWorkouts[editingWorkoutName || name] = exercises;
+    elements.workoutDialog.close();
+    saveAndRender();
+  }
+
+  function duplicateWorkout(sourceName) {
+    const baseName = `${sourceName} Copy`;
+    let name = baseName;
+    let number = 2;
+    while (DEFAULT_WORKOUTS[name] || state.customWorkouts[name]) {
+      name = `${baseName} ${number++}`;
+    }
+    state.customWorkouts[name] = [...getWorkoutDetails(sourceName)];
+    saveAndRender();
+    openWorkoutDialog(name);
+  }
+
+  function deleteCustomWorkout(name) {
+    const assignedDays = state.settings.schedule
+      .map((workout, index) => workout === name ? index + 1 : null)
+      .filter(Boolean);
+    const message = assignedDays.length
+      ? `“${name}” is assigned to day${assignedDays.length > 1 ? "s" : ""} ${assignedDays.join(", ")}. Delete it and change those days to Rest?`
+      : `Delete “${name}”?`;
+    if (!confirm(message)) return;
+    delete state.customWorkouts[name];
+    state.settings.schedule = state.settings.schedule.map((workout) => workout === name ? "Rest" : workout);
+    saveAndRender();
   }
 
   function renderHistory() {
@@ -598,7 +783,17 @@
 
   function openScheduleDialog(index) {
     scheduleDialogIndex = index;
-    elements.scheduleDialogInput.value = state.settings.schedule[index];
+    elements.scheduleDialogInput.replaceChildren();
+    const current = state.settings.schedule[index];
+    const names = Object.keys(getWorkoutLibrary());
+    if (current && !names.includes(current)) names.push(current);
+    names.forEach((name) => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      option.selected = name === current;
+      elements.scheduleDialogInput.appendChild(option);
+    });
     elements.scheduleDialog.showModal();
     setTimeout(() => elements.scheduleDialogInput.focus(), 0);
   }
