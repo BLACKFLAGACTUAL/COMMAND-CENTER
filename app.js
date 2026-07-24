@@ -53,6 +53,7 @@
   let activeView = "today";
   let taskDialogCategory = null;
   let scheduleDialogIndex = null;
+  let lastRenderedDateKey = getTodayKey();
 
   const elements = {};
 
@@ -134,8 +135,21 @@
 
     elements.aarRating.addEventListener("input", () => {
       elements.aarRatingOutput.value = elements.aarRating.value;
+      saveAarDraft();
     });
+    [
+      elements.aarWentWell,
+      elements.aarImprove,
+      elements.aarLesson,
+      elements.aarPriority
+    ].forEach((field) => field.addEventListener("input", saveAarDraft));
     elements.aarForm.addEventListener("submit", saveAar);
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) refreshForNewDate();
+    });
+    window.addEventListener("focus", refreshForNewDate);
+    window.setInterval(refreshForNewDate, 60_000);
 
     elements.cycleStartDate.addEventListener("change", () => {
       if (!elements.cycleStartDate.value) return;
@@ -226,6 +240,7 @@
   }
 
   function renderAll() {
+    lastRenderedDateKey = getTodayKey();
     renderHeader();
     renderToday();
     renderSchedule();
@@ -631,6 +646,20 @@
     elements.aarRatingOutput.value = String(aar.rating || 5);
   }
 
+  function saveAarDraft() {
+    const day = getTodayRecord();
+    day.aar = {
+      ...day.aar,
+      wentWell: elements.aarWentWell.value,
+      improve: elements.aarImprove.value,
+      lesson: elements.aarLesson.value,
+      priority: elements.aarPriority.value,
+      rating: Number(elements.aarRating.value)
+    };
+    day.updatedAt = new Date().toISOString();
+    saveState();
+  }
+
   function saveAar(event) {
     event.preventDefault();
     const day = getTodayRecord();
@@ -786,8 +815,9 @@
 
   function calculateCycleDay(date) {
     const start = parseLocalDate(state.settings.cycleStartDate);
-    const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    const difference = Math.floor((target - start) / 86400000);
+    const startUtc = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+    const targetUtc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    const difference = Math.round((targetUtc - startUtc) / 86400000);
     return modulo(difference, 14) + 1;
   }
 
@@ -851,6 +881,14 @@
 
   function saveAndRender() {
     saveState();
+    renderAll();
+  }
+
+  function refreshForNewDate() {
+    const currentDateKey = getTodayKey();
+    if (currentDateKey === lastRenderedDateKey) return;
+
+    getTodayRecord();
     renderAll();
   }
 
