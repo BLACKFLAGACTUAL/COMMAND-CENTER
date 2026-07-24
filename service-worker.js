@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-v2.2.0-custom-builder-fix";
+const CACHE_NAME = "command-center-v2.3.0-protocol-card-redesign";
 const APP_SHELL = [
   "./",
   "./index.html",

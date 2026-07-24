@@ -402,6 +402,7 @@
       number.textContent = String(index + 1);
 
       const label = document.createElement("div");
+      label.className = "schedule-copy";
       const small = document.createElement("span");
       small.className = "data-label";
       small.textContent = index + 1 === currentDay ? "TODAY" : `DAY ${index + 1}`;
