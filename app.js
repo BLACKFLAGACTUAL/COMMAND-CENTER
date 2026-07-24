@@ -89,7 +89,9 @@
       "scheduleDialog", "scheduleDialogForm", "scheduleDialogInput",
       "workoutLibrary", "addWorkoutButton", "workoutDialog",
       "workoutDialogForm", "workoutDialogTitle", "workoutNameInput",
-      "exerciseEditor", "addExerciseRowButton", "workoutDialogStatus"
+      "exerciseEditor", "addExerciseRowButton", "workoutDialogStatus",
+      "quickWorkoutForm", "quickWorkoutName", "quickExerciseEditor",
+      "quickAddExerciseButton", "quickAssignDays", "quickWorkoutStatus"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
@@ -139,6 +141,8 @@
     elements.addWorkoutButton.addEventListener("click", () => openWorkoutDialog());
     elements.addExerciseRowButton.addEventListener("click", () => addExerciseEditorRow(""));
     elements.workoutDialogForm.addEventListener("submit", handleWorkoutDialogSubmit);
+    elements.quickAddExerciseButton.addEventListener("click", () => addQuickExerciseRow(""));
+    elements.quickWorkoutForm.addEventListener("submit", handleQuickWorkoutSubmit);
 
     elements.aarRating.addEventListener("input", () => {
       elements.aarRatingOutput.value = elements.aarRating.value;
@@ -418,6 +422,7 @@
     });
 
     renderWorkoutLibrary();
+    renderQuickWorkoutBuilder();
 
     elements.trainingReference.innerHTML = "";
     Object.entries(getWorkoutLibrary()).forEach(([name, details]) => {
@@ -433,6 +438,87 @@
       disclosure.append(summary, list);
       elements.trainingReference.appendChild(disclosure);
     });
+  }
+
+
+  function renderQuickWorkoutBuilder() {
+    if (!elements.quickExerciseEditor.children.length) {
+      addQuickExerciseRow("");
+      addQuickExerciseRow("");
+    }
+
+    elements.quickAssignDays.replaceChildren();
+    state.settings.schedule.forEach((assignment, index) => {
+      const label = document.createElement("label");
+      label.className = "assign-day-option";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = String(index);
+
+      const dayText = document.createElement("span");
+      dayText.innerHTML = `<strong>DAY ${index + 1}</strong><small>${escapeHtml(assignment)}</small>`;
+
+      label.append(checkbox, dayText);
+      elements.quickAssignDays.appendChild(label);
+    });
+  }
+
+  function addQuickExerciseRow(value = "") {
+    const row = document.createElement("div");
+    row.className = "exercise-editor-row";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 120;
+    input.placeholder = "Exercise name";
+    input.value = value;
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.setAttribute("aria-label", "Remove exercise");
+    remove.addEventListener("click", () => {
+      if (elements.quickExerciseEditor.children.length === 1) {
+        input.value = "";
+        input.focus();
+      } else {
+        row.remove();
+      }
+    });
+
+    row.append(input, remove);
+    elements.quickExerciseEditor.appendChild(row);
+  }
+
+  function handleQuickWorkoutSubmit(event) {
+    event.preventDefault();
+    const name = elements.quickWorkoutName.value.trim();
+    const exercises = [...elements.quickExerciseEditor.querySelectorAll("input")]
+      .map((input) => input.value.trim())
+      .filter(Boolean);
+
+    if (!name || !exercises.length) {
+      elements.quickWorkoutStatus.textContent = "Enter a workout name and at least one exercise.";
+      return;
+    }
+    if (DEFAULT_WORKOUTS[name] || state.customWorkouts[name]) {
+      elements.quickWorkoutStatus.textContent = "That workout name already exists. Choose another name or edit it in the library.";
+      return;
+    }
+
+    state.customWorkouts[name] = exercises;
+    [...elements.quickAssignDays.querySelectorAll('input[type="checkbox"]:checked')]
+      .forEach((checkbox) => {
+        state.settings.schedule[Number(checkbox.value)] = name;
+      });
+
+    elements.quickWorkoutName.value = "";
+    elements.quickExerciseEditor.replaceChildren();
+    addQuickExerciseRow("");
+    addQuickExerciseRow("");
+    elements.quickWorkoutStatus.textContent = `${name} saved and assigned.`;
+    saveAndRender();
   }
 
   function getWorkoutLibrary() {

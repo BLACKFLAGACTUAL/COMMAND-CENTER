@@ -208,3 +208,19 @@ select {
   .workout-library-card .section-heading { align-items:flex-start; }
   .compact-action { font-size:.72rem; }
 }
+
+
+/* INLINE CUSTOM WORKOUT BUILDER */
+.quick-workout-form { display:grid; gap:12px; margin-top:18px; }
+.builder-label-row { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:4px; }
+.builder-label-row label { margin:0; }
+.assign-days-fieldset { border:1px solid var(--line); padding:14px; margin:4px 0 0; }
+.assign-days-fieldset legend { padding:0 8px; color:var(--accent); font-family:var(--display); font-weight:900; text-transform:uppercase; letter-spacing:.08em; }
+.assign-days-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.assign-day-option { display:grid; grid-template-columns:22px minmax(0,1fr); align-items:center; gap:9px; border:1px solid var(--line); background:var(--panel-2); padding:10px; cursor:pointer; }
+.assign-day-option input { width:18px; height:18px; accent-color:var(--accent); }
+.assign-day-option span { min-width:0; }
+.assign-day-option strong { display:block; color:var(--text); font-family:var(--display); font-size:.86rem; }
+.assign-day-option small { display:block; overflow:hidden; color:var(--muted); text-overflow:ellipsis; white-space:nowrap; margin-top:2px; }
+.quick-workout-form .save-status:not(:empty) { border-left:3px solid var(--accent); padding:8px 10px; background:var(--accent-soft); }
+@media (min-width:620px) { .assign-days-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }

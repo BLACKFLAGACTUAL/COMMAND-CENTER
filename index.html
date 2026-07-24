@@ -202,15 +202,45 @@
 
         <div id="scheduleList" class="schedule-list"></div>
 
+        <section class="reference-card workout-builder-card" aria-labelledby="quickBuilderHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">CUSTOM WORKOUT BUILDER</p>
+              <h3 id="quickBuilderHeading">Build and assign a protocol</h3>
+            </div>
+          </div>
+          <p class="helper-text">Create your own workout, add exercises, and assign it directly to any days in the 14-day schedule.</p>
+
+          <form id="quickWorkoutForm" class="quick-workout-form">
+            <label for="quickWorkoutName">Workout name</label>
+            <input id="quickWorkoutName" type="text" maxlength="80" placeholder="Example: Upper Body Power" required>
+
+            <div class="builder-label-row">
+              <label>Exercises</label>
+              <button id="quickAddExerciseButton" class="text-button" type="button">+ Add exercise</button>
+            </div>
+            <div id="quickExerciseEditor" class="exercise-editor"></div>
+
+            <fieldset class="assign-days-fieldset">
+              <legend>Assign to schedule days</legend>
+              <div id="quickAssignDays" class="assign-days-grid"></div>
+              <p class="helper-text">Optional. You can also assign it later by tapping Edit on any schedule day.</p>
+            </fieldset>
+
+            <p id="quickWorkoutStatus" class="save-status" aria-live="polite"></p>
+            <button class="button primary full-width" type="submit">Save custom workout</button>
+          </form>
+        </section>
+
         <section class="reference-card workout-library-card" aria-labelledby="workoutLibraryHeading">
           <div class="section-heading">
             <div>
               <p class="category-kicker">WORKOUT LIBRARY</p>
-              <h3 id="workoutLibraryHeading">Custom protocols</h3>
+              <h3 id="workoutLibraryHeading">Templates and custom protocols</h3>
             </div>
-            <button id="addWorkoutButton" class="button primary compact-action" type="button">+ Add workout</button>
+            <button id="addWorkoutButton" class="button secondary compact-action" type="button">Open editor</button>
           </div>
-          <p class="helper-text">Original templates stay protected. Duplicate one to customize it, or build a new protocol from scratch.</p>
+          <p class="helper-text">Original templates stay protected. Duplicate one to customize it, or use the builder above.</p>
           <div id="workoutLibrary" class="workout-library"></div>
         </section>
 
