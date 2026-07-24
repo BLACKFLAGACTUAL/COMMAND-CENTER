@@ -1,17 +1,13 @@
 {
-  "name": "My Command Center \u2014 Operation Arete",
+  "name": "My Command Center — Operation Arete",
   "short_name": "Command Center",
-  "description": "A mobile personal development dashboard for Operation Arete.",
+  "description": "A tactical personal development dashboard for Operation Arete.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#080b09",
-  "theme_color": "#0b0f0d",
+  "background_color": "#060608",
+  "theme_color": "#060608",
   "orientation": "portrait-primary",
   "lang": "en-US",
-  "categories": [
-    "productivity",
-    "health",
-    "lifestyle"
-  ]
+  "categories": ["productivity", "health", "lifestyle"]
 }
