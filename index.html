@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f0d">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="My Command Center — Operation Arete personal development dashboard.">
+  <title>My Command Center</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./styles.css">
+  <!-- Add apple-touch-icon.png later for a custom iPhone Home Screen icon. -->
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+</head>
+<body>
+  <noscript>
+    <div class="noscript">My Command Center requires JavaScript.</div>
+  </noscript>
+
+  <div id="storageAlert" class="storage-alert" role="alert" hidden>
+    Your browser blocked local storage. Changes may not persist.
+  </div>
+
+  <div class="app-shell">
+    <header class="command-header">
+      <div class="brand-lockup">
+        <p class="eyebrow">OPERATION ARETE</p>
+        <h1>MY COMMAND CENTER</h1>
+      </div>
+
+      <div class="header-grid">
+        <div>
+          <span class="data-label">DATE</span>
+          <strong id="currentDate">—</strong>
+        </div>
+        <div>
+          <span class="data-label">CYCLE</span>
+          <strong id="cycleDayHeader">DAY — / 14</strong>
+        </div>
+        <div>
+          <span class="data-label">READINESS</span>
+          <strong id="overallPercentHeader">0%</strong>
+        </div>
+      </div>
+
+      <section class="quote-panel" aria-labelledby="quoteHeading">
+        <div class="section-heading compact">
+          <div>
+            <span class="data-label">OF THE DAY</span>
+            <h2 id="quoteHeading">Commander’s Intent</h2>
+          </div>
+          <button id="editQuoteButton" class="icon-button" type="button" aria-label="Edit quote of the day">✎</button>
+        </div>
+        <blockquote id="quoteDisplay">“The secret of all victory lies in the organization of the non-obvious.”</blockquote>
+        <div id="quoteEditor" class="inline-editor" hidden>
+          <label for="quoteInput">Quote of the day</label>
+          <textarea id="quoteInput" rows="3" maxlength="280"></textarea>
+          <div class="button-row">
+            <button id="saveQuoteButton" class="button primary" type="button">Save quote</button>
+            <button id="cancelQuoteButton" class="button secondary" type="button">Cancel</button>
+          </div>
+        </div>
+      </section>
+    </header>
+
+    <main id="mainContent">
+      <!-- TODAY -->
+      <section id="todayView" class="view active" data-view="today" aria-labelledby="todayHeading">
+        <div class="view-title-row">
+          <div>
+            <p class="eyebrow">DAILY EXECUTION</p>
+            <h2 id="todayHeading">Today</h2>
+          </div>
+          <div class="overall-ring" aria-label="Overall daily completion">
+            <span id="overallPercent">0%</span>
+          </div>
+        </div>
+
+        <div class="category-card mind-card">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">MIND</p>
+              <h3>Sharpen the edge</h3>
+            </div>
+            <span id="mindPercent" class="percent-badge">0%</span>
+          </div>
+          <div id="mindTasks" class="task-list"></div>
+          <button class="text-button add-task-button" type="button" data-category="mind">+ Add mind task</button>
+        </div>
+
+        <div class="category-card body-card">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">BODY</p>
+              <h3>Build capacity</h3>
+            </div>
+            <span id="bodyPercent" class="percent-badge">0%</span>
+          </div>
+
+          <div class="workout-card">
+            <label class="workout-check-row">
+              <input id="workoutComplete" type="checkbox">
+              <span class="custom-checkbox" aria-hidden="true"></span>
+              <span>
+                <span class="data-label">TODAY’S TRAINING</span>
+                <strong id="todayWorkoutName">—</strong>
+              </span>
+            </label>
+            <button id="toggleWorkoutDetails" class="details-toggle" type="button" aria-expanded="false">
+              View workout details
+            </button>
+            <div id="workoutDetails" class="workout-details" hidden></div>
+          </div>
+
+          <div class="protein-panel">
+            <div class="protein-header">
+              <div>
+                <span class="data-label">PROTEIN LOG</span>
+                <strong id="proteinValue">0 / 170 g</strong>
+              </div>
+              <span id="proteinPercent" class="percent-badge">0%</span>
+            </div>
+            <label class="sr-only" for="proteinSlider">Protein consumed in grams</label>
+            <input id="proteinSlider" class="protein-slider" type="range" min="0" max="170" step="5" value="0">
+            <div class="protein-scale" aria-hidden="true">
+              <span>0</span>
+              <span id="proteinMidpoint">85</span>
+              <span id="proteinGoalLabel">170 g</span>
+            </div>
+            <div class="button-grid four">
+              <button class="button secondary protein-adjust" type="button" data-change="-10">−10 g</button>
+              <button class="button secondary protein-adjust" type="button" data-change="10">+10 g</button>
+              <button class="button secondary protein-adjust" type="button" data-change="25">+25 g</button>
+              <button id="resetProteinButton" class="button danger-ghost" type="button">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-card spirit-card">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">SPIRIT</p>
+              <h3>Live with purpose</h3>
+            </div>
+            <span id="spiritPercent" class="percent-badge">0%</span>
+          </div>
+          <div id="spiritTasks" class="task-list"></div>
+          <button class="text-button add-task-button" type="button" data-category="spirit">+ Add spirit task</button>
+        </div>
+
+        <section class="aar-card" aria-labelledby="aarHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">AFTER ACTION REVIEW</p>
+              <h3 id="aarHeading">Close the loop</h3>
+            </div>
+            <span id="aarSavedStatus" class="save-status" aria-live="polite"></span>
+          </div>
+
+          <form id="aarForm">
+            <label for="aarWentWell">What went well?</label>
+            <textarea id="aarWentWell" rows="3" maxlength="1000"></textarea>
+
+            <label for="aarImprove">What needs improvement?</label>
+            <textarea id="aarImprove" rows="3" maxlength="1000"></textarea>
+
+            <label for="aarLesson">Lesson learned</label>
+            <textarea id="aarLesson" rows="3" maxlength="1000"></textarea>
+
+            <label for="aarPriority">Tomorrow’s main priority</label>
+            <textarea id="aarPriority" rows="2" maxlength="500"></textarea>
+
+            <div class="rating-row">
+              <div>
+                <label for="aarRating">Overall rating</label>
+                <p class="helper-text">1 = poor execution, 10 = exceptional execution</p>
+              </div>
+              <output id="aarRatingOutput" for="aarRating">5</output>
+            </div>
+            <input id="aarRating" type="range" min="1" max="10" step="1" value="5">
+
+            <button class="button primary full-width" type="submit">Save AAR</button>
+          </form>
+        </section>
+      </section>
+
+      <!-- SCHEDULE -->
+      <section id="scheduleView" class="view" data-view="schedule" aria-labelledby="scheduleHeading" hidden>
+        <div class="view-title-row">
+          <div>
+            <p class="eyebrow">14-DAY BATTLE RHYTHM</p>
+            <h2 id="scheduleHeading">Schedule</h2>
+          </div>
+          <span id="cycleDaySchedule" class="cycle-badge">DAY —</span>
+        </div>
+
+        <div class="settings-card compact-card">
+          <label for="cycleStartDate">Cycle start date</label>
+          <input id="cycleStartDate" type="date">
+          <p class="helper-text">This date is Day 1. The schedule repeats every 14 days.</p>
+        </div>
+
+        <div id="scheduleList" class="schedule-list"></div>
+
+        <section class="reference-card">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">TRAINING REFERENCE</p>
+              <h3>Workout details</h3>
+            </div>
+          </div>
+          <div id="trainingReference"></div>
+        </section>
+      </section>
+
+      <!-- HISTORY -->
+      <section id="historyView" class="view" data-view="history" aria-labelledby="historyHeading" hidden>
+        <div class="view-title-row">
+          <div>
+            <p class="eyebrow">PATTERNS & LESSONS</p>
+            <h2 id="historyHeading">History</h2>
+          </div>
+        </div>
+
+        <div class="history-summary">
+          <div class="metric-card">
+            <span class="data-label">DAYS LOGGED</span>
+            <strong id="historyDaysLogged">0</strong>
+          </div>
+          <div class="metric-card">
+            <span class="data-label">AVG EXECUTION</span>
+            <strong id="historyAverage">0%</strong>
+          </div>
+          <div class="metric-card">
+            <span class="data-label">AVG PROTEIN</span>
+            <strong id="historyProteinAverage">0 g</strong>
+          </div>
+        </div>
+
+        <div id="historyList" class="history-list"></div>
+        <p id="emptyHistory" class="empty-state">No daily records yet. Complete tasks or save an AAR to begin your history.</p>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="settingsView" class="view" data-view="settings" aria-labelledby="settingsHeading" hidden>
+        <div class="view-title-row">
+          <div>
+            <p class="eyebrow">SYSTEM CONTROL</p>
+            <h2 id="settingsHeading">Settings</h2>
+          </div>
+        </div>
+
+        <section class="settings-card">
+          <h3>Daily targets</h3>
+          <label for="proteinGoalInput">Protein goal (grams)</label>
+          <input id="proteinGoalInput" type="number" min="50" max="400" step="5" inputmode="numeric">
+          <button id="saveSettingsButton" class="button primary full-width" type="button">Save settings</button>
+          <p id="settingsSavedStatus" class="save-status" aria-live="polite"></p>
+        </section>
+
+        <section class="settings-card">
+          <h3>Task templates</h3>
+          <p class="helper-text">These are the default tasks used when a new day is opened.</p>
+          <div id="mindTemplateEditor" class="template-editor"></div>
+          <button class="text-button template-add" type="button" data-category="mind">+ Add mind template</button>
+
+          <div class="divider"></div>
+
+          <div id="spiritTemplateEditor" class="template-editor"></div>
+          <button class="text-button template-add" type="button" data-category="spirit">+ Add spirit template</button>
+        </section>
+
+        <section class="settings-card">
+          <h3>Backup and restore</h3>
+          <p class="helper-text">Export regularly. Local browser data can be erased if Safari website data is cleared.</p>
+          <div class="button-stack">
+            <button id="exportDataButton" class="button secondary full-width" type="button">Export data</button>
+            <label class="button secondary full-width file-button" for="importDataInput">Import data</label>
+            <input id="importDataInput" class="sr-only" type="file" accept="application/json,.json">
+          </div>
+        </section>
+
+        <section class="settings-card danger-zone">
+          <h3>Reset controls</h3>
+          <button id="resetTodayButton" class="button danger full-width" type="button">Reset today</button>
+          <button id="deleteAllDataButton" class="button danger-ghost full-width" type="button">Delete all stored data</button>
+        </section>
+
+        <section class="settings-card">
+          <h3>Home Screen icon</h3>
+          <p class="helper-text">
+            Add <code>apple-touch-icon.png</code>, <code>icon-192.png</code>, and
+            <code>icon-512.png</code> to the repository root, then add the PNG icons to
+            <code>manifest.json</code>. Until then, the browser may use a generic icon.
+          </p>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Primary navigation">
+      <button class="nav-button active" type="button" data-target="today" aria-current="page">
+        <span class="nav-icon" aria-hidden="true">⌖</span>
+        <span>Today</span>
+      </button>
+      <button class="nav-button" type="button" data-target="schedule">
+        <span class="nav-icon" aria-hidden="true">▦</span>
+        <span>Schedule</span>
+      </button>
+      <button class="nav-button" type="button" data-target="history">
+        <span class="nav-icon" aria-hidden="true">◫</span>
+        <span>History</span>
+      </button>
+      <button class="nav-button" type="button" data-target="settings">
+        <span class="nav-icon" aria-hidden="true">⚙</span>
+        <span>Settings</span>
+      </button>
+    </nav>
+  </div>
+
+  <dialog id="taskDialog">
+    <form id="taskDialogForm" method="dialog">
+      <h2 id="taskDialogTitle">Add task</h2>
+      <label for="taskDialogInput">Task name</label>
+      <input id="taskDialogInput" type="text" maxlength="120" required>
+      <div class="button-row">
+        <button id="taskDialogSave" class="button primary" value="save">Save</button>
+        <button class="button secondary" value="cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="scheduleDialog">
+    <form id="scheduleDialogForm" method="dialog">
+      <h2>Edit training day</h2>
+      <label for="scheduleDialogInput">Training assignment</label>
+      <input id="scheduleDialogInput" type="text" maxlength="120" required>
+      <div class="button-row">
+        <button class="button primary" value="save">Save</button>
+        <button class="button secondary" value="cancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
