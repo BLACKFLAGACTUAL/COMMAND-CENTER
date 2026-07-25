@@ -270,3 +270,7 @@ select {
 #exerciseDateInput{width:100%;min-height:48px;border:1px solid var(--line);border-radius:0;background:var(--panel-2);color:var(--text);padding:12px 13px;font-size:16px;color-scheme:dark}
 #exerciseSelectField{margin-bottom:.8rem}
 @media(max-width:520px){.progress-toolbar{grid-template-columns:1fr}.progress-toolbar .compact-action{width:100%}}
+
+.manual-entry-card{border-color:rgba(243,79,88,.65);background:linear-gradient(180deg,rgba(243,79,88,.08),rgba(243,79,88,.02));}
+.manual-entry-card .helper-text{margin:0 0 1rem;line-height:1.55;}
+.manual-entry-card .button{font-size:.9rem;letter-spacing:.1em;}

@@ -269,6 +269,17 @@
           </div>
         </div>
 
+        <section class="settings-card manual-entry-card" aria-labelledby="manualEntryHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">MANUAL ENTRY</p>
+              <h3 id="manualEntryHeading">Add previous lift</h3>
+            </div>
+          </div>
+          <p class="helper-text">Enter any workout from an earlier date this year—or any prior year—and it will be added to the selected exercise graph.</p>
+          <button id="manualStrengthEntryButton" class="button primary full-width" type="button">+ Add manual strength entry</button>
+        </section>
+
         <div class="history-summary">
           <div class="metric-card">
             <span class="data-label">DAYS LOGGED</span>
@@ -291,8 +302,13 @@
               <h3 id="progressHeading">Exercise progress</h3>
             </div>
           </div>
-          <label for="progressExerciseSelect">Exercise</label>
-          <select id="progressExerciseSelect"></select>
+          <div class="progress-toolbar">
+            <div class="progress-select-wrap">
+              <label for="progressExerciseSelect">Exercise</label>
+              <select id="progressExerciseSelect"></select>
+            </div>
+            <button id="addPastLiftButton" class="button secondary compact-action" type="button">+ Add past lift</button>
+          </div>
           <div class="chart-wrap">
             <canvas id="progressChart" width="720" height="360" aria-label="Weight progress graph"></canvas>
           </div>
@@ -424,6 +440,13 @@
     <form id="exerciseLogForm">
       <h2>Log exercise</h2>
       <p id="exerciseLogName" class="dialog-workout-name"></p>
+      <div id="exerciseSelectField" hidden>
+        <label for="exerciseNameSelect">Exercise</label>
+        <input id="exerciseNameInput" type="text" list="exerciseNameOptions" maxlength="100" placeholder="Type or choose an exercise" autocomplete="off" required>
+        <datalist id="exerciseNameOptions"></datalist>
+      </div>
+      <label for="exerciseDateInput">Workout date</label>
+      <input id="exerciseDateInput" type="date" required>
       <div class="log-input-grid">
         <div><label for="exerciseWeightInput">Weight</label><input id="exerciseWeightInput" type="number" min="0" max="2000" step="0.5" inputmode="decimal" required></div>
         <div><label for="exerciseRepsInput">Reps</label><input id="exerciseRepsInput" type="number" min="1" max="1000" step="1" inputmode="numeric" required></div>

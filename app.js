@@ -97,10 +97,10 @@
       "toggleScheduleButton", "schedulePanel", "taskDialogCancel",
       "scheduleDialogCancel", "workoutDialogCancel", "exerciseLogDialog",
       "exerciseLogForm", "exerciseLogName", "exerciseSelectField",
-      "exerciseNameSelect", "exerciseDateInput", "exerciseWeightInput",
+      "exerciseNameInput", "exerciseNameOptions", "exerciseDateInput", "exerciseWeightInput",
       "exerciseRepsInput", "exerciseSetsInput", "exerciseLogNote",
       "exerciseLogStatus", "exerciseLogCancel", "progressExerciseSelect",
-      "addPastLiftButton", "progressChart", "progressChartEmpty", "progressLogList"
+      "addPastLiftButton", "manualStrengthEntryButton", "progressChart", "progressChartEmpty", "progressLogList"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
@@ -161,6 +161,7 @@
     elements.exerciseLogForm.addEventListener("submit", saveExerciseLog);
     elements.progressExerciseSelect.addEventListener("change", renderProgressChart);
     elements.addPastLiftButton.addEventListener("click", openPastExerciseLogDialog);
+    elements.manualStrengthEntryButton.addEventListener("click", openPastExerciseLogDialog);
     [elements.taskDialog, elements.scheduleDialog, elements.workoutDialog, elements.exerciseLogDialog].forEach((dialog) => {
       dialog.addEventListener("cancel", (event) => { event.preventDefault(); dialog.close(); });
       dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
@@ -770,6 +771,7 @@
     elements.exerciseLogName.textContent = "Historical strength entry";
     elements.exerciseSelectField.hidden = false;
     populateExerciseNameSelect();
+    elements.exerciseNameInput.value = elements.progressExerciseSelect.value || "";
     elements.exerciseDateInput.value = getTodayKey();
     elements.exerciseWeightInput.value = "";
     elements.exerciseRepsInput.value = "";
@@ -777,7 +779,7 @@
     elements.exerciseLogNote.value = "";
     elements.exerciseLogStatus.textContent = "";
     elements.exerciseLogDialog.showModal();
-    setTimeout(() => elements.exerciseNameSelect.focus(), 0);
+    setTimeout(() => elements.exerciseNameInput.focus(), 0);
   }
 
   function populateExerciseNameSelect() {
@@ -785,20 +787,19 @@
     Object.values(DEFAULT_WORKOUTS).flat().forEach((name) => names.add(name));
     Object.values(state.customWorkouts || {}).flat().forEach((name) => names.add(name));
     const sorted = [...names].filter(Boolean).sort((a, b) => a.localeCompare(b));
-    elements.exerciseNameSelect.replaceChildren();
+    elements.exerciseNameOptions.replaceChildren();
     sorted.forEach((name) => {
       const option = document.createElement("option");
       option.value = name;
-      option.textContent = name;
-      elements.exerciseNameSelect.appendChild(option);
+      elements.exerciseNameOptions.appendChild(option);
     });
     const selected = elements.progressExerciseSelect.value;
-    if (sorted.includes(selected)) elements.exerciseNameSelect.value = selected;
+    elements.exerciseNameInput.value = selected || "";
   }
 
   function saveExerciseLog(event) {
     event.preventDefault();
-    const exerciseName = loggingPastEntry ? elements.exerciseNameSelect.value : loggingExerciseName;
+    const exerciseName = loggingPastEntry ? elements.exerciseNameInput.value.trim() : loggingExerciseName;
     const dateKey = elements.exerciseDateInput.value;
     const weight = Number(elements.exerciseWeightInput.value);
     const reps = Number(elements.exerciseRepsInput.value);
