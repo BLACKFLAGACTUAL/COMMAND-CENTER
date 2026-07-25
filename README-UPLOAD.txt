@@ -1,16 +1,16 @@
-MY COMMAND CENTER — STRENGTH LOGGING UPDATE
+MY COMMAND CENTER — PAST LIFT ENTRY UPDATE
 
-Upload and replace these four files in the root of your GitHub repository:
+Upload and replace these four files in the ROOT of your GitHub repository:
 - index.html
 - styles.css
 - app.js
 - service-worker.js
 
-New features:
-- Hide/show the 14-day schedule
-- Fixed Cancel buttons in dialogs
-- Log weight, reps, sets, and notes for each exercise
-- Exercise progress graph and recent logs in Archive
-- Existing localStorage data and custom workouts are preserved
+New feature:
+- Archive > Exercise Progress now includes “+ Add past lift.”
+- Select an exercise and historical workout date.
+- Enter weight, reps, sets, and an optional note.
+- Saved historical entries are sorted by date and immediately update the graph.
 
-After GitHub Pages deploys, refresh Safari, then fully close and reopen the Home Screen app.
+Existing localStorage data, schedules, custom workouts, and logs are retained.
+After GitHub Pages deploys, refresh Safari and fully close/reopen the Home Screen app.

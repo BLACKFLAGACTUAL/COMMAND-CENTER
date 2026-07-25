@@ -263,3 +263,10 @@ select {
 .progress-log-row strong{text-align:right}
 .progress-log-row small{grid-column:1/-1;color:var(--muted)}
 @media(max-width:520px){.schedule-title-actions{width:100%;justify-content:space-between}.log-input-grid{grid-template-columns:1fr}#progressChart{height:230px}}
+
+/* Historical lift entry */
+.progress-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.8rem;align-items:end}
+.progress-select-wrap{min-width:0}
+#exerciseDateInput{width:100%;min-height:48px;border:1px solid var(--line);border-radius:0;background:var(--panel-2);color:var(--text);padding:12px 13px;font-size:16px;color-scheme:dark}
+#exerciseSelectField{margin-bottom:.8rem}
+@media(max-width:520px){.progress-toolbar{grid-template-columns:1fr}.progress-toolbar .compact-action{width:100%}}

@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-v3-strength-progress";
+const CACHE_NAME = "command-center-v3-past-strength-history";
 const APP_SHELL = [
   "./",
   "./index.html",

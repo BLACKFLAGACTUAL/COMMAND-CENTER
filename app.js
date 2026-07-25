@@ -55,6 +55,7 @@
   let scheduleDialogIndex = null;
   let editingWorkoutName = null;
   let loggingExerciseName = null;
+  let loggingPastEntry = false;
   let lastRenderedDateKey = getTodayKey();
 
   const elements = {};
@@ -95,10 +96,11 @@
       "quickAddExerciseButton", "quickAssignDays", "quickWorkoutStatus",
       "toggleScheduleButton", "schedulePanel", "taskDialogCancel",
       "scheduleDialogCancel", "workoutDialogCancel", "exerciseLogDialog",
-      "exerciseLogForm", "exerciseLogName", "exerciseWeightInput",
+      "exerciseLogForm", "exerciseLogName", "exerciseSelectField",
+      "exerciseNameSelect", "exerciseDateInput", "exerciseWeightInput",
       "exerciseRepsInput", "exerciseSetsInput", "exerciseLogNote",
       "exerciseLogStatus", "exerciseLogCancel", "progressExerciseSelect",
-      "progressChart", "progressChartEmpty", "progressLogList"
+      "addPastLiftButton", "progressChart", "progressChartEmpty", "progressLogList"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
@@ -158,6 +160,7 @@
     elements.exerciseLogCancel.addEventListener("click", () => elements.exerciseLogDialog.close());
     elements.exerciseLogForm.addEventListener("submit", saveExerciseLog);
     elements.progressExerciseSelect.addEventListener("change", renderProgressChart);
+    elements.addPastLiftButton.addEventListener("click", openPastExerciseLogDialog);
     [elements.taskDialog, elements.scheduleDialog, elements.workoutDialog, elements.exerciseLogDialog].forEach((dialog) => {
       dialog.addEventListener("cancel", (event) => { event.preventDefault(); dialog.close(); });
       dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
@@ -746,9 +749,12 @@
   }
 
   function openExerciseLogDialog(exerciseName) {
+    loggingPastEntry = false;
     loggingExerciseName = exerciseName;
     const latest = getLatestExerciseLog(exerciseName);
     elements.exerciseLogName.textContent = exerciseName;
+    elements.exerciseSelectField.hidden = true;
+    elements.exerciseDateInput.value = getTodayKey();
     elements.exerciseWeightInput.value = latest ? String(latest.weight) : "";
     elements.exerciseRepsInput.value = latest ? String(latest.reps) : "";
     elements.exerciseSetsInput.value = latest ? String(latest.sets || 1) : "1";
@@ -758,22 +764,67 @@
     setTimeout(() => elements.exerciseWeightInput.focus(), 0);
   }
 
+  function openPastExerciseLogDialog() {
+    loggingPastEntry = true;
+    loggingExerciseName = null;
+    elements.exerciseLogName.textContent = "Historical strength entry";
+    elements.exerciseSelectField.hidden = false;
+    populateExerciseNameSelect();
+    elements.exerciseDateInput.value = getTodayKey();
+    elements.exerciseWeightInput.value = "";
+    elements.exerciseRepsInput.value = "";
+    elements.exerciseSetsInput.value = "1";
+    elements.exerciseLogNote.value = "";
+    elements.exerciseLogStatus.textContent = "";
+    elements.exerciseLogDialog.showModal();
+    setTimeout(() => elements.exerciseNameSelect.focus(), 0);
+  }
+
+  function populateExerciseNameSelect() {
+    const names = new Set(Object.keys(state.exerciseLogs || {}));
+    Object.values(DEFAULT_WORKOUTS).flat().forEach((name) => names.add(name));
+    Object.values(state.customWorkouts || {}).flat().forEach((name) => names.add(name));
+    const sorted = [...names].filter(Boolean).sort((a, b) => a.localeCompare(b));
+    elements.exerciseNameSelect.replaceChildren();
+    sorted.forEach((name) => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      elements.exerciseNameSelect.appendChild(option);
+    });
+    const selected = elements.progressExerciseSelect.value;
+    if (sorted.includes(selected)) elements.exerciseNameSelect.value = selected;
+  }
+
   function saveExerciseLog(event) {
     event.preventDefault();
+    const exerciseName = loggingPastEntry ? elements.exerciseNameSelect.value : loggingExerciseName;
+    const dateKey = elements.exerciseDateInput.value;
     const weight = Number(elements.exerciseWeightInput.value);
     const reps = Number(elements.exerciseRepsInput.value);
     const sets = Number(elements.exerciseSetsInput.value);
-    if (!loggingExerciseName || !Number.isFinite(weight) || weight < 0 || !Number.isInteger(reps) || reps < 1 || !Number.isInteger(sets) || sets < 1) {
-      elements.exerciseLogStatus.textContent = "Enter a valid weight, rep count, and set count.";
+    if (!exerciseName || !dateKey || !Number.isFinite(weight) || weight < 0 || !Number.isInteger(reps) || reps < 1 || !Number.isInteger(sets) || sets < 1) {
+      elements.exerciseLogStatus.textContent = "Choose an exercise and date, then enter valid weight, reps, and sets.";
       return;
     }
-    const log = { id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, date: new Date().toISOString(), weight, reps, sets, note: elements.exerciseLogNote.value.trim(), workout: state.settings.schedule[calculateCycleDay(new Date()) - 1] };
-    if (!Array.isArray(state.exerciseLogs[loggingExerciseName])) state.exerciseLogs[loggingExerciseName] = [];
-    state.exerciseLogs[loggingExerciseName].push(log);
+    const selectedDate = new Date(`${dateKey}T12:00:00`);
+    if (Number.isNaN(selectedDate.getTime())) {
+      elements.exerciseLogStatus.textContent = "Choose a valid workout date.";
+      return;
+    }
+    const log = { id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, date: selectedDate.toISOString(), weight, reps, sets, note: elements.exerciseLogNote.value.trim(), workout: state.settings.schedule[calculateCycleDay(selectedDate) - 1] };
+    if (!Array.isArray(state.exerciseLogs[exerciseName])) state.exerciseLogs[exerciseName] = [];
+    state.exerciseLogs[exerciseName].push(log);
     saveState();
     elements.exerciseLogDialog.close();
+    loggingPastEntry = false;
+    loggingExerciseName = null;
     renderWorkoutDetails(state.settings.schedule[calculateCycleDay(new Date()) - 1]);
     renderHistory();
+    if (exerciseName) {
+      elements.progressExerciseSelect.value = exerciseName;
+      renderProgressChart();
+    }
   }
 
   function getLatestExerciseLog(exerciseName) {
