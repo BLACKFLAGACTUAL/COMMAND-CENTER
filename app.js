@@ -54,6 +54,7 @@
   let taskDialogCategory = null;
   let scheduleDialogIndex = null;
   let editingWorkoutName = null;
+  let loggingExerciseName = null;
   let lastRenderedDateKey = getTodayKey();
 
   const elements = {};
@@ -91,7 +92,13 @@
       "workoutDialogForm", "workoutDialogTitle", "workoutNameInput",
       "exerciseEditor", "addExerciseRowButton", "workoutDialogStatus",
       "quickWorkoutForm", "quickWorkoutName", "quickExerciseEditor",
-      "quickAddExerciseButton", "quickAssignDays", "quickWorkoutStatus"
+      "quickAddExerciseButton", "quickAssignDays", "quickWorkoutStatus",
+      "toggleScheduleButton", "schedulePanel", "taskDialogCancel",
+      "scheduleDialogCancel", "workoutDialogCancel", "exerciseLogDialog",
+      "exerciseLogForm", "exerciseLogName", "exerciseWeightInput",
+      "exerciseRepsInput", "exerciseSetsInput", "exerciseLogNote",
+      "exerciseLogStatus", "exerciseLogCancel", "progressExerciseSelect",
+      "progressChart", "progressChartEmpty", "progressLogList"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
@@ -144,6 +151,18 @@
     elements.quickAddExerciseButton.addEventListener("click", () => addQuickExerciseRow(""));
     elements.quickWorkoutForm.addEventListener("submit", handleQuickWorkoutSubmit);
 
+    elements.toggleScheduleButton.addEventListener("click", toggleScheduleVisibility);
+    elements.taskDialogCancel.addEventListener("click", () => elements.taskDialog.close());
+    elements.scheduleDialogCancel.addEventListener("click", () => elements.scheduleDialog.close());
+    elements.workoutDialogCancel.addEventListener("click", () => elements.workoutDialog.close());
+    elements.exerciseLogCancel.addEventListener("click", () => elements.exerciseLogDialog.close());
+    elements.exerciseLogForm.addEventListener("submit", saveExerciseLog);
+    elements.progressExerciseSelect.addEventListener("change", renderProgressChart);
+    [elements.taskDialog, elements.scheduleDialog, elements.workoutDialog, elements.exerciseLogDialog].forEach((dialog) => {
+      dialog.addEventListener("cancel", (event) => { event.preventDefault(); dialog.close(); });
+      dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+    });
+
     elements.aarRating.addEventListener("input", () => {
       elements.aarRatingOutput.value = elements.aarRating.value;
       saveAarDraft();
@@ -182,7 +201,7 @@
 
   function ensureStateShape() {
     if (!state || typeof state !== "object") state = createInitialState();
-    state.version = 2;
+    state.version = 3;
     state.settings = { ...DEFAULT_SETTINGS, ...(state.settings || {}) };
 
     if (!Array.isArray(state.settings.mindTemplates)) {
@@ -200,6 +219,10 @@
     if (!state.customWorkouts || typeof state.customWorkouts !== "object" || Array.isArray(state.customWorkouts)) {
       state.customWorkouts = {};
     }
+    if (!state.exerciseLogs || typeof state.exerciseLogs !== "object" || Array.isArray(state.exerciseLogs)) {
+      state.exerciseLogs = {};
+    }
+    if (typeof state.settings.scheduleCollapsed !== "boolean") state.settings.scheduleCollapsed = false;
 
     getTodayRecord();
     saveState();
@@ -207,11 +230,12 @@
 
   function createInitialState() {
     return {
-      version: 2,
+      version: 3,
       settings: structuredCloneSafe(DEFAULT_SETTINGS),
       daily: {},
       quotes: {},
-      customWorkouts: {}
+      customWorkouts: {},
+      exerciseLogs: {}
     };
   }
 
@@ -363,12 +387,25 @@
   function renderWorkoutDetails(workoutName) {
     const details = getWorkoutDetails(workoutName);
     elements.workoutDetails.replaceChildren();
-
-    const list = document.createElement("ul");
+    const list = document.createElement("div");
+    list.className = "today-exercise-list";
     details.forEach((item) => {
-      const li = document.createElement("li");
-      li.textContent = item;
-      list.appendChild(li);
+      const row = document.createElement("div");
+      row.className = "today-exercise-row";
+      const copy = document.createElement("div");
+      const name = document.createElement("strong");
+      name.textContent = item;
+      const latest = getLatestExerciseLog(item);
+      const sub = document.createElement("small");
+      sub.textContent = latest ? `Last: ${formatWeight(latest.weight)} × ${latest.reps} reps · ${formatShortDate(latest.date)}` : "No weight logged yet";
+      copy.append(name, sub);
+      const logButton = document.createElement("button");
+      logButton.type = "button";
+      logButton.className = "button secondary log-set-button";
+      logButton.textContent = "Log";
+      logButton.addEventListener("click", () => openExerciseLogDialog(item));
+      row.append(copy, logButton);
+      list.appendChild(row);
     });
     elements.workoutDetails.appendChild(list);
   }
@@ -382,8 +419,22 @@
       : "View workout details";
   }
 
+  function toggleScheduleVisibility() {
+    state.settings.scheduleCollapsed = !state.settings.scheduleCollapsed;
+    saveState();
+    applyScheduleVisibility();
+  }
+
+  function applyScheduleVisibility() {
+    const collapsed = Boolean(state.settings.scheduleCollapsed);
+    elements.schedulePanel.hidden = collapsed;
+    elements.toggleScheduleButton.textContent = collapsed ? "Show schedule" : "Hide schedule";
+    elements.toggleScheduleButton.setAttribute("aria-expanded", String(!collapsed));
+  }
+
   function renderSchedule() {
     elements.cycleStartDate.value = state.settings.cycleStartDate;
+    applyScheduleVisibility();
     const currentDay = calculateCycleDay(new Date());
     elements.scheduleList.replaceChildren();
 
@@ -694,7 +745,120 @@
     saveAndRender();
   }
 
+  function openExerciseLogDialog(exerciseName) {
+    loggingExerciseName = exerciseName;
+    const latest = getLatestExerciseLog(exerciseName);
+    elements.exerciseLogName.textContent = exerciseName;
+    elements.exerciseWeightInput.value = latest ? String(latest.weight) : "";
+    elements.exerciseRepsInput.value = latest ? String(latest.reps) : "";
+    elements.exerciseSetsInput.value = latest ? String(latest.sets || 1) : "1";
+    elements.exerciseLogNote.value = "";
+    elements.exerciseLogStatus.textContent = "";
+    elements.exerciseLogDialog.showModal();
+    setTimeout(() => elements.exerciseWeightInput.focus(), 0);
+  }
+
+  function saveExerciseLog(event) {
+    event.preventDefault();
+    const weight = Number(elements.exerciseWeightInput.value);
+    const reps = Number(elements.exerciseRepsInput.value);
+    const sets = Number(elements.exerciseSetsInput.value);
+    if (!loggingExerciseName || !Number.isFinite(weight) || weight < 0 || !Number.isInteger(reps) || reps < 1 || !Number.isInteger(sets) || sets < 1) {
+      elements.exerciseLogStatus.textContent = "Enter a valid weight, rep count, and set count.";
+      return;
+    }
+    const log = { id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, date: new Date().toISOString(), weight, reps, sets, note: elements.exerciseLogNote.value.trim(), workout: state.settings.schedule[calculateCycleDay(new Date()) - 1] };
+    if (!Array.isArray(state.exerciseLogs[loggingExerciseName])) state.exerciseLogs[loggingExerciseName] = [];
+    state.exerciseLogs[loggingExerciseName].push(log);
+    saveState();
+    elements.exerciseLogDialog.close();
+    renderWorkoutDetails(state.settings.schedule[calculateCycleDay(new Date()) - 1]);
+    renderHistory();
+  }
+
+  function getLatestExerciseLog(exerciseName) {
+    const logs = state.exerciseLogs?.[exerciseName];
+    return Array.isArray(logs) && logs.length ? [...logs].sort((a, b) => b.date.localeCompare(a.date))[0] : null;
+  }
+
+  function renderProgressChart() {
+    const exercise = elements.progressExerciseSelect.value;
+    const logs = exercise && Array.isArray(state.exerciseLogs[exercise]) ? [...state.exerciseLogs[exercise]].sort((a, b) => a.date.localeCompare(b.date)) : [];
+    elements.progressChartEmpty.hidden = logs.length > 0;
+    elements.progressChart.hidden = logs.length === 0;
+    elements.progressLogList.replaceChildren();
+    [...logs].reverse().slice(0, 8).forEach((log) => {
+      const row = document.createElement("div");
+      row.className = "progress-log-row";
+      row.innerHTML = `<span>${escapeHtml(formatShortDate(log.date))}</span><strong>${escapeHtml(formatWeight(log.weight))} × ${log.reps}</strong><small>${log.sets || 1} set${(log.sets || 1) === 1 ? "" : "s"}${log.note ? ` · ${escapeHtml(log.note)}` : ""}</small>`;
+      elements.progressLogList.appendChild(row);
+    });
+    if (logs.length) drawProgressChart(logs);
+  }
+
+  function drawProgressChart(logs) {
+    const canvas = elements.progressChart;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(320, Math.floor(rect.width || 720));
+    const height = Math.max(220, Math.floor(rect.height || 360));
+    canvas.width = width * dpr; canvas.height = height * dpr;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr); ctx.clearRect(0, 0, width, height);
+    const pad = { left: 48, right: 18, top: 24, bottom: 38 };
+    const values = logs.map((log) => Number(log.weight) || 0);
+    let min = Math.min(...values), max = Math.max(...values);
+    if (min === max) { min = Math.max(0, min - 10); max += 10; }
+    const range = max - min || 1;
+    ctx.font = "12px ui-monospace, SFMono-Regular, Menlo, monospace";
+    ctx.strokeStyle = "rgba(150,150,165,.28)"; ctx.fillStyle = "#9696a5"; ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = pad.top + ((height - pad.top - pad.bottom) * i / 4);
+      const value = max - range * i / 4;
+      ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(width - pad.right, y); ctx.stroke();
+      ctx.fillText(`${Math.round(value * 10) / 10}`, 4, y + 4);
+    }
+    const xFor = (i) => logs.length === 1 ? (pad.left + width - pad.right) / 2 : pad.left + (width - pad.left - pad.right) * i / (logs.length - 1);
+    const yFor = (v) => pad.top + (height - pad.top - pad.bottom) * (max - v) / range;
+    ctx.strokeStyle = "#f34f58"; ctx.lineWidth = 3; ctx.beginPath();
+    logs.forEach((log, i) => { const x=xFor(i), y=yFor(Number(log.weight)||0); i ? ctx.lineTo(x,y) : ctx.moveTo(x,y); }); ctx.stroke();
+    ctx.fillStyle = "#f34f58";
+    logs.forEach((log, i) => { const x=xFor(i), y=yFor(Number(log.weight)||0); ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill(); });
+    ctx.fillStyle = "#9696a5";
+    const first = formatShortDate(logs[0].date), last = formatShortDate(logs[logs.length-1].date);
+    ctx.fillText(first, pad.left, height - 12);
+    ctx.fillText(last, width - pad.right - ctx.measureText(last).width, height - 12);
+  }
+
+  function formatWeight(weight) {
+    const n = Number(weight);
+    return `${Number.isInteger(n) ? n : n.toFixed(1)} lb`;
+  }
+
+  function formatShortDate(value) {
+    return new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+
   function renderHistory() {
+    const exercises = Object.keys(state.exerciseLogs || {}).filter((name) => Array.isArray(state.exerciseLogs[name]) && state.exerciseLogs[name].length).sort();
+    const previous = elements.progressExerciseSelect.value;
+    elements.progressExerciseSelect.replaceChildren();
+    if (!exercises.length) {
+      const option = document.createElement("option");
+      option.value = ""; option.textContent = "No exercises logged";
+      elements.progressExerciseSelect.appendChild(option);
+      elements.progressExerciseSelect.disabled = true;
+    } else {
+      elements.progressExerciseSelect.disabled = false;
+      exercises.forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name; option.textContent = name;
+        elements.progressExerciseSelect.appendChild(option);
+      });
+      elements.progressExerciseSelect.value = exercises.includes(previous) ? previous : exercises[0];
+    }
+    renderProgressChart();
+
     const records = Object.values(state.daily)
       .filter(hasMeaningfulData)
       .sort((a, b) => b.date.localeCompare(a.date));

@@ -191,9 +191,13 @@
             <p class="eyebrow">14-DAY BATTLE RHYTHM</p>
             <h2 id="scheduleHeading">Schedule</h2>
           </div>
-          <span id="cycleDaySchedule" class="cycle-badge">DAY —</span>
+          <div class="schedule-title-actions">
+            <span id="cycleDaySchedule" class="cycle-badge">DAY —</span>
+            <button id="toggleScheduleButton" class="button secondary compact-action" type="button" aria-expanded="true">Hide schedule</button>
+          </div>
         </div>
 
+        <div id="schedulePanel">
         <div class="settings-card compact-card">
           <label for="cycleStartDate">Cycle start date</label>
           <input id="cycleStartDate" type="date">
@@ -201,6 +205,7 @@
         </div>
 
         <div id="scheduleList" class="schedule-list"></div>
+        </div>
 
         <section class="reference-card workout-builder-card" aria-labelledby="quickBuilderHeading">
           <div class="section-heading">
@@ -278,6 +283,22 @@
             <strong id="historyProteinAverage">0 g</strong>
           </div>
         </div>
+
+        <section class="settings-card progress-card" aria-labelledby="progressHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">STRENGTH INTELLIGENCE</p>
+              <h3 id="progressHeading">Exercise progress</h3>
+            </div>
+          </div>
+          <label for="progressExerciseSelect">Exercise</label>
+          <select id="progressExerciseSelect"></select>
+          <div class="chart-wrap">
+            <canvas id="progressChart" width="720" height="360" aria-label="Weight progress graph"></canvas>
+          </div>
+          <p id="progressChartEmpty" class="empty-state">Log weight from today’s workout to build your progress graph.</p>
+          <div id="progressLogList" class="progress-log-list"></div>
+        </section>
 
         <div id="historyList" class="history-list"></div>
         <p id="emptyHistory" class="empty-state">No daily records yet. Complete tasks or save an AAR to begin your history.</p>
@@ -366,7 +387,7 @@
       <input id="taskDialogInput" type="text" maxlength="120" required>
       <div class="button-row">
         <button id="taskDialogSave" class="button primary" value="save">Save</button>
-        <button class="button secondary" value="cancel">Cancel</button>
+        <button id="taskDialogCancel" class="button secondary" type="button">Cancel</button>
       </div>
     </form>
   </dialog>
@@ -378,7 +399,7 @@
       <select id="scheduleDialogInput" required></select>
       <div class="button-row">
         <button class="button primary" value="save">Save</button>
-        <button class="button secondary" value="cancel">Cancel</button>
+        <button id="scheduleDialogCancel" class="button secondary" type="button">Cancel</button>
       </div>
     </form>
   </dialog>
@@ -394,7 +415,26 @@
       <p id="workoutDialogStatus" class="save-status" aria-live="polite"></p>
       <div class="button-row">
         <button class="button primary" value="save">Save workout</button>
-        <button class="button secondary" value="cancel">Cancel</button>
+        <button id="workoutDialogCancel" class="button secondary" type="button">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="exerciseLogDialog">
+    <form id="exerciseLogForm">
+      <h2>Log exercise</h2>
+      <p id="exerciseLogName" class="dialog-workout-name"></p>
+      <div class="log-input-grid">
+        <div><label for="exerciseWeightInput">Weight</label><input id="exerciseWeightInput" type="number" min="0" max="2000" step="0.5" inputmode="decimal" required></div>
+        <div><label for="exerciseRepsInput">Reps</label><input id="exerciseRepsInput" type="number" min="1" max="1000" step="1" inputmode="numeric" required></div>
+        <div><label for="exerciseSetsInput">Sets</label><input id="exerciseSetsInput" type="number" min="1" max="100" step="1" inputmode="numeric" value="1" required></div>
+      </div>
+      <label for="exerciseLogNote">Note (optional)</label>
+      <input id="exerciseLogNote" type="text" maxlength="160" placeholder="PR, tempo, form note…">
+      <p id="exerciseLogStatus" class="save-status" aria-live="polite"></p>
+      <div class="button-row">
+        <button class="button primary" type="submit">Save log</button>
+        <button id="exerciseLogCancel" class="button secondary" type="button">Cancel</button>
       </div>
     </form>
   </dialog>

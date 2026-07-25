@@ -1,14 +1,16 @@
-MY COMMAND CENTER — PROTOCOL CARD REDESIGN
+MY COMMAND CENTER — STRENGTH LOGGING UPDATE
 
-Upload and replace these files in the ROOT of your GitHub repository:
+Upload and replace these four files in the root of your GitHub repository:
 - index.html
 - styles.css
 - app.js
 - service-worker.js
 
-This update retains the custom workout builder and scrolling fix. It redesigns each 14-day schedule card so the day label, workout title, and Edit action no longer share a cramped horizontal line.
+New features:
+- Hide/show the 14-day schedule
+- Fixed Cancel buttons in dialogs
+- Log weight, reps, sets, and notes for each exercise
+- Exercise progress graph and recent logs in Archive
+- Existing localStorage data and custom workouts are preserved
 
-After committing:
-1. Wait for GitHub Pages to deploy.
-2. Open the website in Safari and refresh.
-3. Fully close and reopen the Home Screen app.
+After GitHub Pages deploys, refresh Safari, then fully close and reopen the Home Screen app.

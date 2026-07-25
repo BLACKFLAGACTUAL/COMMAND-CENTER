@@ -242,3 +242,24 @@ select {
 .assign-day-option small { display:block; overflow:hidden; color:var(--muted); text-overflow:ellipsis; white-space:nowrap; margin-top:2px; }
 .quick-workout-form .save-status:not(:empty) { border-left:3px solid var(--accent); padding:8px 10px; background:var(--accent-soft); }
 @media (min-width:620px) { .assign-days-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+
+/* Protocol usability + strength logging update */
+.schedule-title-actions{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;justify-content:flex-end}
+#schedulePanel[hidden]{display:none!important}
+.today-exercise-list{display:grid;gap:.65rem}
+.today-exercise-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.75rem;align-items:center;padding:.8rem 0;border-bottom:1px solid var(--line)}
+.today-exercise-row:last-child{border-bottom:0}
+.today-exercise-row strong,.today-exercise-row small{display:block}
+.today-exercise-row small{margin-top:.22rem;color:var(--muted);font-family:var(--mono);font-size:.76rem}
+.log-set-button{min-width:68px;padding:.65rem .8rem}
+.log-input-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem}
+.dialog-workout-name{color:var(--accent);font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;margin-top:-.4rem}
+.progress-card{margin-bottom:1rem}
+.chart-wrap{width:100%;overflow:hidden;border:1px solid var(--line);background:#09090d;margin-top:1rem}
+#progressChart{display:block;width:100%;height:260px}
+.progress-log-list{display:grid;gap:.5rem;margin-top:.8rem}
+.progress-log-row{display:grid;grid-template-columns:auto 1fr;gap:.2rem .75rem;padding:.7rem 0;border-bottom:1px solid var(--line)}
+.progress-log-row span{color:var(--muted);font-family:var(--mono)}
+.progress-log-row strong{text-align:right}
+.progress-log-row small{grid-column:1/-1;color:var(--muted)}
+@media(max-width:520px){.schedule-title-actions{width:100%;justify-content:space-between}.log-input-grid{grid-template-columns:1fr}#progressChart{height:230px}}
