@@ -41,6 +41,62 @@
     ]
   };
 
+  const ACTIVITY_METRIC_PRESETS = {
+    MMA: [
+      { name: "Training time", unit: "min" },
+      { name: "Rounds", unit: "rounds" },
+      { name: "Sparring rounds", unit: "rounds" },
+      { name: "Performance", unit: "/10" }
+    ],
+    BJJ: [
+      { name: "Training time", unit: "min" },
+      { name: "Rolling rounds", unit: "rounds" },
+      { name: "Submissions", unit: "subs" },
+      { name: "Performance", unit: "/10" }
+    ],
+    Boxing: [
+      { name: "Training time", unit: "min" },
+      { name: "Rounds", unit: "rounds" },
+      { name: "Sparring rounds", unit: "rounds" },
+      { name: "Performance", unit: "/10" }
+    ],
+    Running: [
+      { name: "Distance", unit: "mi" },
+      { name: "Time", unit: "min" },
+      { name: "Pace", unit: "min/mi" },
+      { name: "Heart rate", unit: "bpm" }
+    ],
+    Ruck: [
+      { name: "Distance", unit: "mi" },
+      { name: "Time", unit: "min" },
+      { name: "Load", unit: "lb" },
+      { name: "Pace", unit: "min/mi" }
+    ],
+    Swimming: [
+      { name: "Distance", unit: "yd" },
+      { name: "Time", unit: "min" },
+      { name: "Pace", unit: "min/100yd" }
+    ],
+    Surfing: [
+      { name: "Session time", unit: "min" },
+      { name: "Waves caught", unit: "waves" },
+      { name: "Best wave", unit: "/10" }
+    ],
+    Chess: [
+      { name: "Rating", unit: "Elo" },
+      { name: "Games", unit: "games" },
+      { name: "Wins", unit: "wins" },
+      { name: "Study time", unit: "min" }
+    ],
+    Reading: [
+      { name: "Pages", unit: "pages" },
+      { name: "Study time", unit: "min" }
+    ],
+    "Body Weight": [
+      { name: "Body weight", unit: "lb" }
+    ]
+  };
+
   const DEFAULT_WORKOUTS = {
     "Strength A": ["Zercher squat", "Incline bench", "Weighted pull-ups"],
     "Strength B": ["Trap-bar deadlift", "Overhead press", "Chest-supported row"],
@@ -116,7 +172,9 @@
       "editAarRating", "editAarStatus", "editAarCancel", "newOperationButton", "currentOperationCard",
       "operationCycleStrip", "operationsList", "operationDialog", "operationForm", "operationDialogTitle",
       "operationTimingNote", "operationName", "operationIntent", "operationMission", "operationDialogStatus",
-      "operationDialogCancel", "operationTrendSummary", "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
+      "operationDialogCancel", "operationTrendSummary", "operationObjectives", "operationsYearSelect", "operationsYearTimeline",
+      "intelRange", "intelMetricGrid", "intelFindings", "intelExecutionChart", "intelProteinChart", "intelRatingChart", "intelActivitySummary",
+      "activityTrackerMetrics", "activityMetricSuggestions", "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
       "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
@@ -269,6 +327,18 @@
     elements.addActivityTrackerButton.addEventListener("click", openActivityTrackerDialog);
     elements.activityTrackerCancel.addEventListener("click", () => elements.activityTrackerDialog.close());
     elements.activityTrackerForm.addEventListener("submit", saveActivityTracker);
+    elements.activityTrackerName.addEventListener("input", () => {
+      const metrics = inferActivityMetrics(elements.activityTrackerName.value);
+      if (metrics.length) {
+        elements.activityTrackerMetrics.value = metrics.map((metric) => `${metric.name} | ${metric.unit}`).join("\n");
+      }
+    });
+    elements.intelRange.addEventListener("change", () => {
+      state.settings.intelRange = elements.intelRange.value;
+      saveState();
+      renderIntel();
+    });
+    elements.operationsYearSelect.addEventListener("change", renderOperationsYearTimeline);
     elements.addActivityEntryButton.addEventListener("click", openActivityEntryDialog);
     elements.activityEntryCancel.addEventListener("click", () => elements.activityEntryDialog.close());
     elements.activityEntryForm.addEventListener("submit", saveActivityEntry);
@@ -321,7 +391,7 @@
 
   function ensureStateShape() {
     if (!state || typeof state !== "object") state = createInitialState();
-    state.version = 6;
+    state.version = 7;
     state.settings = { ...DEFAULT_SETTINGS, ...(state.settings || {}) };
 
     if (!Array.isArray(state.settings.mindTemplates)) {
@@ -330,8 +400,13 @@
     if (!Array.isArray(state.settings.spiritTemplates)) {
       state.settings.spiritTemplates = [...DEFAULT_SETTINGS.spiritTemplates];
     }
-    if (!Array.isArray(state.settings.schedule) || state.settings.schedule.length !== 14) {
+    if (!Array.isArray(state.settings.schedule)) {
       state.settings.schedule = [...DEFAULT_SETTINGS.schedule];
+    } else {
+      state.settings.schedule = [...state.settings.schedule.slice(0, 14)];
+      while (state.settings.schedule.length < 14) {
+        state.settings.schedule.push(DEFAULT_SETTINGS.schedule[state.settings.schedule.length] || "Rest");
+      }
     }
 
     if (!state.daily || typeof state.daily !== "object") state.daily = {};
@@ -343,12 +418,18 @@
       state.exerciseLogs = {};
     }
     if (!state.activityTrackers || typeof state.activityTrackers !== "object" || Array.isArray(state.activityTrackers)) {
-      state.activityTrackers = { MMA: { name: "MMA", entries: [] } };
+      state.activityTrackers = {};
     }
-    if (!state.activityTrackers.MMA) state.activityTrackers.MMA = { name: "MMA", entries: [] };
+    if (!state.activityTrackers.MMA) {
+      state.activityTrackers.MMA = { name: "MMA", entries: [], metrics: structuredCloneSafe(ACTIVITY_METRIC_PRESETS.MMA) };
+    }
     Object.values(state.activityTrackers).forEach((tracker) => {
       if (!Array.isArray(tracker.entries)) tracker.entries = [];
+      if (!Array.isArray(tracker.metrics) || !tracker.metrics.length) {
+        tracker.metrics = inferActivityMetrics(tracker.name);
+      }
     });
+    if (!state.settings.intelRange) state.settings.intelRange = "365";
     if (!state.settings.archiveDomain) state.settings.archiveDomain = "Weightlifting";
     if (typeof state.settings.progressExercise !== "string") state.settings.progressExercise = "";
     if (typeof state.settings.scheduleCollapsed !== "boolean") state.settings.scheduleCollapsed = false;
@@ -364,13 +445,13 @@
 
   function createInitialState() {
     return {
-      version: 6,
+      version: 7,
       settings: structuredCloneSafe(DEFAULT_SETTINGS),
       daily: {},
       quotes: {},
       customWorkouts: {},
       exerciseLogs: {},
-      activityTrackers: { MMA: { name: "MMA", entries: [] } },
+      activityTrackers: { MMA: { name: "MMA", entries: [], metrics: structuredCloneSafe(ACTIVITY_METRIC_PRESETS.MMA) } },
       operations: { items: [], cycles: [], activeOperationId: null }
     };
   }
@@ -420,6 +501,7 @@
     renderToday();
     renderSchedule();
     renderHistory();
+    renderIntel();
     renderSettings();
   }
 
@@ -1039,6 +1121,19 @@
       if (!Number.isInteger(operation.startCycleIndex)) operation.startCycleIndex = 0;
       if (operation.endCycleIndex !== null && !Number.isInteger(operation.endCycleIndex)) operation.endCycleIndex = null;
       if (!operation.status) operation.status = operation.endCycleIndex === null ? "active" : "complete";
+      if (!Array.isArray(operation.objectives)) operation.objectives = [];
+      operation.objectives = operation.objectives.map((objective) => {
+        if (typeof objective === "string") {
+          return { id: `obj-${Date.now()}-${Math.random().toString(16).slice(2)}`, text: objective, completed: false, completedAt: null };
+        }
+        return {
+          id: objective.id || `obj-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          text: String(objective.text || ""),
+          completed: Boolean(objective.completed),
+          completedAt: objective.completedAt || null
+        };
+      }).filter((objective) => objective.text.trim());
+      if (typeof operation.overallSummary !== "string") operation.overallSummary = "";
     });
 
     if (!state.operations.items.length) {
@@ -1050,6 +1145,8 @@
         startCycleIndex: 0,
         endCycleIndex: null,
         status: "active",
+        objectives: [],
+        overallSummary: "",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -1113,6 +1210,7 @@
           endDate: bounds.endKey,
           operationId: operation?.id || null,
           status: i < currentIndex ? "complete" : "active",
+          summary: "",
           createdAt: new Date().toISOString()
         };
         state.operations.cycles.push(cycle);
@@ -1121,6 +1219,7 @@
         cycle.endDate = bounds.endKey;
         cycle.status = i < currentIndex ? "complete" : "active";
         if (!cycle.operationId && operation) cycle.operationId = operation.id;
+        if (typeof cycle.summary !== "string") cycle.summary = "";
       }
     }
   }
@@ -1170,6 +1269,132 @@
 
   function getPlannedOperation() {
     return state.operations.items.find((operation) => operation.status === "planned") || null;
+  }
+
+  function intelRecordsForRange() {
+    const value = state.settings.intelRange || "365";
+    const records = Object.values(state.daily || {}).filter(hasMeaningfulData).sort((a, b) => a.date.localeCompare(b.date));
+    if (value === "all") return records;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - Number(value) + 1);
+    const cutoffKey = formatDateKey(cutoff);
+    return records.filter((day) => day.date >= cutoffKey);
+  }
+
+  function averageNumbers(values) {
+    const valid = values.map(Number).filter(Number.isFinite);
+    return valid.length ? valid.reduce((sum, value) => sum + value, 0) / valid.length : 0;
+  }
+
+  function renderMiniLineChart(container, points, suffix = "") {
+    container.replaceChildren();
+    if (!points.length) {
+      container.innerHTML = `<p class="empty-state">Not enough data yet.</p>`;
+      return;
+    }
+    const values = points.map((point) => Number(point.value)).filter(Number.isFinite);
+    if (!values.length) return;
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min || 1;
+    const width = 600, height = 150, pad = 12;
+    const coords = points.map((point, i) => ({
+      x: points.length === 1 ? width / 2 : pad + (i / (points.length - 1)) * (width - pad * 2),
+      y: height - pad - ((Number(point.value) - min) / range) * (height - pad * 2)
+    }));
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", `Trend from ${points[0].value}${suffix} to ${points.at(-1).value}${suffix}`);
+    const grid = document.createElementNS(svg.namespaceURI, "line");
+    grid.setAttribute("x1", pad); grid.setAttribute("x2", width-pad); grid.setAttribute("y1", height/2); grid.setAttribute("y2", height/2); grid.setAttribute("class", "intel-chart-gridline");
+    svg.appendChild(grid);
+    const path = document.createElementNS(svg.namespaceURI, "polyline");
+    path.setAttribute("points", coords.map((p) => `${p.x},${p.y}`).join(" "));
+    path.setAttribute("class", "intel-chart-line");
+    svg.appendChild(path);
+    coords.forEach((p) => {
+      const dot = document.createElementNS(svg.namespaceURI, "circle");
+      dot.setAttribute("cx", p.x); dot.setAttribute("cy", p.y); dot.setAttribute("r", 3); dot.setAttribute("class", "intel-chart-dot");
+      svg.appendChild(dot);
+    });
+    container.appendChild(svg);
+    const footer = document.createElement("div");
+    footer.className = "intel-chart-footer";
+    footer.innerHTML = `<span>${escapeHtml(points[0].label)}</span><strong>${escapeHtml(String(points.at(-1).value))}${escapeHtml(suffix)}</strong><span>${escapeHtml(points.at(-1).label)}</span>`;
+    container.appendChild(footer);
+  }
+
+  function renderIntel() {
+    if (!elements.intelMetricGrid) return;
+    elements.intelRange.value = state.settings.intelRange || "365";
+    const records = intelRecordsForRange();
+    const execution = records.map((day) => calculateCompletion(day).overall);
+    const protein = records.map((day) => Number(day.protein) || 0);
+    const ratings = records.filter((day) => aarHasContent(day)).map((day) => Number(day.aar?.rating)).filter(Number.isFinite);
+
+    const allLiftLogs = Object.entries(state.exerciseLogs || {}).flatMap(([exercise, logs]) =>
+      (Array.isArray(logs) ? logs : []).map((log) => ({ ...log, exercise }))
+    );
+    const rangeStart = records[0]?.date || "";
+    const liftLogs = rangeStart ? allLiftLogs.filter((log) => String(log.date || "").slice(0, 10) >= rangeStart) : allLiftLogs;
+
+    const metrics = [
+      ["AVG EXECUTION", `${Math.round(averageNumbers(execution))}%`],
+      ["AVG PROTEIN", `${Math.round(averageNumbers(protein))} g`],
+      ["AVG AAR", ratings.length ? `${averageNumbers(ratings).toFixed(1)}/10` : "—"],
+      ["DAYS LOGGED", String(records.length)],
+      ["LIFT ENTRIES", String(liftLogs.length)],
+      ["OPERATIONS", String(state.operations.items.length)]
+    ];
+    elements.intelMetricGrid.replaceChildren();
+    metrics.forEach(([label, value]) => {
+      const card = document.createElement("div");
+      card.className = "intel-metric";
+      card.innerHTML = `<span>${label}</span><strong>${value}</strong>`;
+      elements.intelMetricGrid.appendChild(card);
+    });
+
+    const findings = [];
+    if (records.length >= 8) {
+      const latest = records.slice(-7);
+      const previous = records.slice(-14, -7);
+      if (previous.length) {
+        const execDelta = Math.round(averageNumbers(latest.map((d) => calculateCompletion(d).overall)) - averageNumbers(previous.map((d) => calculateCompletion(d).overall)));
+        findings.push(`Recent 7-day execution is ${formatSignedDelta(execDelta, " pp")} vs the prior period.`);
+        const proteinDelta = Math.round(averageNumbers(latest.map((d) => d.protein || 0)) - averageNumbers(previous.map((d) => d.protein || 0)));
+        findings.push(`Recent protein average is ${formatSignedDelta(proteinDelta, " g")} vs the prior period.`);
+      }
+    }
+    if (records.length) {
+      const weekday = new Map();
+      records.forEach((day) => {
+        const name = parseLocalDate(day.date).toLocaleDateString(undefined, { weekday: "short" });
+        const bucket = weekday.get(name) || [];
+        bucket.push(calculateCompletion(day).overall);
+        weekday.set(name, bucket);
+      });
+      const ranked = [...weekday.entries()].map(([name, values]) => [name, averageNumbers(values)]).sort((a,b)=>b[1]-a[1]);
+      if (ranked[0]) findings.push(`${ranked[0][0]} is your strongest execution day at ${Math.round(ranked[0][1])}% average.`);
+      if (ranked.at(-1)) findings.push(`${ranked.at(-1)[0]} is your lowest execution day at ${Math.round(ranked.at(-1)[1])}% average.`);
+    }
+    elements.intelFindings.innerHTML = `<h4>KEY FINDINGS</h4>${findings.length ? `<ul>${findings.map((finding) => `<li>${escapeHtml(finding)}</li>`).join("")}</ul>` : `<p class="empty-state">Log more days to generate trend findings.</p>`}`;
+
+    const pointify = (selector) => records.map((day) => ({ label: formatShortDate(day.date), value: selector(day) }));
+    renderMiniLineChart(elements.intelExecutionChart, pointify((day) => calculateCompletion(day).overall), "%");
+    renderMiniLineChart(elements.intelProteinChart, pointify((day) => Number(day.protein) || 0), " g");
+    renderMiniLineChart(elements.intelRatingChart, records.filter(aarHasContent).map((day) => ({ label: formatShortDate(day.date), value: Number(day.aar?.rating) || 0 })), "/10");
+
+    elements.intelActivitySummary.replaceChildren();
+    Object.entries(state.activityTrackers || {}).forEach(([name, tracker]) => {
+      const card = document.createElement("div");
+      card.className = "intel-activity-card";
+      const entries = tracker.entries || [];
+      const recent = rangeStart ? entries.filter((entry) => String(entry.date || "").slice(0, 10) >= rangeStart) : entries;
+      const metricNames = [...new Set(recent.map((entry) => entry.metric).filter(Boolean))];
+      card.innerHTML = `<strong>${escapeHtml(name)}</strong><span>${recent.length} entries</span><small>${escapeHtml(metricNames.slice(0,4).join(" · ") || "No metrics logged")}</small>`;
+      elements.intelActivitySummary.appendChild(card);
+    });
   }
 
   function cycleRecords(cycleIndex) {
@@ -1274,6 +1499,57 @@
     }
   }
 
+  function getOperationCycleRecord(cycleIndex) {
+    return state.operations.cycles.find((cycle) => cycle.cycleIndex === cycleIndex) || null;
+  }
+
+  function generateBlockSummary(cycleIndex, previousCycleIndex = null) {
+    const stats = cycleStats(cycleIndex);
+    const aars = cycleAarCount(cycleIndex);
+    const previous = Number.isInteger(previousCycleIndex) ? cycleStats(previousCycleIndex) : null;
+    const executionTrend = previous ? stats.execution - previous.execution : null;
+    const ratingTrend = previous ? Math.round((stats.rating - previous.rating) * 10) / 10 : null;
+    return [
+      `${stats.records}/14 days logged with ${stats.execution}% average execution.`,
+      `${aars} AARs captured; average rating ${stats.rating || "—"}/10.`,
+      `${stats.protein} g average protein and ${stats.liftEntries} strength log entries.`,
+      previous ? `Vs prior block: execution ${formatSignedDelta(executionTrend, " pp")}, rating ${formatSignedDelta(ratingTrend)}.` : "Baseline block for this Operation."
+    ].join(" ");
+  }
+
+  function editBlockSummary(cycleIndex) {
+    const cycle = getOperationCycleRecord(cycleIndex);
+    if (!cycle) return;
+    const defaultText = cycle.summary || generateBlockSummary(cycleIndex, cycleIndex - 1);
+    const next = prompt("Block Commander Summary", defaultText);
+    if (next === null) return;
+    cycle.summary = next.trim();
+    saveState();
+    renderOperations();
+  }
+
+  function generateOperationSummary(operation) {
+    const trend = operationTrendData(operation);
+    const stats = operationStats(operation);
+    const complete = (operation.objectives || []).filter((objective) => objective.completed).length;
+    const total = (operation.objectives || []).length;
+    return `${operation.name}: ${stats.cycleCount} blocks, ${stats.daysLogged} logged days, ${stats.execution}% average execution, ${stats.protein} g average protein. ` +
+      `${trend.totalAars} AARs and ${trend.totalLifts} lift logs captured. ` +
+      `Objectives completed: ${complete}/${total || 0}. ` +
+      `Execution moved ${formatSignedDelta(trend.executionDelta, " pp")} from first to latest block.`;
+  }
+
+  function editOperationOverallSummary(operationId) {
+    const operation = state.operations.items.find((item) => item.id === operationId);
+    if (!operation) return;
+    const next = prompt("Overall Operation Summary", operation.overallSummary || generateOperationSummary(operation));
+    if (next === null) return;
+    operation.overallSummary = next.trim();
+    operation.updatedAt = new Date().toISOString();
+    saveState();
+    renderOperations();
+  }
+
   function buildBlockDeepDive(cycleIndex, operation, blockNumber) {
     const stats = cycleStats(cycleIndex);
     const records = cycleRecords(cycleIndex);
@@ -1304,6 +1580,22 @@
       <span>${stats.rating || "—"}/10 avg rating</span>
     `;
     body.appendChild(metrics);
+
+    const cycleRecord = getOperationCycleRecord(cycleIndex);
+    const commanderSummary = document.createElement("div");
+    commanderSummary.className = "block-commander-summary";
+    const autoSummary = generateBlockSummary(cycleIndex, blockNumber > 1 ? cycleIndex - 1 : null);
+    commanderSummary.innerHTML = `
+      <small>BLOCK SUMMARY</small>
+      <p>${escapeHtml(cycleRecord?.summary || autoSummary)}</p>
+    `;
+    const editSummary = document.createElement("button");
+    editSummary.type = "button";
+    editSummary.className = "text-button";
+    editSummary.textContent = cycleRecord?.summary ? "Edit block summary" : "Add commander note";
+    editSummary.addEventListener("click", () => editBlockSummary(cycleIndex));
+    commanderSummary.appendChild(editSummary);
+    body.appendChild(commanderSummary);
 
     const aarList = document.createElement("div");
     aarList.className = "block-aar-list";
@@ -1383,6 +1675,27 @@
           <span>${stats.protein} g avg protein</span>
         </div>
       `;
+      const objectives = document.createElement("div");
+      objectives.className = "operation-objectives";
+      objectives.innerHTML = `<div class="operation-objectives-heading"><small>OBJECTIVES</small><strong>${(current.objectives || []).filter((objective) => objective.completed).length}/${(current.objectives || []).length} COMPLETE</strong></div>`;
+      if (!(current.objectives || []).length) {
+        objectives.innerHTML += `<p class="helper-text">No objectives set. Use Edit operation to add measurable objectives.</p>`;
+      } else {
+        current.objectives.forEach((objective) => {
+          const label = document.createElement("label");
+          label.className = `operation-objective${objective.completed ? " complete" : ""}`;
+          const input = document.createElement("input");
+          input.type = "checkbox";
+          input.checked = Boolean(objective.completed);
+          input.addEventListener("change", () => toggleOperationObjective(current.id, objective.id));
+          const copy = document.createElement("span");
+          copy.innerHTML = `<strong>${escapeHtml(objective.text)}</strong>${objective.completedAt ? `<small>Victory · ${escapeHtml(formatShortDate(objective.completedAt))}</small>` : ""}`;
+          label.append(input, copy);
+          objectives.appendChild(label);
+        });
+      }
+      wrapper.appendChild(objectives);
+
       const actions = document.createElement("div");
       actions.className = "button-row operation-actions";
       const edit = document.createElement("button");
@@ -1476,6 +1789,19 @@
           </div>
         `;
 
+        if (operation.status === "complete") {
+          const overall = document.createElement("div");
+          overall.className = "operation-overall-summary";
+          overall.innerHTML = `<small>FINAL OPERATION SUMMARY</small><p>${escapeHtml(operation.overallSummary || generateOperationSummary(operation))}</p>`;
+          const editOverall = document.createElement("button");
+          editOverall.type = "button";
+          editOverall.className = "text-button";
+          editOverall.textContent = operation.overallSummary ? "Edit final summary" : "Add commander summary";
+          editOverall.addEventListener("click", () => editOperationOverallSummary(operation.id));
+          overall.appendChild(editOverall);
+          body.appendChild(overall);
+        }
+
         const blocksHeading = document.createElement("h5");
         blocksHeading.className = "operation-blocks-heading";
         blocksHeading.textContent = "14-DAY BLOCKS";
@@ -1495,7 +1821,107 @@
         elements.operationsList.appendChild(item);
       });
 
+    renderOperationsYearTimeline();
     initializeCollapsibleSections();
+  }
+
+  function operationDateRange(operation) {
+    const currentIndex = Math.max(0, getCycleIndexForDate(new Date()));
+    const start = getCycleBounds(operation.startCycleIndex).start;
+    const endIndex = operation.endCycleIndex === null ? currentIndex : operation.endCycleIndex;
+    const end = getCycleBounds(Math.max(operation.startCycleIndex, endIndex)).end;
+    return { start, end };
+  }
+
+  function renderOperationsYearTimeline() {
+    if (!elements.operationsYearSelect || !elements.operationsYearTimeline) return;
+    const years = new Set([new Date().getFullYear()]);
+    state.operations.items.forEach((operation) => {
+      const range = operationDateRange(operation);
+      years.add(range.start.getFullYear());
+      years.add(range.end.getFullYear());
+      (operation.objectives || []).forEach((objective) => {
+        if (objective.completedAt) years.add(new Date(objective.completedAt).getFullYear());
+      });
+    });
+    const sortedYears = [...years].sort((a, b) => b - a);
+    const previous = Number(elements.operationsYearSelect.value) || new Date().getFullYear();
+    elements.operationsYearSelect.replaceChildren();
+    sortedYears.forEach((year) => {
+      const option = document.createElement("option");
+      option.value = String(year);
+      option.textContent = String(year);
+      elements.operationsYearSelect.appendChild(option);
+    });
+    elements.operationsYearSelect.value = sortedYears.includes(previous) ? String(previous) : String(sortedYears[0]);
+    const year = Number(elements.operationsYearSelect.value);
+
+    const yearStart = new Date(year, 0, 1, 12);
+    const yearEnd = new Date(year, 11, 31, 12);
+    const yearDays = Math.max(1, Math.round((yearEnd - yearStart) / 86400000) + 1);
+    const pos = (date) => clamp(Math.round(((date - yearStart) / 86400000) / yearDays * 100), 0, 100);
+
+    elements.operationsYearTimeline.replaceChildren();
+    const months = document.createElement("div");
+    months.className = "timeline-months";
+    ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"].forEach((month) => {
+      const span = document.createElement("span");
+      span.textContent = month;
+      months.appendChild(span);
+    });
+    elements.operationsYearTimeline.appendChild(months);
+
+    const track = document.createElement("div");
+    track.className = "year-timeline-track";
+
+    state.operations.items.forEach((operation) => {
+      const range = operationDateRange(operation);
+      if (range.end < yearStart || range.start > yearEnd) return;
+      const start = range.start < yearStart ? yearStart : range.start;
+      const end = range.end > yearEnd ? yearEnd : range.end;
+      const bar = document.createElement("button");
+      bar.type = "button";
+      bar.className = "timeline-operation-bar";
+      bar.style.left = `${pos(start)}%`;
+      bar.style.width = `${Math.max(3, pos(end) - pos(start) + 1)}%`;
+      bar.textContent = operation.name.replace(/^Operation\\s+/i, "");
+      bar.title = `${operation.name}: ${formatDisplayDate(range.start)} – ${formatDisplayDate(range.end)}`;
+      bar.addEventListener("click", () => openOperationDialog(operation.id));
+      track.appendChild(bar);
+
+      (operation.objectives || []).filter((objective) => objective.completed && objective.completedAt).forEach((objective) => {
+        const date = new Date(objective.completedAt);
+        if (date.getFullYear() !== year) return;
+        const flag = document.createElement("button");
+        flag.type = "button";
+        flag.className = "timeline-victory-flag";
+        flag.style.left = `${pos(date)}%`;
+        flag.textContent = "⚑";
+        flag.title = `${objective.text} · ${formatDisplayDate(date)}`;
+        flag.setAttribute("aria-label", `Victory milestone: ${objective.text}`);
+        track.appendChild(flag);
+      });
+    });
+
+    elements.operationsYearTimeline.appendChild(track);
+
+    const milestones = document.createElement("div");
+    milestones.className = "timeline-milestones";
+    const wins = [];
+    state.operations.items.forEach((operation) => {
+      (operation.objectives || []).forEach((objective) => {
+        if (!objective.completedAt) return;
+        const date = new Date(objective.completedAt);
+        if (date.getFullYear() === year) wins.push({ operation, objective, date });
+      });
+    });
+    wins.sort((a, b) => a.date - b.date).forEach(({ operation, objective, date }) => {
+      const row = document.createElement("div");
+      row.innerHTML = `<span>⚑</span><div><strong>${escapeHtml(objective.text)}</strong><small>${escapeHtml(operation.name)} · ${escapeHtml(formatDisplayDate(date))}</small></div>`;
+      milestones.appendChild(row);
+    });
+    if (!wins.length) milestones.innerHTML = `<p class="empty-state">Complete Operation objectives to place victory flags on the yearly timeline.</p>`;
+    elements.operationsYearTimeline.appendChild(milestones);
   }
 
   function formatDisplayDate(date) {
@@ -1514,6 +1940,7 @@
       elements.operationName.value = existing.name;
       elements.operationIntent.value = existing.intent || "";
       elements.operationMission.value = existing.mission || "";
+      elements.operationObjectives.value = (existing.objectives || []).map((objective) => objective.text).join("\n");
       const bounds = getCycleBounds(existing.startCycleIndex);
       elements.operationTimingNote.textContent = `${existing.status === "planned" ? "Begins" : "Started"} ${formatDisplayDate(bounds.start)}. Existing daily data is not changed.`;
     } else {
@@ -1529,12 +1956,43 @@
       elements.operationName.value = "";
       elements.operationIntent.value = "";
       elements.operationMission.value = "";
+      elements.operationObjectives.value = "";
       elements.operationTimingNote.textContent = current
         ? `The current operation keeps this 14-day block. The new operation begins ${formatDisplayDate(bounds.start)} and receives future 14-day blocks until you plan another.`
         : `This operation begins ${formatDisplayDate(bounds.start)}.`;
     }
     elements.operationDialog.showModal();
     setTimeout(() => elements.operationName.focus(), 0);
+  }
+
+  function mergeOperationObjectives(existingObjectives, objectiveText) {
+    const existing = Array.isArray(existingObjectives) ? existingObjectives : [];
+    const byText = new Map(existing.map((objective) => [String(objective.text || "").trim().toLowerCase(), objective]));
+    return String(objectiveText || "")
+      .split(/\n+/)
+      .map((text) => text.trim())
+      .filter(Boolean)
+      .map((text) => {
+        const old = byText.get(text.toLowerCase());
+        return old ? { ...old, text } : {
+          id: `obj-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          text,
+          completed: false,
+          completedAt: null
+        };
+      });
+  }
+
+  function toggleOperationObjective(operationId, objectiveId) {
+    const operation = state.operations.items.find((item) => item.id === operationId);
+    const objective = operation?.objectives?.find((item) => item.id === objectiveId);
+    if (!objective) return;
+    objective.completed = !objective.completed;
+    objective.completedAt = objective.completed ? new Date().toISOString() : null;
+    operation.updatedAt = new Date().toISOString();
+    saveState();
+    renderOperations();
+    renderIntel();
   }
 
   function saveOperation(event) {
@@ -1551,6 +2009,7 @@
       existing.name = name;
       existing.intent = elements.operationIntent.value.trim();
       existing.mission = elements.operationMission.value.trim();
+      existing.objectives = mergeOperationObjectives(existing.objectives, elements.operationObjectives.value);
       existing.updatedAt = new Date().toISOString();
     } else {
       const current = operationForCycle(currentIndex);
@@ -1565,6 +2024,8 @@
         name,
         intent: elements.operationIntent.value.trim(),
         mission: elements.operationMission.value.trim(),
+        objectives: mergeOperationObjectives([], elements.operationObjectives.value),
+        overallSummary: "",
         startCycleIndex,
         endCycleIndex: null,
         status: startCycleIndex > currentIndex ? "planned" : "active",
@@ -1746,6 +2207,32 @@
     setTimeout(() => elements.activityTrackerName.focus(), 0);
   }
 
+  function inferActivityMetrics(name) {
+    const normalized = String(name || "").trim().toLowerCase();
+    const match = Object.entries(ACTIVITY_METRIC_PRESETS).find(([preset]) => {
+      const p = preset.toLowerCase();
+      return normalized === p || normalized.includes(p) || p.includes(normalized);
+    });
+    return structuredCloneSafe(match?.[1] || [
+      { name: "Sessions", unit: "sessions" },
+      { name: "Training time", unit: "min" },
+      { name: "Performance", unit: "/10" }
+    ]);
+  }
+
+  function parseTrackerMetrics(text, fallbackName) {
+    const parsed = String(text || "")
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [name, unit = ""] = line.split("|").map((part) => part.trim());
+        return { name, unit };
+      })
+      .filter((metric) => metric.name);
+    return parsed.length ? parsed : inferActivityMetrics(fallbackName);
+  }
+
   function saveActivityTracker(event) {
     event.preventDefault();
     const name = elements.activityTrackerName.value.trim();
@@ -1754,7 +2241,11 @@
       elements.activityTrackerStatus.textContent = "That progress folder already exists.";
       return;
     }
-    state.activityTrackers[name] = { name, entries: [] };
+    state.activityTrackers[name] = {
+      name,
+      entries: [],
+      metrics: parseTrackerMetrics(elements.activityTrackerMetrics.value, name)
+    };
     state.settings.archiveDomain = name;
     saveState();
     elements.activityTrackerDialog.close();
@@ -1764,6 +2255,7 @@
   function openActivityEntryDialog() {
     const domain = state.settings.archiveDomain;
     if (!domain || domain === "Weightlifting") return;
+    const tracker = state.activityTrackers?.[domain];
     elements.activityEntryDomain.textContent = domain;
     elements.activityEntryDate.value = getTodayKey();
     elements.activityEntryMetric.value = elements.activityMetricSelect.value || "";
@@ -1771,6 +2263,23 @@
     elements.activityEntryUnit.value = "";
     elements.activityEntryNote.value = "";
     elements.activityEntryStatus.textContent = "";
+    elements.activityMetricSuggestions.replaceChildren();
+
+    const metrics = Array.isArray(tracker?.metrics) && tracker.metrics.length ? tracker.metrics : inferActivityMetrics(domain);
+    metrics.forEach((metric) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "metric-suggestion";
+      button.textContent = metric.name;
+      button.addEventListener("click", () => {
+        elements.activityEntryMetric.value = metric.name;
+        elements.activityEntryUnit.value = metric.unit || "";
+      });
+      elements.activityMetricSuggestions.appendChild(button);
+    });
+
+    const selectedMetric = metrics.find((metric) => metric.name === elements.activityEntryMetric.value);
+    if (selectedMetric) elements.activityEntryUnit.value = selectedMetric.unit || "";
     elements.activityEntryDialog.showModal();
   }
 
@@ -2351,6 +2860,7 @@
     });
 
     if (target === "history") renderHistory();
+    if (target === "intel") renderIntel();
     if (target === "operations") renderOperations();
     if (target === "schedule") renderSchedule();
     if (target === "settings") renderSettings();
@@ -2398,17 +2908,6 @@
     return taskTouched || day.workoutComplete || Number(day.protein) > 0 || aarTouched;
   }
 
-  function scoreStoredState(candidate) {
-    if (!candidate || typeof candidate !== "object") return -1;
-    let score = 0;
-    score += Object.keys(candidate.daily || {}).length * 20;
-    score += Object.values(candidate.exerciseLogs || {}).reduce((sum, logs) => sum + (Array.isArray(logs) ? logs.length : 0), 0) * 5;
-    score += Object.values(candidate.activityTrackers || {}).reduce((sum, tracker) => sum + (Array.isArray(tracker?.entries) ? tracker.entries.length : 0), 0) * 4;
-    score += Object.keys(candidate.customWorkouts || {}).length * 2;
-    score += Array.isArray(candidate.operations?.items) ? candidate.operations.items.length * 3 : 0;
-    return score;
-  }
-
   function parseStoredState(raw) {
     if (!raw) return null;
     try {
@@ -2419,19 +2918,159 @@
     }
   }
 
+  function mergeUniqueEntries(a = [], b = []) {
+    const result = [];
+    const seen = new Set();
+    [...a, ...b].forEach((entry) => {
+      if (!entry || typeof entry !== "object") return;
+      const key = entry.id || JSON.stringify([
+        entry.date || "",
+        entry.weight ?? "",
+        entry.reps ?? "",
+        entry.sets ?? "",
+        entry.metric || "",
+        entry.value ?? "",
+        entry.note || ""
+      ]);
+      if (seen.has(key)) return;
+      seen.add(key);
+      result.push(structuredCloneSafe(entry));
+    });
+    return result;
+  }
+
+  function mergeAar(primary = {}, backup = {}) {
+    const result = { ...backup, ...primary };
+    ["wentWell", "improve", "lesson", "priority"].forEach((field) => {
+      if (!String(primary?.[field] || "").trim() && String(backup?.[field] || "").trim()) {
+        result[field] = backup[field];
+      }
+    });
+    if (!primary?.savedAt && backup?.savedAt) result.savedAt = backup.savedAt;
+    if ((!Number.isFinite(Number(primary?.rating)) || Number(primary?.rating) === 5) && Number.isFinite(Number(backup?.rating))) {
+      result.rating = Number(backup.rating);
+    }
+    return result;
+  }
+
+  function mergeDailyRecord(primary, backup) {
+    if (!primary) return structuredCloneSafe(backup);
+    if (!backup) return structuredCloneSafe(primary);
+    const result = { ...backup, ...primary };
+    result.aar = mergeAar(primary.aar, backup.aar);
+
+    ["mindTasks", "spiritTasks"].forEach((field) => {
+      const p = Array.isArray(primary[field]) ? primary[field] : [];
+      const b = Array.isArray(backup[field]) ? backup[field] : [];
+      const byId = new Map();
+      [...b, ...p].forEach((task) => {
+        if (!task) return;
+        const key = task.id || task.text;
+        const existing = byId.get(key);
+        byId.set(key, existing ? { ...existing, ...task } : structuredCloneSafe(task));
+      });
+      result[field] = [...byId.values()];
+    });
+
+    if ((Number(primary.protein) || 0) === 0 && (Number(backup.protein) || 0) > 0) result.protein = backup.protein;
+    if (!primary.workoutComplete && backup.workoutComplete) result.workoutComplete = true;
+    return result;
+  }
+
+  function mergeCommandCenterStates(primary, backup) {
+    if (!primary) return backup ? structuredCloneSafe(backup) : null;
+    if (!backup) return structuredCloneSafe(primary);
+
+    const merged = structuredCloneSafe(primary);
+    merged.settings = { ...(backup.settings || {}), ...(primary.settings || {}) };
+    merged.daily = {};
+    const dates = new Set([...Object.keys(backup.daily || {}), ...Object.keys(primary.daily || {})]);
+    dates.forEach((dateKey) => {
+      merged.daily[dateKey] = mergeDailyRecord(primary.daily?.[dateKey], backup.daily?.[dateKey]);
+    });
+
+    merged.quotes = { ...(backup.quotes || {}), ...(primary.quotes || {}) };
+    merged.customWorkouts = { ...(backup.customWorkouts || {}), ...(primary.customWorkouts || {}) };
+
+    merged.exerciseLogs = {};
+    const exercises = new Set([...Object.keys(backup.exerciseLogs || {}), ...Object.keys(primary.exerciseLogs || {})]);
+    exercises.forEach((name) => {
+      merged.exerciseLogs[name] = mergeUniqueEntries(primary.exerciseLogs?.[name], backup.exerciseLogs?.[name]);
+    });
+
+    merged.activityTrackers = {};
+    const trackers = new Set([...Object.keys(backup.activityTrackers || {}), ...Object.keys(primary.activityTrackers || {})]);
+    trackers.forEach((name) => {
+      const p = primary.activityTrackers?.[name] || {};
+      const b = backup.activityTrackers?.[name] || {};
+      merged.activityTrackers[name] = {
+        ...b,
+        ...p,
+        name: p.name || b.name || name,
+        metrics: Array.isArray(p.metrics) && p.metrics.length ? structuredCloneSafe(p.metrics) : structuredCloneSafe(b.metrics || []),
+        entries: mergeUniqueEntries(p.entries, b.entries)
+      };
+    });
+
+    const pOps = primary.operations || {};
+    const bOps = backup.operations || {};
+    const opMap = new Map();
+    [...(bOps.items || []), ...(pOps.items || [])].forEach((op) => {
+      if (!op) return;
+      const key = op.id || `${op.name}-${op.startCycleIndex}`;
+      const existing = opMap.get(key);
+      if (!existing) {
+        opMap.set(key, structuredCloneSafe(op));
+      } else {
+        const newest = { ...existing, ...op };
+        const oldObjectives = Array.isArray(existing.objectives) ? existing.objectives : [];
+        const newObjectives = Array.isArray(op.objectives) ? op.objectives : [];
+        const objectiveMap = new Map();
+        [...oldObjectives, ...newObjectives].forEach((objective) => {
+          const obj = typeof objective === "string" ? { text: objective } : objective;
+          if (!obj?.text) return;
+          const objKey = obj.id || obj.text.trim().toLowerCase();
+          objectiveMap.set(objKey, { ...(objectiveMap.get(objKey) || {}), ...obj });
+        });
+        newest.objectives = [...objectiveMap.values()];
+        if (!String(newest.overallSummary || "").trim() && String(existing.overallSummary || "").trim()) {
+          newest.overallSummary = existing.overallSummary;
+        }
+        opMap.set(key, newest);
+      }
+    });
+
+    const cycleMap = new Map();
+    [...(bOps.cycles || []), ...(pOps.cycles || [])].forEach((cycle) => {
+      if (!cycle || !Number.isInteger(cycle.cycleIndex)) return;
+      const existing = cycleMap.get(cycle.cycleIndex);
+      cycleMap.set(cycle.cycleIndex, existing ? {
+        ...existing,
+        ...cycle,
+        summary: String(cycle.summary || existing.summary || "")
+      } : structuredCloneSafe(cycle));
+    });
+
+    merged.operations = {
+      ...bOps,
+      ...pOps,
+      items: [...opMap.values()],
+      cycles: [...cycleMap.values()].sort((a, b) => a.cycleIndex - b.cycleIndex),
+      activeOperationId: pOps.activeOperationId || bOps.activeOperationId || null
+    };
+
+    return merged;
+  }
+
   function loadState() {
     try {
-      const primaryRaw = localStorage.getItem(STORAGE_KEY);
-      const backupRaw = localStorage.getItem(BACKUP_STORAGE_KEY);
-      const primary = parseStoredState(primaryRaw);
-      const backup = parseStoredState(backupRaw);
-
-      if (primary && backup && scoreStoredState(backup) > scoreStoredState(primary)) {
-        console.warn("Restoring richer last-known-good Command Center data.");
-        return backup;
+      const primary = parseStoredState(localStorage.getItem(STORAGE_KEY));
+      const backup = parseStoredState(localStorage.getItem(BACKUP_STORAGE_KEY));
+      const merged = mergeCommandCenterStates(primary, backup);
+      if (merged) {
+        if (primary && backup) console.info("Merged primary and backup Command Center data without discarding unique records.");
+        return merged;
       }
-      if (primary) return primary;
-      if (backup) return backup;
       return createInitialState();
     } catch (error) {
       console.error("Could not load local data:", error);
@@ -2447,13 +3086,14 @@
     try {
       const serialized = JSON.stringify(state);
       const previousRaw = localStorage.getItem(STORAGE_KEY);
-      const previous = parseStoredState(previousRaw);
-      if (previous && scoreStoredState(previous) >= scoreStoredState(state)) {
-        localStorage.setItem(BACKUP_STORAGE_KEY, previousRaw);
-      } else if (!localStorage.getItem(BACKUP_STORAGE_KEY) && previousRaw) {
+
+      // Snapshot the complete previous state before every write. We never choose a
+      // "richer" snapshot over current data; loadState merges both non-destructively.
+      if (previousRaw && previousRaw !== serialized) {
         localStorage.setItem(BACKUP_STORAGE_KEY, previousRaw);
       }
       localStorage.setItem(STORAGE_KEY, serialized);
+
       if (elements.storageAlert) elements.storageAlert.hidden = true;
       return true;
     } catch (error) {

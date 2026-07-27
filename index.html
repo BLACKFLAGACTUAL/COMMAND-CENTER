@@ -395,6 +395,66 @@
       </section>
 
 
+
+      <!-- INTEL -->
+      <section id="intelView" class="view" data-view="intel" aria-labelledby="intelPageHeading" hidden>
+        <div class="view-title-row">
+          <div>
+            <p class="eyebrow">PATTERNS // TREND ANALYSIS</p>
+            <h2 id="intelPageHeading">Intel</h2>
+          </div>
+        </div>
+
+        <section class="settings-card" data-collapsible-key="intel-summary" aria-labelledby="intelSummaryHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">PERFORMANCE INTELLIGENCE</p>
+              <h3 id="intelSummaryHeading">Situation report</h3>
+            </div>
+            <select id="intelRange" class="compact-select" aria-label="Intel time range">
+              <option value="30">30 days</option>
+              <option value="90">90 days</option>
+              <option value="365" selected>This year</option>
+              <option value="all">All time</option>
+            </select>
+          </div>
+          <div id="intelMetricGrid" class="intel-metric-grid"></div>
+          <div id="intelFindings" class="intel-findings"></div>
+        </section>
+
+        <section class="settings-card" data-collapsible-key="intel-trends" aria-labelledby="intelTrendsHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">TREND LINES</p>
+              <h3 id="intelTrendsHeading">Performance trends</h3>
+            </div>
+          </div>
+          <div class="intel-chart-block">
+            <h4>Execution</h4>
+            <div id="intelExecutionChart" class="intel-line-chart"></div>
+          </div>
+          <div class="intel-chart-block">
+            <h4>Protein</h4>
+            <div id="intelProteinChart" class="intel-line-chart"></div>
+          </div>
+          <div class="intel-chart-block">
+            <h4>AAR rating</h4>
+            <div id="intelRatingChart" class="intel-line-chart"></div>
+          </div>
+        </section>
+
+        <section class="settings-card" data-collapsible-key="intel-activities" aria-labelledby="intelActivitiesHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">DOMAIN INTELLIGENCE</p>
+              <h3 id="intelActivitiesHeading">Activity trends</h3>
+            </div>
+          </div>
+          <div id="intelActivitySummary" class="intel-activity-summary"></div>
+        </section>
+      </section>
+
+
       <!-- OPERATIONS -->
       <section id="operationsView" class="view" data-view="operations" aria-labelledby="operationsPageHeading" hidden>
         <div class="view-title-row">
@@ -422,6 +482,18 @@
           <p class="helper-text">One Operation can contain as many complete 14-day blocks as required to accomplish its mission.</p>
           <div id="currentOperationCard" class="current-operation-card"></div>
           <div id="operationTrendSummary" class="operation-trend-summary"></div>
+        </section>
+
+        <section class="settings-card" data-collapsible-key="operations-year-timeline" aria-labelledby="yearTimelineHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">YEARLY CAMPAIGN MAP</p>
+              <h3 id="yearTimelineHeading">Year timeline</h3>
+            </div>
+            <select id="operationsYearSelect" class="compact-select" aria-label="Timeline year"></select>
+          </div>
+          <p class="helper-text">Operations span the year. Objective victories are marked with flags on the timeline.</p>
+          <div id="operationsYearTimeline" class="operations-year-timeline"></div>
         </section>
 
         <section class="settings-card operations-block-card" data-collapsible-key="operations-blocks" aria-labelledby="operationBlocksHeading">
@@ -517,6 +589,10 @@
         <span class="nav-icon" aria-hidden="true">◫</span>
         <span>Archive</span>
       </button>
+      <button class="nav-button" type="button" data-target="intel">
+        <span class="nav-icon" aria-hidden="true">⌁</span>
+        <span>Intel</span>
+      </button>
       <button class="nav-button" type="button" data-target="operations">
         <span class="nav-icon" aria-hidden="true">⌁</span>
         <span>Operations</span>
@@ -599,6 +675,9 @@
       <h2>Create progress folder</h2>
       <label for="activityTrackerName">Activity name</label>
       <input id="activityTrackerName" type="text" maxlength="60" placeholder="MMA, Running, Ruck, Swimming…" required>
+      <label for="activityTrackerMetrics">Metrics <span class="helper-inline">(one per line: Metric | unit)</span></label>
+      <textarea id="activityTrackerMetrics" rows="6" maxlength="1200" placeholder="Distance | mi&#10;Time | min&#10;Pace | min/mi"></textarea>
+      <p class="helper-text">Known activities automatically receive recommended metrics. Edit these before creating the folder.</p>
       <p id="activityTrackerStatus" class="save-status" aria-live="polite"></p>
       <div class="button-row">
         <button class="button primary" type="submit">Create folder</button>
@@ -614,6 +693,7 @@
       <label for="activityEntryDate">Date</label>
       <input id="activityEntryDate" type="date" required>
       <label for="activityEntryMetric">Metric</label>
+      <div id="activityMetricSuggestions" class="metric-suggestions"></div>
       <input id="activityEntryMetric" type="text" maxlength="60" placeholder="Rounds, 3-mile time, distance…" required>
       <div class="activity-entry-grid">
         <div><label for="activityEntryValue">Value</label><input id="activityEntryValue" type="number" step="0.01" inputmode="decimal" required></div>
@@ -640,6 +720,9 @@
       <textarea id="operationIntent" rows="4" maxlength="600" placeholder="What does success look like, and why does this operation matter?"></textarea>
       <label for="operationMission">Mission</label>
       <textarea id="operationMission" rows="4" maxlength="600" placeholder="What will you accomplish during this operation?"></textarea>
+      <label for="operationObjectives">Objectives <span class="helper-inline">(one per line)</span></label>
+      <textarea id="operationObjectives" rows="5" maxlength="1200" placeholder="Deadlift 525 lb&#10;Run 3 miles under 20:00&#10;Complete 12 MMA sessions"></textarea>
+      <p class="helper-text">Objectives can be edited throughout the Operation. Completed objectives become victory flags on the yearly timeline.</p>
       <p id="operationDialogStatus" class="save-status" aria-live="polite"></p>
       <div class="button-row">
         <button class="button primary" type="submit">Save operation</button>
