@@ -3,8 +3,6 @@
 
   const STORAGE_KEY = "myCommandCenter.v1";
   const BACKUP_STORAGE_KEY = "myCommandCenter.lastKnownGood";
-  const SNAPSHOT_INDEX_KEY = "myCommandCenter.snapshotIndex.v8";
-  const MAX_SNAPSHOTS = 5;
   const DEFAULT_QUOTE =
     "The secret of all victory lies in the organization of the non-obvious.";
 
@@ -45,58 +43,59 @@
 
   const ACTIVITY_METRIC_PRESETS = {
     MMA: [
-      { name: "Training time", unit: "min" },
-      { name: "Rounds", unit: "rounds" },
-      { name: "Sparring rounds", unit: "rounds" },
-      { name: "Performance", unit: "/10" }
+      { name: "Training time", unit: "min", type: "number" },
+      { name: "Rounds", unit: "rounds", type: "number" },
+      { name: "Sparring rounds", unit: "rounds", type: "number" },
+      { name: "Performance", unit: "/10", type: "number" }
     ],
     BJJ: [
-      { name: "Training time", unit: "min" },
-      { name: "Rolling rounds", unit: "rounds" },
-      { name: "Submissions", unit: "subs" },
-      { name: "Performance", unit: "/10" }
+      { name: "Training time", unit: "min", type: "number" },
+      { name: "Rolling rounds", unit: "rounds", type: "number" },
+      { name: "Submissions", unit: "subs", type: "number" },
+      { name: "Performance", unit: "/10", type: "number" }
     ],
     Boxing: [
-      { name: "Training time", unit: "min" },
-      { name: "Rounds", unit: "rounds" },
-      { name: "Sparring rounds", unit: "rounds" },
-      { name: "Performance", unit: "/10" }
+      { name: "Training time", unit: "min", type: "number" },
+      { name: "Rounds", unit: "rounds", type: "number" },
+      { name: "Sparring rounds", unit: "rounds", type: "number" },
+      { name: "Performance", unit: "/10", type: "number" }
     ],
     Running: [
-      { name: "Distance", unit: "mi" },
-      { name: "Time", unit: "min" },
-      { name: "Pace", unit: "min/mi" },
-      { name: "Heart rate", unit: "bpm" },
-      { name: "Heart rate zone", unit: "zone" }
+      { name: "Distance", unit: "mi", type: "number" },
+      { name: "Time", unit: "min", type: "number" },
+      { name: "Pace", unit: "min/mi", type: "calculated", dependsOn: ["Distance", "Time"] },
+      { name: "Heart rate", unit: "bpm", type: "number" },
+      { name: "Heart rate zone", unit: "zone", type: "number" }
     ],
     Ruck: [
-      { name: "Distance", unit: "mi" },
-      { name: "Time", unit: "min" },
-      { name: "Load", unit: "lb" },
-      { name: "Pace", unit: "min/mi" }
+      { name: "Distance", unit: "mi", type: "number" },
+      { name: "Time", unit: "min", type: "number" },
+      { name: "Pace", unit: "min/mi", type: "calculated", dependsOn: ["Distance", "Time"] },
+      { name: "Load", unit: "lb", type: "number" },
+      { name: "Heart rate", unit: "bpm", type: "number" }
     ],
     Swimming: [
-      { name: "Distance", unit: "yd" },
-      { name: "Time", unit: "min" },
-      { name: "Pace", unit: "min/100yd" }
+      { name: "Distance", unit: "yd", type: "number" },
+      { name: "Time", unit: "min", type: "number" },
+      { name: "Pace", unit: "min/100yd", type: "calculated", dependsOn: ["Distance", "Time"] }
     ],
     Surfing: [
-      { name: "Session time", unit: "min" },
-      { name: "Waves caught", unit: "waves" },
-      { name: "Best wave", unit: "/10" }
+      { name: "Session time", unit: "min", type: "number" },
+      { name: "Waves caught", unit: "waves", type: "number" },
+      { name: "Best wave", unit: "/10", type: "number" }
     ],
     Chess: [
-      { name: "Rating", unit: "Elo" },
-      { name: "Games", unit: "games" },
-      { name: "Wins", unit: "wins" },
-      { name: "Study time", unit: "min" }
+      { name: "Rating", unit: "Elo", type: "number" },
+      { name: "Games", unit: "games", type: "number" },
+      { name: "Wins", unit: "wins", type: "number" },
+      { name: "Study time", unit: "min", type: "number" }
     ],
     Reading: [
-      { name: "Pages", unit: "pages" },
-      { name: "Study time", unit: "min" }
+      { name: "Pages", unit: "pages", type: "number" },
+      { name: "Study time", unit: "min", type: "number" }
     ],
     "Body Weight": [
-      { name: "Body weight", unit: "lb" }
+      { name: "Body weight", unit: "lb", type: "number" }
     ]
   };
 
@@ -177,8 +176,10 @@
       "operationTimingNote", "operationName", "operationIntent", "operationMission", "operationDialogStatus",
       "operationDialogCancel", "operationTrendSummary", "operationObjectives", "operationsYearSelect", "operationsYearTimeline",
       "intelRange", "intelMetricGrid", "intelFindings", "intelExecutionChart", "intelProteinChart", "intelRatingChart", "intelActivitySummary",
-      "activityTrackerMetrics", "activityMetricSuggestions", "runningHeartRatePanel", "maxHeartRateInput",
-      "heartRateZoneGrid", "heartRateZoneCurrent", "heartRateZonePicker", "heartRateZoneButtons", "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
+      "activityTrackerMetrics", "activityMetricSuggestions", "activitySessionFields", "activityEntryActivity",
+      "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
+      "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
+      "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
       "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
@@ -242,10 +243,6 @@
 
       section.dataset.collapseReady = "true";
     });
-  }
-
-  function on(element, eventName, handler, options) {
-    if (element) element.addEventListener(eventName, handler, options);
   }
 
   function bindEvents() {
@@ -356,26 +353,26 @@
       saveState();
       renderActivityProgress();
     });
-    if (elements.maxHeartRateInput) {
-      elements.maxHeartRateInput.addEventListener("change", () => {
-        const value = Number(elements.maxHeartRateInput.value);
-        state.settings.maxHeartRate = Number.isFinite(value) && value >= 100 && value <= 240 ? Math.round(value) : 0;
-        saveState();
-        renderHeartRateZonePanel();
-        renderActivityProgress();
-      });
-    }
+
+    elements.activitySwipePrev.addEventListener("click", () => moveActivityMetricSlide(-1));
+    elements.activitySwipeNext.addEventListener("click", () => moveActivityMetricSlide(1));
+    elements.activityTrendWindow.addEventListener("change", renderActivityProgress);
+    elements.maxHeartRateInput.addEventListener("change", () => {
+      const value = Number(elements.maxHeartRateInput.value);
+      state.settings.maxHeartRate = Number.isFinite(value) && value >= 100 && value <= 240 ? Math.round(value) : 0;
+      saveState();
+      renderHeartRateZonePanel();
+      renderActivityProgress();
+    });
     elements.editAarCancel.addEventListener("click", () => elements.editAarDialog.close());
     elements.editAarForm.addEventListener("submit", saveArchivedAar);
     elements.newOperationButton.addEventListener("click", () => openOperationDialog());
     elements.operationDialogCancel.addEventListener("click", () => elements.operationDialog.close());
     elements.operationForm.addEventListener("submit", saveOperation);
-    [elements.taskDialog, elements.scheduleDialog, elements.workoutDialog, elements.exerciseLogDialog, elements.activityTrackerDialog, elements.activityEntryDialog, elements.editAarDialog, elements.operationDialog]
-      .filter(Boolean)
-      .forEach((dialog) => {
-        dialog.addEventListener("cancel", (event) => { event.preventDefault(); dialog.close(); });
-        dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
-      });
+    [elements.taskDialog, elements.scheduleDialog, elements.workoutDialog, elements.exerciseLogDialog, elements.activityTrackerDialog, elements.activityEntryDialog, elements.editAarDialog, elements.operationDialog].forEach((dialog) => {
+      dialog.addEventListener("cancel", (event) => { event.preventDefault(); dialog.close(); });
+      dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+    });
 
     elements.aarRating.addEventListener("input", () => {
       elements.aarRatingOutput.value = elements.aarRating.value;
@@ -415,7 +412,7 @@
 
   function ensureStateShape() {
     if (!state || typeof state !== "object") state = createInitialState();
-    state.version = 8;
+    state.version = 7;
     state.settings = { ...DEFAULT_SETTINGS, ...(state.settings || {}) };
 
     if (!Array.isArray(state.settings.mindTemplates)) {
@@ -453,13 +450,13 @@
         tracker.metrics = inferActivityMetrics(tracker.name);
       }
 
-      // Add new preset metrics without deleting existing custom metrics.
-      const preset = inferActivityMetrics(tracker.name);
-      const existingMetricNames = new Set(
+      // Add any new smart preset metrics without deleting personalized metrics.
+      const presetMetrics = inferActivityMetrics(tracker.name);
+      const existingNames = new Set(
         tracker.metrics.map((metric) => String(metric?.name || "").trim().toLowerCase())
       );
-      preset.forEach((metric) => {
-        if (!existingMetricNames.has(String(metric.name).trim().toLowerCase())) {
+      presetMetrics.forEach((metric) => {
+        if (!existingNames.has(String(metric.name).trim().toLowerCase())) {
           tracker.metrics.push(structuredCloneSafe(metric));
         }
       });
@@ -467,6 +464,9 @@
     if (!state.settings.intelRange) state.settings.intelRange = "365";
     if (!state.settings.activityMetricByDomain || typeof state.settings.activityMetricByDomain !== "object") {
       state.settings.activityMetricByDomain = {};
+    }
+    if (!state.settings.activitySlideByDomain || typeof state.settings.activitySlideByDomain !== "object") {
+      state.settings.activitySlideByDomain = {};
     }
     if (!Number.isFinite(Number(state.settings.maxHeartRate))) state.settings.maxHeartRate = 0;
     if (!state.settings.archiveDomain) state.settings.archiveDomain = "Weightlifting";
@@ -484,7 +484,7 @@
 
   function createInitialState() {
     return {
-      version: 8,
+      version: 7,
       settings: structuredCloneSafe(DEFAULT_SETTINGS),
       daily: {},
       quotes: {},
@@ -2215,6 +2215,601 @@
     initializeCollapsibleSections();
   }
 
+  function renderProgressDomains() {
+    const domains = ["Weightlifting", ...Object.keys(state.activityTrackers || {}).sort((a, b) => a.localeCompare(b))];
+    if (!domains.includes(state.settings.archiveDomain)) state.settings.archiveDomain = "Weightlifting";
+    elements.activityDomainTabs.replaceChildren();
+    domains.forEach((name) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `activity-domain-button${state.settings.archiveDomain === name ? " active" : ""}`;
+      button.textContent = name;
+      button.setAttribute("role", "tab");
+      button.setAttribute("aria-selected", String(state.settings.archiveDomain === name));
+      button.addEventListener("click", () => {
+        state.settings.archiveDomain = name;
+        saveState();
+        renderProgressDomains();
+      });
+      elements.activityDomainTabs.appendChild(button);
+    });
+    const weightlifting = state.settings.archiveDomain === "Weightlifting";
+    elements.weightliftingProgressSection.hidden = !weightlifting;
+    elements.activityProgressSection.hidden = weightlifting;
+    if (!weightlifting) renderActivityProgress();
+  }
+
+  function openActivityTrackerDialog() {
+    elements.activityTrackerName.value = "";
+    elements.activityTrackerStatus.textContent = "";
+    elements.activityTrackerDialog.showModal();
+    setTimeout(() => elements.activityTrackerName.focus(), 0);
+  }
+
+  function inferActivityMetrics(name) {
+    const normalized = String(name || "").trim().toLowerCase();
+    const match = Object.entries(ACTIVITY_METRIC_PRESETS).find(([preset]) => {
+      const p = preset.toLowerCase();
+      return normalized === p || normalized.includes(p) || p.includes(normalized);
+    });
+    return structuredCloneSafe(match?.[1] || [
+      { name: "Sessions", unit: "sessions", type: "number" },
+      { name: "Training time", unit: "min", type: "number" },
+      { name: "Performance", unit: "/10", type: "number" }
+    ]);
+  }
+
+  function parseTrackerMetrics(text, fallbackName) {
+    const parsed = String(text || "")
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [name, unit = ""] = line.split("|").map((part) => part.trim());
+        return { name, unit, type: "number" };
+      })
+      .filter((metric) => metric.name);
+    return parsed.length ? parsed : inferActivityMetrics(fallbackName);
+  }
+
+  function getTrackerMetrics(domain) {
+    const tracker = state.activityTrackers?.[domain];
+    if (!tracker) return [];
+    const configured = Array.isArray(tracker.metrics) && tracker.metrics.length
+      ? tracker.metrics
+      : inferActivityMetrics(domain);
+
+    const map = new Map();
+    configured.forEach((metric) => {
+      const key = String(metric?.name || "").trim().toLowerCase();
+      if (!key) return;
+      map.set(key, { type: "number", unit: "", ...structuredCloneSafe(metric) });
+    });
+
+    (tracker.entries || []).forEach((entry) => {
+      const key = String(entry.metric || "").trim().toLowerCase();
+      if (!key || map.has(key)) return;
+      map.set(key, { name: entry.metric, unit: entry.unit || "", type: "number" });
+    });
+
+    return [...map.values()];
+  }
+
+  function ensureTrackerMetric(tracker, metric) {
+    if (!tracker || !metric?.name) return;
+    if (!Array.isArray(tracker.metrics)) tracker.metrics = [];
+    const exists = tracker.metrics.some(
+      (item) => String(item?.name || "").trim().toLowerCase() === String(metric.name).trim().toLowerCase()
+    );
+    if (!exists) tracker.metrics.push(structuredCloneSafe(metric));
+  }
+
+  function saveActivityTracker(event) {
+    event.preventDefault();
+    const name = elements.activityTrackerName.value.trim();
+    if (!name) return;
+    if (name.toLowerCase() === "weightlifting" || Object.keys(state.activityTrackers).some((key) => key.toLowerCase() === name.toLowerCase())) {
+      elements.activityTrackerStatus.textContent = "That progress folder already exists.";
+      return;
+    }
+
+    state.activityTrackers[name] = {
+      name,
+      entries: [],
+      metrics: parseTrackerMetrics(elements.activityTrackerMetrics.value, name)
+    };
+    state.settings.archiveDomain = name;
+    saveState();
+    elements.activityTrackerDialog.close();
+    renderHistory();
+  }
+
+  function formatPaceMinutes(minutesPerUnit) {
+    if (!Number.isFinite(minutesPerUnit) || minutesPerUnit <= 0) return "";
+    const whole = Math.floor(minutesPerUnit);
+    let seconds = Math.round((minutesPerUnit - whole) * 60);
+    let adjusted = whole;
+    if (seconds === 60) {
+      adjusted += 1;
+      seconds = 0;
+    }
+    return `${adjusted}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  function paceNumberFromTimeDistance(timeMinutes, distance, domain) {
+    const t = Number(timeMinutes);
+    const d = Number(distance);
+    if (!Number.isFinite(t) || !Number.isFinite(d) || t <= 0 || d <= 0) return null;
+    if (String(domain).toLowerCase().includes("swimming")) {
+      return t / (d / 100);
+    }
+    return t / d;
+  }
+
+  function calculateDerivedActivityMetrics(domain, values) {
+    const derived = {};
+    const pace = paceNumberFromTimeDistance(values.Time, values.Distance, domain);
+    if (pace !== null) {
+      derived.Pace = pace;
+    }
+
+    if (Number.isFinite(Number(values["Heart rate"])) && Number(state.settings.maxHeartRate) > 0) {
+      const zone = zoneForHeartRate(Number(values["Heart rate"]));
+      if (zone) derived["Heart rate zone"] = zone.zone;
+    }
+
+    return derived;
+  }
+
+  function buildActivitySessionFields(domain) {
+    const tracker = state.activityTrackers?.[domain];
+    if (!tracker) return;
+    elements.activitySessionFields.replaceChildren();
+
+    const metrics = getTrackerMetrics(domain);
+    metrics.forEach((metric) => {
+      const row = document.createElement("div");
+      row.className = "activity-session-field";
+
+      const copy = document.createElement("div");
+      copy.className = "activity-session-copy";
+      const label = document.createElement("label");
+      label.htmlFor = `activityMetric-${slugifyMetric(metric.name)}`;
+      label.textContent = metric.name;
+
+      const helper = document.createElement("small");
+      helper.textContent = metric.type === "calculated"
+        ? metric.name === "Pace"
+          ? "Calculated automatically after Time and Distance are entered."
+          : "Calculated automatically."
+        : metric.unit
+          ? metric.unit
+          : "Custom metric";
+
+      copy.append(label, helper);
+
+      const control = document.createElement("div");
+      control.className = "activity-session-control";
+
+      const input = document.createElement("input");
+      input.id = `activityMetric-${slugifyMetric(metric.name)}`;
+      input.dataset.metricName = metric.name;
+      input.dataset.metricUnit = metric.unit || "";
+      input.dataset.metricType = metric.type || "number";
+      input.type = "number";
+      input.step = "any";
+      input.inputMode = "decimal";
+      input.placeholder = metric.type === "calculated" ? "AUTO" : metric.unit || "value";
+      if (metric.type === "calculated") {
+        input.readOnly = true;
+        input.classList.add("calculated-field");
+      }
+
+      const unit = document.createElement("span");
+      unit.textContent = metric.unit || "";
+
+      control.append(input, unit);
+      row.append(copy, control);
+      elements.activitySessionFields.appendChild(row);
+    });
+
+    elements.activitySessionFields.querySelectorAll("input:not([readonly])").forEach((input) => {
+      input.addEventListener("input", () => updateCalculatedSessionFields(domain));
+    });
+
+    if (isRunningDomain(domain)) {
+      renderHeartRateZonePanel();
+    }
+  }
+
+  function slugifyMetric(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function sessionFieldValues() {
+    const values = {};
+    elements.activitySessionFields.querySelectorAll("input[data-metric-name]").forEach((input) => {
+      const raw = input.value.trim();
+      if (raw === "") return;
+      const value = Number(raw);
+      if (Number.isFinite(value)) values[input.dataset.metricName] = value;
+    });
+    return values;
+  }
+
+  function updateCalculatedSessionFields(domain) {
+    const values = sessionFieldValues();
+    const derived = calculateDerivedActivityMetrics(domain, values);
+
+    Object.entries(derived).forEach(([metricName, value]) => {
+      const input = [...elements.activitySessionFields.querySelectorAll("input[data-metric-name]")]
+        .find((field) => field.dataset.metricName === metricName);
+      if (!input) return;
+      input.value = String(Math.round(value * 100) / 100);
+    });
+
+    const paceInput = [...elements.activitySessionFields.querySelectorAll("input[data-metric-name]")]
+      .find((field) => field.dataset.metricName === "Pace");
+    if (paceInput && Number.isFinite(derived.Pace)) {
+      paceInput.title = `Pace: ${formatPaceMinutes(derived.Pace)}`;
+    }
+  }
+
+  function openActivityEntryDialog() {
+    const domain = state.settings.archiveDomain;
+    if (!domain || domain === "Weightlifting") return;
+
+    elements.activityEntryDomain.textContent = domain;
+    elements.activityEntryActivity.value = domain;
+    elements.activityEntryDate.value = getTodayKey();
+    elements.activityEntryNote.value = "";
+    elements.activityEntryStatus.textContent = "";
+    buildActivitySessionFields(domain);
+    elements.activityEntryDialog.showModal();
+  }
+
+  function saveActivityEntry(event) {
+    event.preventDefault();
+
+    const domain = state.settings.archiveDomain;
+    const tracker = state.activityTrackers?.[domain];
+    if (!tracker) return;
+
+    const dateKey = elements.activityEntryDate.value;
+    const values = sessionFieldValues();
+    if (!dateKey) {
+      elements.activityEntryStatus.textContent = "Select a date.";
+      return;
+    }
+
+    // Fill calculated metrics before save.
+    const derived = calculateDerivedActivityMetrics(domain, values);
+    Object.assign(values, derived);
+
+    const metricMap = new Map(getTrackerMetrics(domain).map((metric) => [metric.name, metric]));
+    const filledMetrics = Object.entries(values).filter(([, value]) => Number.isFinite(Number(value)));
+    if (!filledMetrics.length) {
+      elements.activityEntryStatus.textContent = "Enter at least one metric.";
+      return;
+    }
+
+    const sessionId = `session-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const sessionDate = new Date(`${dateKey}T12:00:00`).toISOString();
+    const note = elements.activityEntryNote.value.trim();
+
+    filledMetrics.forEach(([metricName, value]) => {
+      const metric = metricMap.get(metricName) || { name: metricName, unit: "", type: "number" };
+      ensureTrackerMetric(tracker, metric);
+
+      const entry = {
+        id: `${sessionId}-${slugifyMetric(metricName)}`,
+        sessionId,
+        date: sessionDate,
+        metric: metricName,
+        value: Number(value),
+        unit: metric.unit || "",
+        note
+      };
+
+      if (metricName === "Heart rate") {
+        const zone = zoneForHeartRate(Number(value));
+        if (zone) {
+          entry.zone = zone.zone;
+          entry.zoneName = zone.name;
+        }
+      }
+
+      tracker.entries.push(entry);
+    });
+
+    tracker.sessions = Array.isArray(tracker.sessions) ? tracker.sessions : [];
+    tracker.sessions.push({
+      id: sessionId,
+      date: sessionDate,
+      note,
+      metrics: Object.fromEntries(filledMetrics.map(([name, value]) => [name, Number(value)]))
+    });
+
+    saveState();
+    elements.activityEntryDialog.close();
+    renderHistory();
+    renderActivityProgress();
+  }
+
+  function activityTrendDays() {
+    const raw = Number(elements.activityTrendWindow?.value || 42);
+    return Number.isFinite(raw) && raw > 0 ? raw : 42;
+  }
+
+  function metricLogsForWindow(tracker, metricName, days) {
+    const all = (tracker.entries || [])
+      .filter((entry) => entry.metric === metricName)
+      .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+
+    if (!all.length || !days) return all;
+    const cutoff = new Date();
+    cutoff.setHours(0, 0, 0, 0);
+    cutoff.setDate(cutoff.getDate() - days + 1);
+    const cutoffKey = formatDateKey(cutoff);
+    return all.filter((entry) => String(entry.date || "").slice(0, 10) >= cutoffKey);
+  }
+
+  function trendSummaryForLogs(metric, logs) {
+    if (!logs.length) return `No ${metric.name} entries in this period.`;
+    if (logs.length === 1) {
+      const value = logs[0].value;
+      return `${metric.name}: one entry · ${formatMetricValue(metric, value)}.`;
+    }
+
+    const first = Number(logs[0].value);
+    const last = Number(logs[logs.length - 1].value);
+    const delta = last - first;
+    const direction = delta > 0 ? "up" : delta < 0 ? "down" : "flat";
+    const deltaText = formatMetricValue(metric, Math.abs(delta));
+
+    if (metric.name === "Pace") {
+      const faster = delta < 0;
+      return `${metric.name}: ${faster ? "faster" : delta > 0 ? "slower" : "unchanged"} by ${formatPaceMinutes(Math.abs(delta))} over the selected period.`;
+    }
+
+    return `${metric.name}: ${direction} ${deltaText} from first to latest entry.`;
+  }
+
+  function formatMetricValue(metric, value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return "—";
+    if (metric.name === "Pace") return formatPaceMinutes(number);
+    return `${Math.round(number * 100) / 100}${metric.unit ? ` ${metric.unit}` : ""}`;
+  }
+
+  function renderActivityProgress() {
+    const domain = state.settings.archiveDomain;
+    if (!domain || domain === "Weightlifting") return;
+
+    const tracker = state.activityTrackers?.[domain] || { entries: [], metrics: [] };
+    const metrics = getTrackerMetrics(domain);
+    elements.activityProgressHeading.textContent = `${domain} progress`;
+
+    elements.activityMetricSelect.replaceChildren();
+    metrics.forEach((metric) => {
+      const option = document.createElement("option");
+      option.value = metric.name;
+      option.textContent = metric.name;
+      elements.activityMetricSelect.appendChild(option);
+    });
+
+    const selectedMetric = state.settings.activityMetricByDomain?.[domain];
+    if (metrics.some((metric) => metric.name === selectedMetric)) {
+      elements.activityMetricSelect.value = selectedMetric;
+    } else if (metrics[0]) {
+      elements.activityMetricSelect.value = metrics[0].name;
+      state.settings.activityMetricByDomain[domain] = metrics[0].name;
+    }
+
+    const activeIndex = Math.max(
+      0,
+      Math.min(
+        metrics.length - 1,
+        Number(state.settings.activitySlideByDomain?.[domain] ?? metrics.findIndex((metric) => metric.name === elements.activityMetricSelect.value))
+      )
+    );
+    state.settings.activitySlideByDomain[domain] = Number.isFinite(activeIndex) ? activeIndex : 0;
+
+    elements.activitySwipeTrack.replaceChildren();
+    elements.activitySwipeDots.replaceChildren();
+
+    const days = activityTrendDays();
+
+    metrics.forEach((metric, index) => {
+      const slide = document.createElement("article");
+      slide.className = `activity-metric-slide${index === activeIndex ? " active" : ""}`;
+      slide.dataset.metricIndex = String(index);
+
+      const logs = metricLogsForWindow(tracker, metric.name, days);
+
+      const head = document.createElement("div");
+      head.className = "activity-slide-header";
+      head.innerHTML = `
+        <div>
+          <span class="data-label">${escapeHtml(domain.toUpperCase())}</span>
+          <h4>${escapeHtml(metric.name)}</h4>
+        </div>
+        <span class="activity-slide-count">${logs.length} entries</span>
+      `;
+
+      const trend = document.createElement("p");
+      trend.className = "activity-slide-trend";
+      trend.textContent = trendSummaryForLogs(metric, logs);
+
+      const chartWrap = document.createElement("div");
+      chartWrap.className = "chart-wrap activity-slide-chart-wrap";
+      const canvas = document.createElement("canvas");
+      canvas.width = 720;
+      canvas.height = 360;
+      canvas.setAttribute("aria-label", `${metric.name} trend graph`);
+      chartWrap.appendChild(canvas);
+
+      const empty = document.createElement("p");
+      empty.className = "empty-state";
+      empty.textContent = `No ${metric.name} entries in this period.`;
+      empty.hidden = logs.length > 0;
+
+      const recentList = document.createElement("div");
+      recentList.className = "progress-log-list";
+      [...logs].reverse().slice(0, 6).forEach((log) => {
+        const row = document.createElement("div");
+        row.className = "progress-log-row";
+        const zoneLabel = log.metric === "Heart rate" && log.zone
+          ? ` · Zone ${log.zone}${log.zoneName ? ` (${log.zoneName})` : ""}`
+          : "";
+        row.innerHTML = `
+          <span>${escapeHtml(formatShortDate(log.date))}</span>
+          <strong>${escapeHtml(formatMetricValue(metric, log.value))}</strong>
+          <small>${escapeHtml(log.note || metric.name)}${escapeHtml(zoneLabel)}</small>
+        `;
+        recentList.appendChild(row);
+      });
+
+      slide.append(head, trend, chartWrap, empty, recentList);
+      elements.activitySwipeTrack.appendChild(slide);
+
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = `activity-swipe-dot${index === activeIndex ? " active" : ""}`;
+      dot.setAttribute("aria-label", `Show ${metric.name}`);
+      dot.addEventListener("click", () => setActivityMetricSlide(index));
+      elements.activitySwipeDots.appendChild(dot);
+
+      requestAnimationFrame(() => {
+        if (logs.length) drawActivityChartOnCanvas(canvas, logs, metric);
+      });
+    });
+
+    elements.activitySwipePrev.disabled = activeIndex <= 0;
+    elements.activitySwipeNext.disabled = activeIndex >= metrics.length - 1;
+    if (metrics[activeIndex]) {
+      elements.activityMetricSelect.value = metrics[activeIndex].name;
+      state.settings.activityMetricByDomain[domain] = metrics[activeIndex].name;
+    }
+
+    elements.activityProgressEmpty.hidden = metrics.length > 0;
+    elements.activityProgressChart.hidden = true;
+    elements.activityProgressLogList.replaceChildren();
+    elements.activityTrendSummary.textContent = metrics[activeIndex]
+      ? `${metrics[activeIndex].name} trends over ${days === 42 ? "6 weeks" : `${days} days`}. Swipe left/right for other metrics.`
+      : "Add metrics to begin tracking.";
+
+    bindActivitySwipeGesture();
+
+    if (isRunningDomain(domain)) renderHeartRateZonePanel();
+    else if (elements.runningHeartRatePanel) elements.runningHeartRatePanel.hidden = true;
+  }
+
+  function drawActivityChartOnCanvas(canvas, logs, metric) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(320, Math.floor(rect.width || 720));
+    const height = Math.max(220, Math.floor(rect.height || 300));
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, width, height);
+
+    const pad = { left: 52, right: 16, top: 22, bottom: 36 };
+    const values = logs.map((log) => Number(log.value)).filter(Number.isFinite);
+    if (!values.length) return;
+
+    let min = Math.min(...values);
+    let max = Math.max(...values);
+    if (min === max) {
+      min -= Math.max(1, Math.abs(min) * .05);
+      max += Math.max(1, Math.abs(max) * .05);
+    }
+    const range = max - min || 1;
+
+    ctx.font = "11px ui-monospace, SFMono-Regular, Menlo, monospace";
+    ctx.strokeStyle = "rgba(150,150,165,.28)";
+    ctx.fillStyle = "#9696a5";
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i <= 4; i++) {
+      const y = pad.top + ((height - pad.top - pad.bottom) * i / 4);
+      const value = max - range * i / 4;
+      ctx.beginPath();
+      ctx.moveTo(pad.left, y);
+      ctx.lineTo(width - pad.right, y);
+      ctx.stroke();
+      const label = metric.name === "Pace" ? formatPaceMinutes(value) : String(Math.round(value * 100) / 100);
+      ctx.fillText(label, 4, y + 4);
+    }
+
+    const xFor = (i) => logs.length === 1
+      ? (pad.left + width - pad.right) / 2
+      : pad.left + (width - pad.left - pad.right) * i / (logs.length - 1);
+    const yFor = (value) =>
+      pad.top + (height - pad.top - pad.bottom) * (max - value) / range;
+
+    ctx.strokeStyle = "#f34f58";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    logs.forEach((log, i) => {
+      const x = xFor(i);
+      const y = yFor(Number(log.value) || 0);
+      if (i) ctx.lineTo(x, y);
+      else ctx.moveTo(x, y);
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = "#f34f58";
+    logs.forEach((log, i) => {
+      const x = xFor(i);
+      const y = yFor(Number(log.value) || 0);
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  function setActivityMetricSlide(index) {
+    const domain = state.settings.archiveDomain;
+    const metrics = getTrackerMetrics(domain);
+    const safeIndex = Math.max(0, Math.min(metrics.length - 1, index));
+    state.settings.activitySlideByDomain[domain] = safeIndex;
+    if (metrics[safeIndex]) {
+      state.settings.activityMetricByDomain[domain] = metrics[safeIndex].name;
+    }
+    saveState();
+    renderActivityProgress();
+  }
+
+  function moveActivityMetricSlide(direction) {
+    const domain = state.settings.archiveDomain;
+    const current = Number(state.settings.activitySlideByDomain?.[domain] || 0);
+    setActivityMetricSlide(current + direction);
+  }
+
+  let activitySwipeStartX = null;
+  function bindActivitySwipeGesture() {
+    const track = elements.activitySwipeTrack;
+    if (!track || track.dataset.swipeBound === "true") return;
+    track.dataset.swipeBound = "true";
+    track.addEventListener("touchstart", (event) => {
+      activitySwipeStartX = event.changedTouches?.[0]?.clientX ?? null;
+    }, { passive: true });
+    track.addEventListener("touchend", (event) => {
+      if (activitySwipeStartX === null) return;
+      const endX = event.changedTouches?.[0]?.clientX ?? activitySwipeStartX;
+      const delta = endX - activitySwipeStartX;
+      activitySwipeStartX = null;
+      if (Math.abs(delta) < 45) return;
+      moveActivityMetricSlide(delta < 0 ? 1 : -1);
+    }, { passive: true });
+  }
+
   const HEART_RATE_ZONES = [
     { zone: 1, name: "Recovery", min: 0.50, max: 0.60, description: "Very easy recovery and aerobic work." },
     { zone: 2, name: "Aerobic base", min: 0.60, max: 0.70, description: "Easy sustainable endurance work." },
@@ -2227,20 +2822,20 @@
     return String(domain || "").trim().toLowerCase().includes("running");
   }
 
-  function bpmRangeForZone(zone) {
-    const maxHr = Number(state.settings.maxHeartRate) || 0;
-    if (!maxHr) return `${Math.round(zone.min * 100)}–${Math.round(Math.min(zone.max, 1) * 100)}% Max HR`;
-    const low = Math.round(maxHr * zone.min);
-    const high = zone.zone === 5 ? maxHr : Math.max(low, Math.round(maxHr * zone.max) - 1);
-    return `${low}–${high} bpm`;
-  }
-
   function zoneForHeartRate(bpm) {
     const maxHr = Number(state.settings.maxHeartRate) || 0;
     const value = Number(bpm);
     if (!maxHr || !Number.isFinite(value) || value <= 0) return null;
     const ratio = value / maxHr;
     return HEART_RATE_ZONES.find((zone) => ratio >= zone.min && ratio < zone.max) || null;
+  }
+
+  function bpmRangeForZone(zone) {
+    const maxHr = Number(state.settings.maxHeartRate) || 0;
+    if (!maxHr) return `${Math.round(zone.min * 100)}–${Math.round(Math.min(zone.max, 1) * 100)}% Max HR`;
+    const low = Math.round(maxHr * zone.min);
+    const high = zone.zone === 5 ? maxHr : Math.max(low, Math.round(maxHr * zone.max) - 1);
+    return `${low}–${high} bpm`;
   }
 
   function renderHeartRateZonePanel() {
@@ -2265,48 +2860,9 @@
       elements.heartRateZoneGrid.appendChild(card);
     });
 
-    if (!maxHr) {
-      elements.heartRateZoneCurrent.textContent = "Set Max HR to show personalized BPM ranges.";
-      return;
-    }
-
-    const tracker = state.activityTrackers?.[state.settings.archiveDomain];
-    const latest = [...(tracker?.entries || [])]
-      .filter((entry) => String(entry.metric || "").toLowerCase() === "heart rate")
-      .sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
-
-    if (latest) {
-      const zone = zoneForHeartRate(latest.value);
-      elements.heartRateZoneCurrent.textContent = zone
-        ? `Latest HR: ${latest.value} bpm · Zone ${zone.zone} (${zone.name})`
-        : `Latest HR: ${latest.value} bpm`;
-    } else {
-      elements.heartRateZoneCurrent.textContent = `Max HR set to ${maxHr} bpm.`;
-    }
-  }
-
-  function renderHeartRateZonePicker(metricName) {
-    if (!elements.heartRateZonePicker) return;
-    const isZone = String(metricName || "").trim().toLowerCase() === "heart rate zone";
-    elements.heartRateZonePicker.hidden = !isZone;
-    elements.heartRateZoneButtons.replaceChildren();
-    if (!isZone) return;
-
-    HEART_RATE_ZONES.forEach((zone) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "zone-pick-button";
-      button.textContent = `Z${zone.zone}`;
-      button.title = `${zone.name}: ${bpmRangeForZone(zone)}`;
-      button.addEventListener("click", () => {
-        elements.activityEntryValue.value = String(zone.zone);
-        elements.activityEntryUnit.value = "zone";
-        if (!elements.activityEntryNote.value.trim()) {
-          elements.activityEntryNote.value = `${zone.name} · ${bpmRangeForZone(zone)}`;
-        }
-      });
-      elements.heartRateZoneButtons.appendChild(button);
-    });
+    elements.heartRateZoneCurrent.textContent = maxHr
+      ? `Max HR set to ${maxHr} bpm. Heart-rate sessions will also be tagged with their calculated zone.`
+      : "Set Max HR to show personalized BPM ranges and auto-tag heart-rate sessions.";
   }
 
   function renderProgressDomains() {
@@ -2330,183 +2886,15 @@
     const weightlifting = state.settings.archiveDomain === "Weightlifting";
     elements.weightliftingProgressSection.hidden = !weightlifting;
     elements.activityProgressSection.hidden = weightlifting;
-    if (!weightlifting) { renderActivityProgress(); renderHeartRateZonePanel(); } else if (elements.runningHeartRatePanel) { elements.runningHeartRatePanel.hidden = true; }
+    if (!weightlifting) renderActivityProgress();
   }
 
   function openActivityTrackerDialog() {
     elements.activityTrackerName.value = "";
+    elements.activityTrackerMetrics.value = "";
     elements.activityTrackerStatus.textContent = "";
     elements.activityTrackerDialog.showModal();
     setTimeout(() => elements.activityTrackerName.focus(), 0);
-  }
-
-  function inferActivityMetrics(name) {
-    const normalized = String(name || "").trim().toLowerCase();
-    const match = Object.entries(ACTIVITY_METRIC_PRESETS).find(([preset]) => {
-      const p = preset.toLowerCase();
-      return normalized === p || normalized.includes(p) || p.includes(normalized);
-    });
-    return structuredCloneSafe(match?.[1] || [
-      { name: "Sessions", unit: "sessions" },
-      { name: "Training time", unit: "min" },
-      { name: "Performance", unit: "/10" }
-    ]);
-  }
-
-  function parseTrackerMetrics(text, fallbackName) {
-    const parsed = String(text || "")
-      .split(/\n+/)
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => {
-        const [name, unit = ""] = line.split("|").map((part) => part.trim());
-        return { name, unit };
-      })
-      .filter((metric) => metric.name);
-    return parsed.length ? parsed : inferActivityMetrics(fallbackName);
-  }
-
-  function saveActivityTracker(event) {
-    event.preventDefault();
-    const name = elements.activityTrackerName.value.trim();
-    if (!name) return;
-    if (name.toLowerCase() === "weightlifting" || Object.keys(state.activityTrackers).some((key) => key.toLowerCase() === name.toLowerCase())) {
-      elements.activityTrackerStatus.textContent = "That progress folder already exists.";
-      return;
-    }
-    state.activityTrackers[name] = {
-      name,
-      entries: [],
-      metrics: parseTrackerMetrics(elements.activityTrackerMetrics.value, name)
-    };
-    state.settings.archiveDomain = name;
-    saveState();
-    elements.activityTrackerDialog.close();
-    renderHistory();
-  }
-
-  function openActivityEntryDialog() {
-    const domain = state.settings.archiveDomain;
-    if (!domain || domain === "Weightlifting") return;
-    const tracker = state.activityTrackers?.[domain];
-    elements.activityEntryDomain.textContent = domain;
-    elements.activityEntryDate.value = getTodayKey();
-    elements.activityEntryMetric.value = elements.activityMetricSelect.value || "";
-    elements.activityEntryValue.value = "";
-    elements.activityEntryUnit.value = "";
-    elements.activityEntryNote.value = "";
-    elements.activityEntryStatus.textContent = "";
-    elements.activityMetricSuggestions.replaceChildren();
-
-    const metrics = Array.isArray(tracker?.metrics) && tracker.metrics.length ? tracker.metrics : inferActivityMetrics(domain);
-    metrics.forEach((metric) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "metric-suggestion";
-      button.textContent = metric.name;
-      button.addEventListener("click", () => {
-        elements.activityEntryMetric.value = metric.name;
-        elements.activityEntryUnit.value = metric.unit || "";
-        renderHeartRateZonePicker(metric.name);
-      });
-      elements.activityMetricSuggestions.appendChild(button);
-    });
-
-    const selectedMetric = metrics.find((metric) => metric.name === elements.activityEntryMetric.value);
-    if (selectedMetric) elements.activityEntryUnit.value = selectedMetric.unit || "";
-    renderHeartRateZonePicker(elements.activityEntryMetric.value);
-    elements.activityEntryMetric.oninput = () => renderHeartRateZonePicker(elements.activityEntryMetric.value);
-    elements.activityEntryDialog.showModal();
-  }
-
-  function saveActivityEntry(event) {
-    event.preventDefault();
-    const domain = state.settings.archiveDomain;
-    const tracker = state.activityTrackers?.[domain];
-    if (!tracker) return;
-    const dateKey = elements.activityEntryDate.value;
-    const metric = elements.activityEntryMetric.value.trim();
-    const value = Number(elements.activityEntryValue.value);
-    if (!dateKey || !metric || !Number.isFinite(value)) {
-      elements.activityEntryStatus.textContent = "Enter a date, metric, and numeric value.";
-      return;
-    }
-    if (metric.toLowerCase() === "heart rate zone" && (value < 1 || value > 5 || !Number.isInteger(value))) {
-      elements.activityEntryStatus.textContent = "Heart rate zone must be a whole number from 1 to 5.";
-      return;
-    }
-
-    const entry = {
-      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      date: new Date(`${dateKey}T12:00:00`).toISOString(),
-      metric,
-      value,
-      unit: elements.activityEntryUnit.value.trim(),
-      note: elements.activityEntryNote.value.trim()
-    };
-
-    if (metric.toLowerCase() === "heart rate") {
-      const zone = zoneForHeartRate(value);
-      if (zone) {
-        entry.zone = zone.zone;
-        entry.zoneName = zone.name;
-      }
-    }
-
-    tracker.entries.push(entry);
-    saveState();
-    elements.activityEntryDialog.close();
-    renderHistory();
-    elements.activityMetricSelect.value = metric;
-    renderActivityProgress();
-  }
-
-  function renderActivityProgress() {
-    const domain = state.settings.archiveDomain;
-    if (!domain || domain === "Weightlifting") return;
-    const tracker = state.activityTrackers?.[domain] || { entries: [] };
-    elements.activityProgressHeading.textContent = `${domain} progress`;
-    const configuredMetrics = (Array.isArray(tracker.metrics) ? tracker.metrics : inferActivityMetrics(domain))
-      .map((metric) => String(metric?.name || "").trim())
-      .filter(Boolean);
-    const loggedMetrics = tracker.entries.map((entry) => String(entry.metric || "").trim()).filter(Boolean);
-    const metrics = [...new Set([...configuredMetrics, ...loggedMetrics])];
-    const previous = state.settings.activityMetricByDomain?.[domain] || elements.activityMetricSelect.value;
-
-    elements.activityMetricSelect.replaceChildren();
-    if (!metrics.length) {
-      const option = document.createElement("option");
-      option.value = "";
-      option.textContent = "No metrics configured";
-      elements.activityMetricSelect.appendChild(option);
-      elements.activityMetricSelect.disabled = true;
-    } else {
-      elements.activityMetricSelect.disabled = false;
-      metrics.forEach((metricName) => {
-        const option = document.createElement("option");
-        option.value = metricName;
-        const count = tracker.entries.filter((entry) => entry.metric === metricName).length;
-        option.textContent = count ? `${metricName} (${count})` : `${metricName} · no entries`;
-        elements.activityMetricSelect.appendChild(option);
-      });
-      const selected = metrics.includes(previous) ? previous : metrics[0];
-      elements.activityMetricSelect.value = selected;
-      state.settings.activityMetricByDomain[domain] = selected;
-    }
-
-    renderHeartRateZonePanel();
-    const metric = elements.activityMetricSelect.value;
-    const logs = tracker.entries.filter((entry) => entry.metric === metric).sort((a, b) => a.date.localeCompare(b.date));
-    elements.activityProgressEmpty.hidden = logs.length > 0;
-    elements.activityProgressChart.hidden = logs.length === 0;
-    elements.activityProgressLogList.replaceChildren();
-    [...logs].reverse().slice(0, 10).forEach((log) => {
-      const row = document.createElement("div");
-      row.className = "progress-log-row";
-      row.innerHTML = `<span>${escapeHtml(formatShortDate(log.date))}</span><strong>${escapeHtml(String(log.value))}${log.unit ? ` ${escapeHtml(log.unit)}` : ""}</strong><small>${log.note ? escapeHtml(log.note) : escapeHtml(log.metric)}</small>`;
-      elements.activityProgressLogList.appendChild(row);
-    });
-    if (logs.length) drawActivityChart(logs);
   }
 
   function drawActivityChart(logs) {
@@ -2979,11 +3367,11 @@
           throw new Error("This file is not a valid Command Center backup.");
         }
 
-        if (!confirm("Merge this backup into your current Command Center data? Existing unique records will be kept.")) {
+        if (!confirm("Import this backup? It will replace the data currently stored in this browser.")) {
           return;
         }
 
-        state = mergeStates(state, incoming);
+        state = incoming;
         ensureStateShape();
         saveAndRender();
         switchView("today");
@@ -3223,183 +3611,38 @@
     return merged;
   }
 
-  function parseStoredState(raw) {
-    if (!raw) return null;
-    try {
-      const value = JSON.parse(raw);
-      return value && typeof value === "object" ? value : null;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  function cloneData(value) {
-    return value == null ? value : JSON.parse(JSON.stringify(value));
-  }
-
-  function mergeUniqueEntries(a = [], b = []) {
-    const result = [];
-    const seen = new Set();
-    [...(Array.isArray(a) ? a : []), ...(Array.isArray(b) ? b : [])].forEach((entry) => {
-      if (!entry || typeof entry !== "object") return;
-      const key = entry.id || JSON.stringify([
-        entry.date || "", entry.exercise || "", entry.weight ?? "", entry.reps ?? "",
-        entry.sets ?? "", entry.metric || "", entry.value ?? "", entry.unit || "", entry.note || ""
-      ]);
-      if (seen.has(key)) return;
-      seen.add(key);
-      result.push(cloneData(entry));
-    });
-    return result;
-  }
-
-  function mergeAar(primary = {}, backup = {}) {
-    const p = primary && typeof primary === "object" ? primary : {};
-    const b = backup && typeof backup === "object" ? backup : {};
-    const result = { ...b, ...p };
-    ["wentWell", "improve", "lesson", "priority"].forEach((field) => {
-      if (!String(p[field] || "").trim() && String(b[field] || "").trim()) {
-        result[field] = b[field];
-      }
-    });
-    if (!p.savedAt && b.savedAt) result.savedAt = b.savedAt;
-    return result;
-  }
-
-  function mergeDailyRecord(primary, backup) {
-    if (!primary) return cloneData(backup);
-    if (!backup) return cloneData(primary);
-    const result = { ...backup, ...primary };
-    result.aar = mergeAar(primary.aar, backup.aar);
-
-    ["mindTasks", "spiritTasks"].forEach((field) => {
-      const map = new Map();
-      [...(backup[field] || []), ...(primary[field] || [])].forEach((task) => {
-        if (!task) return;
-        const key = task.id || String(task.text || "").trim().toLowerCase();
-        if (!key) return;
-        map.set(key, { ...(map.get(key) || {}), ...task });
-      });
-      result[field] = [...map.values()];
-    });
-
-    if ((Number(primary.protein) || 0) === 0 && (Number(backup.protein) || 0) > 0) result.protein = backup.protein;
-    if (!primary.workoutComplete && backup.workoutComplete) result.workoutComplete = true;
-    return result;
-  }
-
-  function mergeStates(primary, backup) {
-    if (!primary) return backup ? cloneData(backup) : null;
-    if (!backup) return cloneData(primary);
-
-    const merged = cloneData(primary);
-    merged.settings = { ...(backup.settings || {}), ...(primary.settings || {}) };
-
-    merged.daily = {};
-    const dates = new Set([...Object.keys(backup.daily || {}), ...Object.keys(primary.daily || {})]);
-    dates.forEach((dateKey) => {
-      merged.daily[dateKey] = mergeDailyRecord(primary.daily?.[dateKey], backup.daily?.[dateKey]);
-    });
-
-    merged.quotes = { ...(backup.quotes || {}), ...(primary.quotes || {}) };
-    merged.customWorkouts = { ...(backup.customWorkouts || {}), ...(primary.customWorkouts || {}) };
-
-    merged.exerciseLogs = {};
-    const exercises = new Set([...Object.keys(backup.exerciseLogs || {}), ...Object.keys(primary.exerciseLogs || {})]);
-    exercises.forEach((name) => {
-      merged.exerciseLogs[name] = mergeUniqueEntries(primary.exerciseLogs?.[name], backup.exerciseLogs?.[name]);
-    });
-
-    merged.activityTrackers = {};
-    const trackers = new Set([...Object.keys(backup.activityTrackers || {}), ...Object.keys(primary.activityTrackers || {})]);
-    trackers.forEach((name) => {
-      const p = primary.activityTrackers?.[name] || {};
-      const b = backup.activityTrackers?.[name] || {};
-      merged.activityTrackers[name] = {
-        ...b,
-        ...p,
-        name: p.name || b.name || name,
-        metrics: Array.isArray(p.metrics) && p.metrics.length ? cloneData(p.metrics) : cloneData(b.metrics || []),
-        entries: mergeUniqueEntries(p.entries, b.entries)
-      };
-    });
-
-    const opMap = new Map();
-    [...(backup.operations?.items || []), ...(primary.operations?.items || [])].forEach((op) => {
-      if (!op) return;
-      const key = op.id || `${op.name || "operation"}:${op.startCycleIndex ?? 0}`;
-      const current = opMap.get(key);
-      opMap.set(key, current ? { ...current, ...op } : cloneData(op));
-    });
-
-    const cycleMap = new Map();
-    [...(backup.operations?.cycles || []), ...(primary.operations?.cycles || [])].forEach((cycle) => {
-      if (!cycle || !Number.isInteger(cycle.cycleIndex)) return;
-      const current = cycleMap.get(cycle.cycleIndex);
-      cycleMap.set(cycle.cycleIndex, current ? { ...current, ...cycle, summary: cycle.summary || current.summary || "" } : cloneData(cycle));
-    });
-
-    merged.operations = {
-      ...(backup.operations || {}),
-      ...(primary.operations || {}),
-      items: [...opMap.values()],
-      cycles: [...cycleMap.values()].sort((a, b) => a.cycleIndex - b.cycleIndex)
-    };
-
-    return merged;
-  }
-
-  function getSnapshotKeys() {
-    try {
-      const parsed = JSON.parse(localStorage.getItem(SNAPSHOT_INDEX_KEY) || "[]");
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (_) {
-      return [];
-    }
-  }
-
-  function createSnapshot(raw) {
-    if (!raw) return;
-    try {
-      const key = `myCommandCenter.snapshot.${Date.now()}`;
-      localStorage.setItem(key, raw);
-      const keys = [key, ...getSnapshotKeys().filter((item) => item !== key)];
-      keys.slice(MAX_SNAPSHOTS).forEach((oldKey) => localStorage.removeItem(oldKey));
-      localStorage.setItem(SNAPSHOT_INDEX_KEY, JSON.stringify(keys.slice(0, MAX_SNAPSHOTS)));
-    } catch (error) {
-      console.warn("Could not create local snapshot:", error);
-    }
-  }
-
   function loadState() {
     try {
-      const candidates = [];
       const primary = parseStoredState(localStorage.getItem(STORAGE_KEY));
       const backup = parseStoredState(localStorage.getItem(BACKUP_STORAGE_KEY));
-      if (primary) candidates.push(primary);
-      if (backup) candidates.push(backup);
-      getSnapshotKeys().forEach((key) => {
-        const snapshot = parseStoredState(localStorage.getItem(key));
-        if (snapshot) candidates.push(snapshot);
-      });
-
-      if (!candidates.length) return createInitialState();
-      return candidates.reduce((merged, candidate) => mergeStates(merged, candidate), null);
+      const merged = mergeCommandCenterStates(primary, backup);
+      if (merged) {
+        if (primary && backup) console.info("Merged primary and backup Command Center data without discarding unique records.");
+        return merged;
+      }
+      return createInitialState();
     } catch (error) {
       console.error("Could not load local data:", error);
+      setTimeout(() => {
+        const alertBox = document.getElementById("storageAlert");
+        if (alertBox) alertBox.hidden = false;
+      }, 0);
       return createInitialState();
     }
   }
 
   function saveState() {
     try {
+      const serialized = JSON.stringify(state);
       const previousRaw = localStorage.getItem(STORAGE_KEY);
-      if (previousRaw) {
-        localStorage.setItem(BACKUP_STORAGE_KEY, previousRaw);
-        createSnapshot(previousRaw);
-      }
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      // Snapshot the complete previous state before every write. We never choose a
+      // "richer" snapshot over current data; loadState merges both non-destructively.
+      if (previousRaw && previousRaw !== serialized) {
+        localStorage.setItem(BACKUP_STORAGE_KEY, previousRaw);
+      }
+      localStorage.setItem(STORAGE_KEY, serialized);
+
       if (elements.storageAlert) elements.storageAlert.hidden = true;
       return true;
     } catch (error) {
@@ -3408,7 +3651,6 @@
       return false;
     }
   }
-
 
   function saveAndRender() {
     saveState();

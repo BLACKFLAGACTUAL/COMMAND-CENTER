@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-v8-integrated-4file";
+const CACHE_NAME = "command-center-activity-overhaul-v1";
 const APP_SHELL = [
   "./",
   "./index.html",

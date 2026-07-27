@@ -366,39 +366,57 @@
               <p class="category-kicker">DOMAIN INTELLIGENCE</p>
               <h3 id="activityProgressHeading">Activity progress</h3>
             </div>
-            <button id="addActivityEntryButton" class="button secondary compact-action" type="button">+ Add entry</button>
+            <button id="addActivityEntryButton" class="button primary compact-action" type="button">+ Log session</button>
           </div>
-          <div class="progress-toolbar">
+
+          <div class="activity-progress-controls">
             <div class="progress-select-wrap">
               <label for="activityMetricSelect">Metric</label>
               <select id="activityMetricSelect"></select>
             </div>
+            <div class="progress-select-wrap">
+              <label for="activityTrendWindow">Trend window</label>
+              <select id="activityTrendWindow">
+                <option value="14">2 weeks</option>
+                <option value="42" selected>6 weeks</option>
+                <option value="90">90 days</option>
+                <option value="365">1 year</option>
+              </select>
+            </div>
           </div>
 
-          <section id="runningHeartRatePanel" class="running-heart-rate-panel" hidden aria-labelledby="runningHeartRateHeading">
+          <section id="runningHeartRatePanel" class="running-heart-rate-panel" hidden>
             <div class="running-zone-header">
               <div>
                 <p class="category-kicker">HEART RATE INTELLIGENCE</p>
-                <h4 id="runningHeartRateHeading">Training zones</h4>
+                <h4>Training zones</h4>
               </div>
               <div class="max-hr-control">
                 <label for="maxHeartRateInput">Max HR</label>
                 <div>
-                  <input id="maxHeartRateInput" type="number" min="100" max="240" step="1" inputmode="numeric" placeholder="e.g. 195">
+                  <input id="maxHeartRateInput" type="number" min="100" max="240" step="1" inputmode="numeric" placeholder="195">
                   <span>bpm</span>
                 </div>
               </div>
             </div>
-            <p class="helper-text">Zones use percentage of maximum heart rate. Set Max HR to calculate your personal BPM ranges.</p>
+            <p class="helper-text">Zones use percentage of Max HR. Set Max HR once to show your personalized BPM ranges.</p>
             <div id="heartRateZoneGrid" class="heart-rate-zone-grid"></div>
             <p id="heartRateZoneCurrent" class="heart-rate-zone-current"></p>
           </section>
 
-          <div class="chart-wrap">
-            <canvas id="activityProgressChart" width="720" height="360" aria-label="Activity progress graph"></canvas>
+          <div class="activity-swipe-controls">
+            <button id="activitySwipePrev" class="activity-swipe-arrow" type="button" aria-label="Previous metric">←</button>
+            <div id="activitySwipeDots" class="activity-swipe-dots" aria-label="Metric pages"></div>
+            <button id="activitySwipeNext" class="activity-swipe-arrow" type="button" aria-label="Next metric">→</button>
           </div>
-          <p id="activityProgressEmpty" class="empty-state">Add an entry to begin tracking this activity.</p>
-          <div id="activityProgressLogList" class="progress-log-list"></div>
+
+          <p id="activityTrendSummary" class="activity-trend-summary"></p>
+          <div id="activitySwipeTrack" class="activity-swipe-track"></div>
+
+          <!-- Kept for backward compatibility with existing app references -->
+          <canvas id="activityProgressChart" width="720" height="360" hidden aria-hidden="true"></canvas>
+          <p id="activityProgressEmpty" class="empty-state" hidden></p>
+          <div id="activityProgressLogList" hidden></div>
         </section>
 
         <section class="settings-card daily-aar-archive-card" data-collapsible-key="archive-daily-aars" aria-labelledby="dailyAarArchiveHeading">
@@ -708,26 +726,38 @@
 
   <dialog id="activityEntryDialog">
     <form id="activityEntryForm">
-      <h2>Log activity progress</h2>
+      <h2>Log activity session</h2>
+
+      <div class="activity-session-top-grid">
+        <div>
+          <label for="activityEntryDate">Date</label>
+          <input id="activityEntryDate" type="date" required>
+        </div>
+        <div>
+          <label for="activityEntryActivity">Activity</label>
+          <input id="activityEntryActivity" type="text" readonly>
+        </div>
+      </div>
+
       <p id="activityEntryDomain" class="dialog-workout-name"></p>
-      <label for="activityEntryDate">Date</label>
-      <input id="activityEntryDate" type="date" required>
-      <label for="activityEntryMetric">Metric</label>
-      <div id="activityMetricSuggestions" class="metric-suggestions"></div>
-      <input id="activityEntryMetric" type="text" maxlength="60" placeholder="Rounds, 3-mile time, distance…" required>
-      <div id="heartRateZonePicker" class="heart-rate-zone-picker" hidden>
-        <span>Quick zone</span>
-        <div id="heartRateZoneButtons" class="heart-rate-zone-buttons"></div>
-      </div>
-      <div class="activity-entry-grid">
-        <div><label for="activityEntryValue">Value</label><input id="activityEntryValue" type="number" step="0.01" inputmode="decimal" required></div>
-        <div><label for="activityEntryUnit">Unit</label><input id="activityEntryUnit" type="text" maxlength="20" placeholder="rounds, min, mi…"></div>
-      </div>
-      <label for="activityEntryNote">Note (optional)</label>
-      <input id="activityEntryNote" type="text" maxlength="180" placeholder="Sparring quality, pace, result…">
+      <p class="helper-text activity-entry-instructions">
+        Enter the session once, then save once. Calculated metrics such as pace fill automatically when the required fields are entered.
+      </p>
+
+      <div id="activitySessionFields" class="activity-session-fields"></div>
+
+      <label for="activityEntryNote">Session note (optional)</label>
+      <input id="activityEntryNote" type="text" maxlength="240" placeholder="How it felt, terrain, sparring quality, conditions…">
+
+      <!-- Legacy inputs retained hidden so older code/data imports remain compatible -->
+      <input id="activityEntryMetric" type="hidden">
+      <input id="activityEntryValue" type="hidden">
+      <input id="activityEntryUnit" type="hidden">
+      <div id="activityMetricSuggestions" hidden></div>
+
       <p id="activityEntryStatus" class="save-status" aria-live="polite"></p>
       <div class="button-row">
-        <button class="button primary" type="submit">Save entry</button>
+        <button class="button primary" type="submit">Save session</button>
         <button id="activityEntryCancel" class="button secondary" type="button">Cancel</button>
       </div>
     </form>
