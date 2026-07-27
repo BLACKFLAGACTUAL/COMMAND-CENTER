@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-archive-calendar-v3";
+const CACHE_NAME = "command-center-organized-ops-analysis-v6";
 const APP_SHELL = [
   "./",
   "./index.html",

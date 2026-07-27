@@ -249,7 +249,7 @@
           <div id="workoutLibrary" class="workout-library"></div>
         </section>
 
-        <section class="reference-card">
+        <section class="reference-card" data-collapsible-key="protocol-training-reference">
           <div class="section-heading">
             <div>
               <p class="category-kicker">TRAINING REFERENCE</p>
@@ -269,7 +269,7 @@
           </div>
         </div>
 
-        <section class="settings-card archive-calendar-card" aria-labelledby="archiveCalendarHeading">
+        <section class="settings-card archive-calendar-card" data-collapsible-key="archive-calendar" aria-labelledby="archiveCalendarHeading">
           <div class="section-heading calendar-heading-row">
             <div>
               <p class="category-kicker">DAILY ARCHIVE</p>
@@ -301,7 +301,7 @@
           </div>
         </section>
 
-        <section class="settings-card manual-entry-card" aria-labelledby="manualEntryHeading">
+        <section class="settings-card manual-entry-card" data-collapsible-key="archive-manual-lifts" aria-labelledby="manualEntryHeading">
           <div class="section-heading">
             <div>
               <p class="category-kicker">MANUAL ENTRY</p>
@@ -312,7 +312,7 @@
           <button id="manualStrengthEntryButton" class="button primary full-width" type="button">+ Add manual strength entry</button>
         </section>
 
-        <section class="settings-card progress-domains-card" aria-labelledby="domainsHeading">
+        <section class="settings-card progress-domains-card" data-collapsible-key="archive-progress-folders" aria-labelledby="domainsHeading">
           <div class="section-heading">
             <div>
               <p class="category-kicker">PROGRESS DOMAINS</p>
@@ -339,7 +339,7 @@
           </div>
         </div>
 
-        <section id="weightliftingProgressSection" class="settings-card progress-card" aria-labelledby="progressHeading">
+        <section id="weightliftingProgressSection" class="settings-card progress-card" data-collapsible-key="archive-weightlifting-progress" aria-labelledby="progressHeading">
           <div class="section-heading">
             <div>
               <p class="category-kicker">STRENGTH INTELLIGENCE</p>
@@ -360,7 +360,7 @@
           <div id="progressLogList" class="progress-log-list"></div>
         </section>
 
-        <section id="activityProgressSection" class="settings-card progress-card" aria-labelledby="activityProgressHeading" hidden>
+        <section id="activityProgressSection" class="settings-card progress-card" data-collapsible-key="archive-activity-progress" aria-labelledby="activityProgressHeading" hidden>
           <div class="section-heading">
             <div>
               <p class="category-kicker">DOMAIN INTELLIGENCE</p>
@@ -381,8 +381,17 @@
           <div id="activityProgressLogList" class="progress-log-list"></div>
         </section>
 
-        <div id="historyList" class="history-list"></div>
-        <p id="emptyHistory" class="empty-state">No daily records yet. Complete tasks or save an AAR to begin your history.</p>
+        <section class="settings-card daily-aar-archive-card" data-collapsible-key="archive-daily-aars" aria-labelledby="dailyAarArchiveHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">DAILY RECORDS</p>
+              <h3 id="dailyAarArchiveHeading">AAR archive</h3>
+            </div>
+          </div>
+          <p class="helper-text">Collapse this section when you only need the calendar, graphs, or macro Operation review.</p>
+          <div id="historyList" class="history-list"></div>
+          <p id="emptyHistory" class="empty-state">No daily records yet. Complete tasks or save an AAR to begin your history.</p>
+        </section>
       </section>
 
 
@@ -402,17 +411,38 @@
 
 
 
-        <section class="settings-card operations-card" aria-labelledby="operationsHeading">
+        <section class="settings-card operations-card" data-collapsible-key="operations-overview" aria-labelledby="operationsHeading">
           <div class="section-heading">
             <div>
-              <p class="category-kicker">MACRO CAMPAIGN TRACKING</p>
-              <h3 id="operationsHeading">Operations</h3>
+              <p class="category-kicker">CURRENT CAMPAIGN</p>
+              <h3 id="operationsHeading">Operation overview</h3>
             </div>
             <button id="newOperationButton" class="button secondary compact-action" type="button">+ New operation</button>
           </div>
-          <p class="helper-text">Each operation contains one or more complete 14-day battle-rhythm blocks. Your daily records stay intact; operations give you the year-level view.</p>
+          <p class="helper-text">One Operation can contain as many complete 14-day blocks as required to accomplish its mission.</p>
           <div id="currentOperationCard" class="current-operation-card"></div>
-          <div id="operationCycleStrip" class="operation-cycle-strip" aria-label="14-day operation blocks"></div>
+          <div id="operationTrendSummary" class="operation-trend-summary"></div>
+        </section>
+
+        <section class="settings-card operations-block-card" data-collapsible-key="operations-blocks" aria-labelledby="operationBlocksHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">14-DAY BLOCK ANALYSIS</p>
+              <h3 id="operationBlocksHeading">Battle rhythm blocks</h3>
+            </div>
+          </div>
+          <p class="helper-text">Open a block to review its execution, ratings, lifting activity, and every AAR recorded during those 14 days.</p>
+          <div id="operationCycleStrip" class="operation-cycle-strip operation-block-analysis" aria-label="14-day operation blocks"></div>
+        </section>
+
+        <section class="settings-card operations-history-card" data-collapsible-key="operations-history" aria-labelledby="operationHistoryHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">CAMPAIGN ARCHIVE</p>
+              <h3 id="operationHistoryHeading">Operation history</h3>
+            </div>
+          </div>
+          <p class="helper-text">Deep-dive completed and active Operations to compare block-to-block trends and review their AAR record.</p>
           <div id="operationsList" class="operations-list"></div>
         </section>
       </section>
@@ -427,7 +457,7 @@
           </div>
         </div>
 
-        <section class="settings-card">
+        <section class="settings-card" data-collapsible-key="system-daily-targets">
           <h3>Daily targets</h3>
           <label for="proteinGoalInput">Protein goal (grams)</label>
           <input id="proteinGoalInput" type="number" min="50" max="400" step="5" inputmode="numeric">
@@ -435,7 +465,7 @@
           <p id="settingsSavedStatus" class="save-status" aria-live="polite"></p>
         </section>
 
-        <section class="settings-card">
+        <section class="settings-card" data-collapsible-key="system-task-templates">
           <h3>Task templates</h3>
           <p class="helper-text">These are the default tasks used when a new day is opened.</p>
           <div id="mindTemplateEditor" class="template-editor"></div>
@@ -447,7 +477,7 @@
           <button class="text-button template-add" type="button" data-category="spirit">+ Add spirit template</button>
         </section>
 
-        <section class="settings-card">
+        <section class="settings-card" data-collapsible-key="system-backup">
           <h3>Backup and restore</h3>
           <p class="helper-text">Export regularly. Local browser data can be erased if Safari website data is cleared.</p>
           <div class="button-stack">
@@ -463,7 +493,7 @@
           <button id="deleteAllDataButton" class="button danger-ghost full-width" type="button">Delete all stored data</button>
         </section>
 
-        <section class="settings-card">
+        <section class="settings-card" data-collapsible-key="system-reset">
           <h3>Home Screen icon</h3>
           <p class="helper-text">
             This project includes <code>apple-touch-icon.png</code>, <code>icon-192.png</code>,

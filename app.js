@@ -70,6 +70,7 @@
     cacheElements();
     ensureStateShape();
     bindEvents();
+    initializeCollapsibleSections();
     renderAll();
     registerServiceWorker();
   }
@@ -115,10 +116,69 @@
       "editAarRating", "editAarStatus", "editAarCancel", "newOperationButton", "currentOperationCard",
       "operationCycleStrip", "operationsList", "operationDialog", "operationForm", "operationDialogTitle",
       "operationTimingNote", "operationName", "operationIntent", "operationMission", "operationDialogStatus",
-      "operationDialogCancel", "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
+      "operationDialogCancel", "operationTrendSummary", "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
       "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
+    });
+  }
+
+  function initializeCollapsibleSections() {
+    document.querySelectorAll("[data-collapsible-key]").forEach((section) => {
+      const key = section.dataset.collapsibleKey;
+      if (!key || section.dataset.collapseReady === "true") return;
+
+      let heading = section.querySelector(":scope > .section-heading");
+      if (!heading) {
+        const firstHeading = section.querySelector(":scope > h3, :scope > h2");
+        if (firstHeading) {
+          heading = document.createElement("div");
+          heading.className = "section-heading generated-collapse-heading";
+          firstHeading.before(heading);
+          heading.appendChild(firstHeading);
+        }
+      }
+      if (!heading) return;
+
+      const body = document.createElement("div");
+      body.className = "collapsible-section-body";
+
+      [...section.children].forEach((child) => {
+        if (child !== heading) body.appendChild(child);
+      });
+      section.appendChild(body);
+
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "section-collapse-button";
+      toggle.setAttribute("aria-controls", `collapse-${key}`);
+      body.id = `collapse-${key}`;
+
+      const initiallyCollapsed = Boolean(state.settings.collapsedSections?.[key]);
+      body.hidden = initiallyCollapsed;
+      toggle.setAttribute("aria-expanded", String(!initiallyCollapsed));
+      toggle.textContent = initiallyCollapsed ? "Show" : "Hide";
+
+      toggle.addEventListener("click", () => {
+        const collapsed = !body.hidden;
+        body.hidden = collapsed;
+        toggle.setAttribute("aria-expanded", String(!collapsed));
+        toggle.textContent = collapsed ? "Show" : "Hide";
+        state.settings.collapsedSections[key] = collapsed;
+        saveState();
+      });
+
+      const existingAction = heading.querySelector(":scope > .compact-action, :scope > button");
+      if (existingAction) {
+        const controls = document.createElement("div");
+        controls.className = "section-heading-controls";
+        existingAction.before(controls);
+        controls.append(existingAction, toggle);
+      } else {
+        heading.appendChild(toggle);
+      }
+
+      section.dataset.collapseReady = "true";
     });
   }
 
@@ -261,7 +321,7 @@
 
   function ensureStateShape() {
     if (!state || typeof state !== "object") state = createInitialState();
-    state.version = 5;
+    state.version = 6;
     state.settings = { ...DEFAULT_SETTINGS, ...(state.settings || {}) };
 
     if (!Array.isArray(state.settings.mindTemplates)) {
@@ -292,6 +352,9 @@
     if (!state.settings.archiveDomain) state.settings.archiveDomain = "Weightlifting";
     if (typeof state.settings.progressExercise !== "string") state.settings.progressExercise = "";
     if (typeof state.settings.scheduleCollapsed !== "boolean") state.settings.scheduleCollapsed = false;
+    if (!state.settings.collapsedSections || typeof state.settings.collapsedSections !== "object" || Array.isArray(state.settings.collapsedSections)) {
+      state.settings.collapsedSections = {};
+    }
     ensureOperationsShape();
     syncOperationCycles();
 
@@ -301,7 +364,7 @@
 
   function createInitialState() {
     return {
-      version: 5,
+      version: 6,
       settings: structuredCloneSafe(DEFAULT_SETTINGS),
       daily: {},
       quotes: {},
@@ -1109,6 +1172,187 @@
     return state.operations.items.find((operation) => operation.status === "planned") || null;
   }
 
+  function cycleRecords(cycleIndex) {
+    const bounds = getCycleBounds(cycleIndex);
+    return Object.values(state.daily || {})
+      .filter((day) => day?.date >= bounds.startKey && day?.date <= bounds.endKey && hasMeaningfulData(day))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  function cycleAarCount(cycleIndex) {
+    return cycleRecords(cycleIndex).filter((day) => aarHasContent(day)).length;
+  }
+
+  function operationCycleIndexes(operation) {
+    const currentIndex = Math.max(0, getCycleIndexForDate(new Date()));
+    const finalIndex = operation.endCycleIndex === null
+      ? currentIndex
+      : Math.min(operation.endCycleIndex, currentIndex);
+    if (finalIndex < operation.startCycleIndex) return [];
+    return Array.from(
+      { length: finalIndex - operation.startCycleIndex + 1 },
+      (_, offset) => operation.startCycleIndex + offset
+    );
+  }
+
+  function formatSignedDelta(value, suffix = "") {
+    if (!Number.isFinite(value)) return "—";
+    if (value === 0) return `0${suffix}`;
+    return `${value > 0 ? "+" : ""}${value}${suffix}`;
+  }
+
+  function operationTrendData(operation) {
+    const indexes = operationCycleIndexes(operation);
+    const blocks = indexes.map((cycleIndex) => ({
+      cycleIndex,
+      ...cycleStats(cycleIndex),
+      aarCount: cycleAarCount(cycleIndex)
+    }));
+    const first = blocks[0] || null;
+    const latest = blocks[blocks.length - 1] || null;
+    const totalAars = blocks.reduce((sum, block) => sum + block.aarCount, 0);
+    const totalLifts = blocks.reduce((sum, block) => sum + block.liftEntries, 0);
+    const daysPossible = blocks.length * 14;
+    const daysLogged = blocks.reduce((sum, block) => sum + block.records, 0);
+
+    return {
+      blocks,
+      first,
+      latest,
+      totalAars,
+      totalLifts,
+      consistency: daysPossible ? Math.round((daysLogged / daysPossible) * 100) : 0,
+      executionDelta: first && latest ? latest.execution - first.execution : 0,
+      ratingDelta: first && latest ? Math.round((latest.rating - first.rating) * 10) / 10 : 0,
+      proteinDelta: first && latest ? latest.protein - first.protein : 0
+    };
+  }
+
+  function renderOperationTrendSummary(operation) {
+    if (!elements.operationTrendSummary) return;
+    elements.operationTrendSummary.replaceChildren();
+    if (!operation) return;
+
+    const trend = operationTrendData(operation);
+    if (!trend.blocks.length) {
+      elements.operationTrendSummary.innerHTML = `<p class="empty-state">Complete daily records to begin Operation trend analysis.</p>`;
+      return;
+    }
+
+    const grid = document.createElement("div");
+    grid.className = "operation-analysis-grid";
+    const metrics = [
+      ["EXECUTION TREND", formatSignedDelta(trend.executionDelta, " pp"), "first block → latest"],
+      ["RATING TREND", formatSignedDelta(trend.ratingDelta), "average AAR rating"],
+      ["PROTEIN TREND", formatSignedDelta(trend.proteinDelta, " g"), "first block → latest"],
+      ["CONSISTENCY", `${trend.consistency}%`, "days logged across blocks"],
+      ["AARs", String(trend.totalAars), "reviews captured"],
+      ["LIFT LOGS", String(trend.totalLifts), "strength entries"]
+    ];
+    metrics.forEach(([label, value, note]) => {
+      const card = document.createElement("div");
+      card.className = "operation-analysis-metric";
+      card.innerHTML = `<span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small>`;
+      grid.appendChild(card);
+    });
+    elements.operationTrendSummary.appendChild(grid);
+
+    if (trend.blocks.length > 1) {
+      const trendRows = document.createElement("div");
+      trendRows.className = "operation-block-trend-bars";
+      trend.blocks.forEach((block, idx) => {
+        const row = document.createElement("div");
+        row.className = "operation-trend-row";
+        row.innerHTML = `
+          <span>B${idx + 1}</span>
+          <div class="operation-trend-track"><i style="width:${Math.max(2, Math.min(100, block.execution))}%"></i></div>
+          <strong>${block.execution}%</strong>
+        `;
+        trendRows.appendChild(row);
+      });
+      elements.operationTrendSummary.appendChild(trendRows);
+    }
+  }
+
+  function buildBlockDeepDive(cycleIndex, operation, blockNumber) {
+    const stats = cycleStats(cycleIndex);
+    const records = cycleRecords(cycleIndex);
+    const bounds = getCycleBounds(cycleIndex);
+    const detail = document.createElement("details");
+    detail.className = "operation-block-detail";
+
+    const aarCount = records.filter((day) => aarHasContent(day)).length;
+    const summary = document.createElement("summary");
+    summary.innerHTML = `
+      <span class="block-summary-main">
+        <small>BLOCK ${blockNumber} · ${escapeHtml(formatDisplayDate(bounds.start))} – ${escapeHtml(formatDisplayDate(bounds.end))}</small>
+        <strong>${stats.execution}% execution</strong>
+      </span>
+      <span class="block-summary-stats">${records.length}/14 days · ${aarCount} AAR · ${stats.rating || "—"}/10</span>
+    `;
+    detail.appendChild(summary);
+
+    const body = document.createElement("div");
+    body.className = "operation-block-body";
+
+    const metrics = document.createElement("div");
+    metrics.className = "operation-metrics operation-block-metrics";
+    metrics.innerHTML = `
+      <span>${stats.protein} g avg protein</span>
+      <span>${stats.liftEntries} lift logs</span>
+      <span>${aarCount} AARs</span>
+      <span>${stats.rating || "—"}/10 avg rating</span>
+    `;
+    body.appendChild(metrics);
+
+    const aarList = document.createElement("div");
+    aarList.className = "block-aar-list";
+
+    if (!records.length) {
+      aarList.innerHTML = `<p class="empty-state">No daily records were logged during this block.</p>`;
+    } else {
+      records.forEach((day) => {
+        const completion = calculateCompletion(day);
+        const hasAar = aarHasContent(day);
+        const row = document.createElement("article");
+        row.className = `block-aar-row${hasAar ? " has-aar" : ""}`;
+
+        const top = document.createElement("div");
+        top.className = "block-aar-top";
+        const date = parseLocalDate(day.date);
+        top.innerHTML = `
+          <span><strong>${escapeHtml(date.toLocaleDateString(undefined, { month: "short", day: "numeric" }))}</strong><small>${completion.overall}% execution · ${Number(day.aar?.rating || 5)}/10</small></span>
+          <span>${hasAar ? "AAR" : "NO AAR"}</span>
+        `;
+        row.appendChild(top);
+
+        if (hasAar) {
+          const review = document.createElement("div");
+          review.className = "block-aar-copy";
+          review.innerHTML = `
+            <p><strong>Went well:</strong> ${escapeHtml(day.aar?.wentWell || "—")}</p>
+            <p><strong>Improve:</strong> ${escapeHtml(day.aar?.improve || "—")}</p>
+            <p><strong>Lesson:</strong> ${escapeHtml(day.aar?.lesson || "—")}</p>
+            <p><strong>Next priority:</strong> ${escapeHtml(day.aar?.priority || "—")}</p>
+          `;
+          row.appendChild(review);
+        }
+
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.className = "text-button block-aar-edit";
+        edit.textContent = hasAar ? "Edit AAR" : "Add AAR";
+        edit.addEventListener("click", () => openArchivedAarEditor(day.date));
+        row.appendChild(edit);
+        aarList.appendChild(row);
+      });
+    }
+
+    body.appendChild(aarList);
+    detail.appendChild(body);
+    return detail;
+  }
+
   function renderOperations() {
     if (!elements.currentOperationCard || !elements.operationCycleStrip || !elements.operationsList) return;
     syncOperationCycles();
@@ -1122,20 +1366,34 @@
       const bounds = getCycleBounds(currentIndex);
       const wrapper = document.createElement("div");
       wrapper.innerHTML = `
-        <div class="operation-status-row"><span class="operation-status">ACTIVE OPERATION</span><span>Cycle ${currentIndex - current.startCycleIndex + 1}</span></div>
+        <div class="operation-status-row">
+          <span class="operation-status">ACTIVE OPERATION</span>
+          <span>Block ${currentIndex - current.startCycleIndex + 1}</span>
+        </div>
         <h4>${escapeHtml(current.name)}</h4>
-        <p><strong>Intent:</strong> ${escapeHtml(current.intent || "Not set yet")}</p>
-        <p><strong>Mission:</strong> ${escapeHtml(current.mission || "Not set yet")}</p>
+        <div class="operation-intent-mission">
+          <div><small>COMMANDER'S INTENT</small><p>${escapeHtml(current.intent || "Not set yet")}</p></div>
+          <div><small>MISSION</small><p>${escapeHtml(current.mission || "Not set yet")}</p></div>
+        </div>
         <p class="helper-text">Current 14-day block: ${escapeHtml(formatDisplayDate(bounds.start))} – ${escapeHtml(formatDisplayDate(bounds.end))}</p>
-        <div class="operation-metrics"><span>${stats.cycleCount} blocks</span><span>${stats.daysLogged} days logged</span><span>${stats.execution}% execution</span><span>${stats.protein} g avg protein</span></div>
+        <div class="operation-metrics">
+          <span>${stats.cycleCount} blocks</span>
+          <span>${stats.daysLogged} days logged</span>
+          <span>${stats.execution}% execution</span>
+          <span>${stats.protein} g avg protein</span>
+        </div>
       `;
       const actions = document.createElement("div");
       actions.className = "button-row operation-actions";
       const edit = document.createElement("button");
-      edit.type = "button"; edit.className = "button secondary"; edit.textContent = "Edit operation";
+      edit.type = "button";
+      edit.className = "button secondary";
+      edit.textContent = "Edit operation";
       edit.addEventListener("click", () => openOperationDialog(current.id));
       const next = document.createElement("button");
-      next.type = "button"; next.className = "button primary"; next.textContent = planned ? "Edit next operation" : "Plan next operation";
+      next.type = "button";
+      next.className = "button primary";
+      next.textContent = planned ? "Edit next operation" : "Plan next operation";
       next.addEventListener("click", () => openOperationDialog(planned?.id || null));
       actions.append(edit, next);
       wrapper.appendChild(actions);
@@ -1152,39 +1410,92 @@
       elements.currentOperationCard.appendChild(plannedCard);
     }
 
-    elements.operationCycleStrip.replaceChildren();
-    state.operations.cycles
-      .filter((cycle) => cycle.cycleIndex >= Math.max(0, currentIndex - 5))
-      .sort((a, b) => a.cycleIndex - b.cycleIndex)
-      .forEach((cycle) => {
-        const operation = state.operations.items.find((item) => item.id === cycle.operationId);
-        const stats = cycleStats(cycle.cycleIndex);
-        const block = document.createElement("div");
-        block.className = `operation-cycle-block${cycle.cycleIndex === currentIndex ? " active" : ""}`;
-        block.innerHTML = `<span>BLOCK ${cycle.cycleIndex + 1}</span><strong>${escapeHtml(operation?.name || "Unassigned")}</strong><small>${stats.execution}% · ${stats.records} days</small>`;
-        elements.operationCycleStrip.appendChild(block);
-      });
+    renderOperationTrendSummary(current);
 
+    // Current Operation block deep dive.
+    elements.operationCycleStrip.replaceChildren();
+    if (current) {
+      const indexes = operationCycleIndexes(current);
+      indexes.forEach((cycleIndex, offset) => {
+        elements.operationCycleStrip.appendChild(buildBlockDeepDive(cycleIndex, current, offset + 1));
+      });
+    } else {
+      elements.operationCycleStrip.innerHTML = `<p class="empty-state">Assign an Operation to begin block analysis.</p>`;
+    }
+
+    // Operation archive with nested block analysis.
     elements.operationsList.replaceChildren();
     [...state.operations.items]
       .sort((a, b) => b.startCycleIndex - a.startCycleIndex)
       .forEach((operation) => {
         const stats = operationStats(operation);
-        const start = getCycleBounds(operation.startCycleIndex).start;
+        const trend = operationTrendData(operation);
+        const startDate = getCycleBounds(operation.startCycleIndex).start;
         const endIndex = operation.endCycleIndex === null ? currentIndex : operation.endCycleIndex;
-        const end = getCycleBounds(Math.max(operation.startCycleIndex, endIndex)).end;
+        const endDate = getCycleBounds(Math.max(operation.startCycleIndex, endIndex)).end;
+
         const item = document.createElement("details");
         item.className = "operation-history-item";
-        const status = operation.status === "planned" ? "PLANNED" : operation.status === "complete" ? "COMPLETE" : "ACTIVE";
-        item.innerHTML = `<summary><span><small>${status}</small><strong>${escapeHtml(operation.name)}</strong></span><span>${stats.cycleCount} blocks</span></summary>
-          <div class="operation-history-body">
-            <p>${escapeHtml(formatDisplayDate(start))} – ${escapeHtml(formatDisplayDate(end))}</p>
-            <p><strong>Intent:</strong> ${escapeHtml(operation.intent || "—")}</p>
-            <p><strong>Mission:</strong> ${escapeHtml(operation.mission || "—")}</p>
-            <div class="operation-metrics"><span>${stats.daysLogged} days</span><span>${stats.execution}% execution</span><span>${stats.protein} g avg protein</span></div>
-          </div>`;
+        if (current?.id === operation.id) item.open = true;
+
+        const status = operation.status === "planned"
+          ? "PLANNED"
+          : operation.status === "complete"
+            ? "COMPLETE"
+            : "ACTIVE";
+
+        const summary = document.createElement("summary");
+        summary.innerHTML = `
+          <span>
+            <small>${status}</small>
+            <strong>${escapeHtml(operation.name)}</strong>
+          </span>
+          <span>${stats.cycleCount} blocks · ${stats.execution}%</span>
+        `;
+        item.appendChild(summary);
+
+        const body = document.createElement("div");
+        body.className = "operation-history-body";
+        body.innerHTML = `
+          <p>${escapeHtml(formatDisplayDate(startDate))} – ${escapeHtml(formatDisplayDate(endDate))}</p>
+          <div class="operation-intent-mission compact">
+            <div><small>INTENT</small><p>${escapeHtml(operation.intent || "—")}</p></div>
+            <div><small>MISSION</small><p>${escapeHtml(operation.mission || "—")}</p></div>
+          </div>
+          <div class="operation-metrics">
+            <span>${stats.daysLogged} days</span>
+            <span>${stats.execution}% execution</span>
+            <span>${stats.protein} g avg protein</span>
+            <span>${trend.totalAars} AARs</span>
+          </div>
+          <div class="operation-history-trend">
+            <span>Execution ${escapeHtml(formatSignedDelta(trend.executionDelta, " pp"))}</span>
+            <span>Rating ${escapeHtml(formatSignedDelta(trend.ratingDelta))}</span>
+            <span>Consistency ${trend.consistency}%</span>
+            <span>${trend.totalLifts} lift logs</span>
+          </div>
+        `;
+
+        const blocksHeading = document.createElement("h5");
+        blocksHeading.className = "operation-blocks-heading";
+        blocksHeading.textContent = "14-DAY BLOCKS";
+        body.appendChild(blocksHeading);
+
+        const blocks = document.createElement("div");
+        blocks.className = "operation-history-blocks";
+        operationCycleIndexes(operation).forEach((cycleIndex, offset) => {
+          blocks.appendChild(buildBlockDeepDive(cycleIndex, operation, offset + 1));
+        });
+        if (!blocks.children.length) {
+          blocks.innerHTML = `<p class="empty-state">This Operation has not begun yet.</p>`;
+        }
+        body.appendChild(blocks);
+
+        item.appendChild(body);
         elements.operationsList.appendChild(item);
       });
+
+    initializeCollapsibleSections();
   }
 
   function formatDisplayDate(date) {
@@ -1371,36 +1682,37 @@
       `;
       const historyActions = document.createElement("div");
       historyActions.className = "history-actions";
-
-      const viewAarButton = document.createElement("button");
-      viewAarButton.type = "button";
-      viewAarButton.className = "button secondary history-action-button";
-      viewAarButton.textContent = "View details";
-      viewAarButton.addEventListener("click", () => {
-        const open = details.hidden;
-        details.hidden = !open;
-        toggle.setAttribute("aria-expanded", String(open));
-        viewAarButton.textContent = open ? "Hide details" : "View details";
-      });
+      historyActions.hidden = true;
 
       const editAarButton = document.createElement("button");
       editAarButton.type = "button";
       editAarButton.className = "button primary edit-aar-button history-action-button";
-      editAarButton.textContent = "Edit AAR";
+      editAarButton.textContent = aarHasContent(day) ? "Edit AAR" : "Add AAR";
       editAarButton.addEventListener("click", () => openArchivedAarEditor(day.date));
 
-      historyActions.append(viewAarButton, editAarButton);
+      const collapseButton = document.createElement("button");
+      collapseButton.type = "button";
+      collapseButton.className = "button secondary history-action-button";
+      collapseButton.textContent = "Collapse";
+      collapseButton.addEventListener("click", () => {
+        details.hidden = true;
+        historyActions.hidden = true;
+        toggle.setAttribute("aria-expanded", "false");
+      });
+
+      historyActions.append(editAarButton, collapseButton);
 
       toggle.addEventListener("click", () => {
         const open = details.hidden;
         details.hidden = !open;
+        historyActions.hidden = !open;
         toggle.setAttribute("aria-expanded", String(open));
-        viewAarButton.textContent = open ? "Hide details" : "View details";
       });
 
-      item.append(toggle, historyActions, details);
+      item.append(toggle, details, historyActions);
       elements.historyList.appendChild(item);
     });
+    initializeCollapsibleSections();
   }
 
   function renderProgressDomains() {
