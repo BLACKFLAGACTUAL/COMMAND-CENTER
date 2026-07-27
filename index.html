@@ -374,6 +374,26 @@
               <select id="activityMetricSelect"></select>
             </div>
           </div>
+
+          <section id="runningHeartRatePanel" class="running-heart-rate-panel" hidden aria-labelledby="runningHeartRateHeading">
+            <div class="running-zone-header">
+              <div>
+                <p class="category-kicker">HEART RATE INTELLIGENCE</p>
+                <h4 id="runningHeartRateHeading">Training zones</h4>
+              </div>
+              <div class="max-hr-control">
+                <label for="maxHeartRateInput">Max HR</label>
+                <div>
+                  <input id="maxHeartRateInput" type="number" min="100" max="240" step="1" inputmode="numeric" placeholder="e.g. 195">
+                  <span>bpm</span>
+                </div>
+              </div>
+            </div>
+            <p class="helper-text">Zones use percentage of maximum heart rate. Set Max HR to calculate your personal BPM ranges.</p>
+            <div id="heartRateZoneGrid" class="heart-rate-zone-grid"></div>
+            <p id="heartRateZoneCurrent" class="heart-rate-zone-current"></p>
+          </section>
+
           <div class="chart-wrap">
             <canvas id="activityProgressChart" width="720" height="360" aria-label="Activity progress graph"></canvas>
           </div>
@@ -695,6 +715,10 @@
       <label for="activityEntryMetric">Metric</label>
       <div id="activityMetricSuggestions" class="metric-suggestions"></div>
       <input id="activityEntryMetric" type="text" maxlength="60" placeholder="Rounds, 3-mile time, distance…" required>
+      <div id="heartRateZonePicker" class="heart-rate-zone-picker" hidden>
+        <span>Quick zone</span>
+        <div id="heartRateZoneButtons" class="heart-rate-zone-buttons"></div>
+      </div>
       <div class="activity-entry-grid">
         <div><label for="activityEntryValue">Value</label><input id="activityEntryValue" type="number" step="0.01" inputmode="decimal" required></div>
         <div><label for="activityEntryUnit">Unit</label><input id="activityEntryUnit" type="text" maxlength="20" placeholder="rounds, min, mi…"></div>
