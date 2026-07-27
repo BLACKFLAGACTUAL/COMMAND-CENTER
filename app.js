@@ -2,6 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "myCommandCenter.v1";
+  const BACKUP_STORAGE_KEY = "myCommandCenter.lastKnownGood";
   const DEFAULT_QUOTE =
     "The secret of all victory lies in the organization of the non-obvious.";
 
@@ -57,6 +58,8 @@
   let loggingExerciseName = null;
   let loggingPastEntry = false;
   let lastRenderedDateKey = getTodayKey();
+  let editingAarDateKey = null;
+  let editingOperationId = null;
 
   const elements = {};
 
@@ -100,7 +103,18 @@
       "exerciseNameInput", "exerciseNameOptions", "exerciseDateInput", "exerciseWeightInput",
       "exerciseRepsInput", "exerciseSetsInput", "exerciseLogNote",
       "exerciseLogStatus", "exerciseLogCancel", "progressExerciseSelect",
-      "addPastLiftButton", "manualStrengthEntryButton", "progressChart", "progressChartEmpty", "progressLogList"
+      "addPastLiftButton", "manualStrengthEntryButton", "progressChart", "progressChartEmpty", "progressLogList",
+      "activityDomainTabs", "addActivityTrackerButton", "weightliftingProgressSection", "activityProgressSection",
+      "activityProgressHeading", "activityMetricSelect", "addActivityEntryButton", "activityProgressChart",
+      "activityProgressEmpty", "activityProgressLogList", "activityTrackerDialog", "activityTrackerForm",
+      "activityTrackerName", "activityTrackerStatus", "activityTrackerCancel", "activityEntryDialog",
+      "activityEntryForm", "activityEntryDomain", "activityEntryDate", "activityEntryMetric", "activityEntryValue",
+      "activityEntryUnit", "activityEntryNote", "activityEntryStatus", "activityEntryCancel", "editAarDialog",
+      "editAarForm", "editAarDate", "editAarWentWell", "editAarImprove", "editAarLesson", "editAarPriority",
+      "editAarRating", "editAarStatus", "editAarCancel", "newOperationButton", "currentOperationCard",
+      "operationCycleStrip", "operationsList", "operationDialog", "operationForm", "operationDialogTitle",
+      "operationTimingNote", "operationName", "operationIntent", "operationMission", "operationDialogStatus",
+      "operationDialogCancel"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
@@ -159,10 +173,26 @@
     elements.workoutDialogCancel.addEventListener("click", () => elements.workoutDialog.close());
     elements.exerciseLogCancel.addEventListener("click", () => elements.exerciseLogDialog.close());
     elements.exerciseLogForm.addEventListener("submit", saveExerciseLog);
-    elements.progressExerciseSelect.addEventListener("change", renderProgressChart);
+    elements.progressExerciseSelect.addEventListener("change", () => {
+      state.settings.progressExercise = elements.progressExerciseSelect.value;
+      saveState();
+      renderProgressChart();
+    });
     elements.addPastLiftButton.addEventListener("click", openPastExerciseLogDialog);
     elements.manualStrengthEntryButton.addEventListener("click", openPastExerciseLogDialog);
-    [elements.taskDialog, elements.scheduleDialog, elements.workoutDialog, elements.exerciseLogDialog].forEach((dialog) => {
+    elements.addActivityTrackerButton.addEventListener("click", openActivityTrackerDialog);
+    elements.activityTrackerCancel.addEventListener("click", () => elements.activityTrackerDialog.close());
+    elements.activityTrackerForm.addEventListener("submit", saveActivityTracker);
+    elements.addActivityEntryButton.addEventListener("click", openActivityEntryDialog);
+    elements.activityEntryCancel.addEventListener("click", () => elements.activityEntryDialog.close());
+    elements.activityEntryForm.addEventListener("submit", saveActivityEntry);
+    elements.activityMetricSelect.addEventListener("change", renderActivityProgress);
+    elements.editAarCancel.addEventListener("click", () => elements.editAarDialog.close());
+    elements.editAarForm.addEventListener("submit", saveArchivedAar);
+    elements.newOperationButton.addEventListener("click", () => openOperationDialog());
+    elements.operationDialogCancel.addEventListener("click", () => elements.operationDialog.close());
+    elements.operationForm.addEventListener("submit", saveOperation);
+    [elements.taskDialog, elements.scheduleDialog, elements.workoutDialog, elements.exerciseLogDialog, elements.activityTrackerDialog, elements.activityEntryDialog, elements.editAarDialog, elements.operationDialog].forEach((dialog) => {
       dialog.addEventListener("cancel", (event) => { event.preventDefault(); dialog.close(); });
       dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
     });
@@ -205,7 +235,7 @@
 
   function ensureStateShape() {
     if (!state || typeof state !== "object") state = createInitialState();
-    state.version = 3;
+    state.version = 5;
     state.settings = { ...DEFAULT_SETTINGS, ...(state.settings || {}) };
 
     if (!Array.isArray(state.settings.mindTemplates)) {
@@ -226,7 +256,18 @@
     if (!state.exerciseLogs || typeof state.exerciseLogs !== "object" || Array.isArray(state.exerciseLogs)) {
       state.exerciseLogs = {};
     }
+    if (!state.activityTrackers || typeof state.activityTrackers !== "object" || Array.isArray(state.activityTrackers)) {
+      state.activityTrackers = { MMA: { name: "MMA", entries: [] } };
+    }
+    if (!state.activityTrackers.MMA) state.activityTrackers.MMA = { name: "MMA", entries: [] };
+    Object.values(state.activityTrackers).forEach((tracker) => {
+      if (!Array.isArray(tracker.entries)) tracker.entries = [];
+    });
+    if (!state.settings.archiveDomain) state.settings.archiveDomain = "Weightlifting";
+    if (typeof state.settings.progressExercise !== "string") state.settings.progressExercise = "";
     if (typeof state.settings.scheduleCollapsed !== "boolean") state.settings.scheduleCollapsed = false;
+    ensureOperationsShape();
+    syncOperationCycles();
 
     getTodayRecord();
     saveState();
@@ -234,12 +275,14 @@
 
   function createInitialState() {
     return {
-      version: 3,
+      version: 5,
       settings: structuredCloneSafe(DEFAULT_SETTINGS),
       daily: {},
       quotes: {},
       customWorkouts: {},
-      exerciseLogs: {}
+      exerciseLogs: {},
+      activityTrackers: { MMA: { name: "MMA", entries: [] } },
+      operations: { items: [], cycles: [], activeOperationId: null }
     };
   }
 
@@ -891,9 +934,322 @@
     return new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" });
   }
 
+
+  function ensureOperationsShape() {
+    if (!state.operations || typeof state.operations !== "object" || Array.isArray(state.operations)) {
+      state.operations = { items: [], cycles: [], activeOperationId: null };
+    }
+    if (!Array.isArray(state.operations.items)) state.operations.items = [];
+    if (!Array.isArray(state.operations.cycles)) state.operations.cycles = [];
+
+    state.operations.items.forEach((operation) => {
+      if (!operation.id) operation.id = `op-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      if (!operation.name) operation.name = "Untitled Operation";
+      if (typeof operation.intent !== "string") operation.intent = "";
+      if (typeof operation.mission !== "string") operation.mission = "";
+      if (!Number.isInteger(operation.startCycleIndex)) operation.startCycleIndex = 0;
+      if (operation.endCycleIndex !== null && !Number.isInteger(operation.endCycleIndex)) operation.endCycleIndex = null;
+      if (!operation.status) operation.status = operation.endCycleIndex === null ? "active" : "complete";
+    });
+
+    if (!state.operations.items.length) {
+      const operation = {
+        id: `op-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        name: "Operation Arete",
+        intent: "",
+        mission: "",
+        startCycleIndex: 0,
+        endCycleIndex: null,
+        status: "active",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      state.operations.items.push(operation);
+      state.operations.activeOperationId = operation.id;
+    }
+  }
+
+  function getCycleIndexForDate(date) {
+    const start = parseLocalDate(state.settings.cycleStartDate);
+    const startUtc = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+    const targetUtc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    return Math.floor((targetUtc - startUtc) / (14 * 86400000));
+  }
+
+  function getCycleBounds(cycleIndex) {
+    const base = parseLocalDate(state.settings.cycleStartDate);
+    const start = new Date(base.getFullYear(), base.getMonth(), base.getDate() + cycleIndex * 14, 12);
+    const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 13, 12);
+    return { start, end, startKey: formatDateKey(start), endKey: formatDateKey(end) };
+  }
+
+  function operationForCycle(cycleIndex) {
+    return state.operations.items
+      .filter((operation) => operation.startCycleIndex <= cycleIndex && (operation.endCycleIndex === null || cycleIndex <= operation.endCycleIndex))
+      .sort((a, b) => b.startCycleIndex - a.startCycleIndex)[0] || null;
+  }
+
+  function syncOperationCycles() {
+    ensureOperationsShape();
+    const currentIndex = getCycleIndexForDate(new Date());
+    if (currentIndex < 0) return;
+
+    state.operations.items.forEach((operation) => {
+      if (operation.status === "planned" && operation.startCycleIndex <= currentIndex) {
+        operation.status = "active";
+        state.operations.activeOperationId = operation.id;
+      }
+      if (operation.endCycleIndex !== null && currentIndex > operation.endCycleIndex && operation.status !== "planned") {
+        operation.status = "complete";
+        if (state.operations.activeOperationId === operation.id) state.operations.activeOperationId = null;
+      }
+    });
+
+    const currentOperation = operationForCycle(currentIndex);
+    if (currentOperation && currentOperation.status !== "planned") {
+      currentOperation.status = "active";
+      state.operations.activeOperationId = currentOperation.id;
+    }
+
+    const byIndex = new Map(state.operations.cycles.map((cycle) => [cycle.cycleIndex, cycle]));
+    for (let i = 0; i <= currentIndex; i += 1) {
+      const bounds = getCycleBounds(i);
+      const operation = operationForCycle(i);
+      let cycle = byIndex.get(i);
+      if (!cycle) {
+        cycle = {
+          id: `cycle-${i}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          cycleIndex: i,
+          startDate: bounds.startKey,
+          endDate: bounds.endKey,
+          operationId: operation?.id || null,
+          status: i < currentIndex ? "complete" : "active",
+          createdAt: new Date().toISOString()
+        };
+        state.operations.cycles.push(cycle);
+      } else {
+        cycle.startDate = bounds.startKey;
+        cycle.endDate = bounds.endKey;
+        cycle.status = i < currentIndex ? "complete" : "active";
+        if (!cycle.operationId && operation) cycle.operationId = operation.id;
+      }
+    }
+  }
+
+  function recordsBetween(startKey, endKey) {
+    return Object.values(state.daily || {})
+      .filter((day) => day?.date >= startKey && day?.date <= endKey && hasMeaningfulData(day));
+  }
+
+  function cycleStats(cycleIndex) {
+    const bounds = getCycleBounds(cycleIndex);
+    const records = recordsBetween(bounds.startKey, bounds.endKey);
+    const execution = records.length
+      ? Math.round(records.reduce((sum, day) => sum + calculateCompletion(day).overall, 0) / records.length)
+      : 0;
+    const protein = records.length
+      ? Math.round(records.reduce((sum, day) => sum + (Number(day.protein) || 0), 0) / records.length)
+      : 0;
+    const ratings = records.map((day) => Number(day.aar?.rating)).filter(Number.isFinite);
+    const rating = ratings.length ? Math.round((ratings.reduce((sum, value) => sum + value, 0) / ratings.length) * 10) / 10 : 0;
+    let liftEntries = 0;
+    Object.values(state.exerciseLogs || {}).forEach((logs) => {
+      (Array.isArray(logs) ? logs : []).forEach((log) => {
+        const key = String(log.date || "").slice(0, 10);
+        if (key >= bounds.startKey && key <= bounds.endKey) liftEntries += 1;
+      });
+    });
+    return { records: records.length, execution, protein, rating, liftEntries };
+  }
+
+  function operationStats(operation) {
+    const currentIndex = Math.max(0, getCycleIndexForDate(new Date()));
+    const finalIndex = operation.endCycleIndex === null ? currentIndex : Math.min(operation.endCycleIndex, currentIndex);
+    const cycleCount = Math.max(0, finalIndex - operation.startCycleIndex + 1);
+    const startBounds = getCycleBounds(operation.startCycleIndex);
+    const endBounds = getCycleBounds(finalIndex);
+    const records = cycleCount ? recordsBetween(startBounds.startKey, endBounds.endKey) : [];
+    const execution = records.length ? Math.round(records.reduce((sum, day) => sum + calculateCompletion(day).overall, 0) / records.length) : 0;
+    const protein = records.length ? Math.round(records.reduce((sum, day) => sum + (Number(day.protein) || 0), 0) / records.length) : 0;
+    return { cycleCount, daysLogged: records.length, execution, protein };
+  }
+
+  function getCurrentOperation() {
+    const currentIndex = getCycleIndexForDate(new Date());
+    return operationForCycle(currentIndex);
+  }
+
+  function getPlannedOperation() {
+    return state.operations.items.find((operation) => operation.status === "planned") || null;
+  }
+
+  function renderOperations() {
+    if (!elements.currentOperationCard || !elements.operationCycleStrip || !elements.operationsList) return;
+    syncOperationCycles();
+    const currentIndex = Math.max(0, getCycleIndexForDate(new Date()));
+    const current = operationForCycle(currentIndex);
+    const planned = getPlannedOperation();
+
+    elements.currentOperationCard.replaceChildren();
+    if (current) {
+      const stats = operationStats(current);
+      const bounds = getCycleBounds(currentIndex);
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = `
+        <div class="operation-status-row"><span class="operation-status">ACTIVE OPERATION</span><span>Cycle ${currentIndex - current.startCycleIndex + 1}</span></div>
+        <h4>${escapeHtml(current.name)}</h4>
+        <p><strong>Intent:</strong> ${escapeHtml(current.intent || "Not set yet")}</p>
+        <p><strong>Mission:</strong> ${escapeHtml(current.mission || "Not set yet")}</p>
+        <p class="helper-text">Current 14-day block: ${escapeHtml(formatDisplayDate(bounds.start))} – ${escapeHtml(formatDisplayDate(bounds.end))}</p>
+        <div class="operation-metrics"><span>${stats.cycleCount} blocks</span><span>${stats.daysLogged} days logged</span><span>${stats.execution}% execution</span><span>${stats.protein} g avg protein</span></div>
+      `;
+      const actions = document.createElement("div");
+      actions.className = "button-row operation-actions";
+      const edit = document.createElement("button");
+      edit.type = "button"; edit.className = "button secondary"; edit.textContent = "Edit operation";
+      edit.addEventListener("click", () => openOperationDialog(current.id));
+      const next = document.createElement("button");
+      next.type = "button"; next.className = "button primary"; next.textContent = planned ? "Edit next operation" : "Plan next operation";
+      next.addEventListener("click", () => openOperationDialog(planned?.id || null));
+      actions.append(edit, next);
+      wrapper.appendChild(actions);
+      elements.currentOperationCard.appendChild(wrapper);
+    } else {
+      elements.currentOperationCard.innerHTML = `<p class="empty-state">No operation is assigned to the current 14-day block.</p>`;
+    }
+
+    if (planned) {
+      const bounds = getCycleBounds(planned.startCycleIndex);
+      const plannedCard = document.createElement("div");
+      plannedCard.className = "planned-operation-note";
+      plannedCard.innerHTML = `<strong>NEXT: ${escapeHtml(planned.name)}</strong><span>Begins ${escapeHtml(formatDisplayDate(bounds.start))}</span>`;
+      elements.currentOperationCard.appendChild(plannedCard);
+    }
+
+    elements.operationCycleStrip.replaceChildren();
+    state.operations.cycles
+      .filter((cycle) => cycle.cycleIndex >= Math.max(0, currentIndex - 5))
+      .sort((a, b) => a.cycleIndex - b.cycleIndex)
+      .forEach((cycle) => {
+        const operation = state.operations.items.find((item) => item.id === cycle.operationId);
+        const stats = cycleStats(cycle.cycleIndex);
+        const block = document.createElement("div");
+        block.className = `operation-cycle-block${cycle.cycleIndex === currentIndex ? " active" : ""}`;
+        block.innerHTML = `<span>BLOCK ${cycle.cycleIndex + 1}</span><strong>${escapeHtml(operation?.name || "Unassigned")}</strong><small>${stats.execution}% · ${stats.records} days</small>`;
+        elements.operationCycleStrip.appendChild(block);
+      });
+
+    elements.operationsList.replaceChildren();
+    [...state.operations.items]
+      .sort((a, b) => b.startCycleIndex - a.startCycleIndex)
+      .forEach((operation) => {
+        const stats = operationStats(operation);
+        const start = getCycleBounds(operation.startCycleIndex).start;
+        const endIndex = operation.endCycleIndex === null ? currentIndex : operation.endCycleIndex;
+        const end = getCycleBounds(Math.max(operation.startCycleIndex, endIndex)).end;
+        const item = document.createElement("details");
+        item.className = "operation-history-item";
+        const status = operation.status === "planned" ? "PLANNED" : operation.status === "complete" ? "COMPLETE" : "ACTIVE";
+        item.innerHTML = `<summary><span><small>${status}</small><strong>${escapeHtml(operation.name)}</strong></span><span>${stats.cycleCount} blocks</span></summary>
+          <div class="operation-history-body">
+            <p>${escapeHtml(formatDisplayDate(start))} – ${escapeHtml(formatDisplayDate(end))}</p>
+            <p><strong>Intent:</strong> ${escapeHtml(operation.intent || "—")}</p>
+            <p><strong>Mission:</strong> ${escapeHtml(operation.mission || "—")}</p>
+            <div class="operation-metrics"><span>${stats.daysLogged} days</span><span>${stats.execution}% execution</span><span>${stats.protein} g avg protein</span></div>
+          </div>`;
+        elements.operationsList.appendChild(item);
+      });
+  }
+
+  function formatDisplayDate(date) {
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  function openOperationDialog(operationId = null) {
+    syncOperationCycles();
+    const currentIndex = Math.max(0, getCycleIndexForDate(new Date()));
+    const existing = operationId ? state.operations.items.find((operation) => operation.id === operationId) : null;
+    editingOperationId = existing?.id || null;
+    elements.operationDialogStatus.textContent = "";
+
+    if (existing) {
+      elements.operationDialogTitle.textContent = existing.status === "planned" ? "Edit next operation" : "Edit operation";
+      elements.operationName.value = existing.name;
+      elements.operationIntent.value = existing.intent || "";
+      elements.operationMission.value = existing.mission || "";
+      const bounds = getCycleBounds(existing.startCycleIndex);
+      elements.operationTimingNote.textContent = `${existing.status === "planned" ? "Begins" : "Started"} ${formatDisplayDate(bounds.start)}. Existing daily data is not changed.`;
+    } else {
+      const planned = getPlannedOperation();
+      if (planned) {
+        openOperationDialog(planned.id);
+        return;
+      }
+      const current = operationForCycle(currentIndex);
+      const startIndex = current ? currentIndex + 1 : currentIndex;
+      const bounds = getCycleBounds(startIndex);
+      elements.operationDialogTitle.textContent = "Plan next operation";
+      elements.operationName.value = "";
+      elements.operationIntent.value = "";
+      elements.operationMission.value = "";
+      elements.operationTimingNote.textContent = current
+        ? `The current operation keeps this 14-day block. The new operation begins ${formatDisplayDate(bounds.start)} and receives future 14-day blocks until you plan another.`
+        : `This operation begins ${formatDisplayDate(bounds.start)}.`;
+    }
+    elements.operationDialog.showModal();
+    setTimeout(() => elements.operationName.focus(), 0);
+  }
+
+  function saveOperation(event) {
+    event.preventDefault();
+    const name = elements.operationName.value.trim();
+    if (!name) {
+      elements.operationDialogStatus.textContent = "Enter an operation name.";
+      return;
+    }
+    const currentIndex = Math.max(0, getCycleIndexForDate(new Date()));
+    const existing = editingOperationId ? state.operations.items.find((operation) => operation.id === editingOperationId) : null;
+
+    if (existing) {
+      existing.name = name;
+      existing.intent = elements.operationIntent.value.trim();
+      existing.mission = elements.operationMission.value.trim();
+      existing.updatedAt = new Date().toISOString();
+    } else {
+      const current = operationForCycle(currentIndex);
+      const startCycleIndex = current ? currentIndex + 1 : currentIndex;
+      if (current && (current.endCycleIndex === null || current.endCycleIndex > currentIndex)) {
+        current.endCycleIndex = currentIndex;
+        current.status = "active";
+        current.updatedAt = new Date().toISOString();
+      }
+      const operation = {
+        id: `op-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        name,
+        intent: elements.operationIntent.value.trim(),
+        mission: elements.operationMission.value.trim(),
+        startCycleIndex,
+        endCycleIndex: null,
+        status: startCycleIndex > currentIndex ? "planned" : "active",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      state.operations.items.push(operation);
+      if (operation.status === "active") state.operations.activeOperationId = operation.id;
+    }
+
+    syncOperationCycles();
+    saveState();
+    elements.operationDialog.close();
+    editingOperationId = null;
+    renderHistory();
+  }
+
   function renderHistory() {
+    syncOperationCycles();
+    renderOperations();
     const exercises = Object.keys(state.exerciseLogs || {}).filter((name) => Array.isArray(state.exerciseLogs[name]) && state.exerciseLogs[name].length).sort();
-    const previous = elements.progressExerciseSelect.value;
+    const previous = state.settings.progressExercise || elements.progressExerciseSelect.value;
     elements.progressExerciseSelect.replaceChildren();
     if (!exercises.length) {
       const option = document.createElement("option");
@@ -908,7 +1264,9 @@
         elements.progressExerciseSelect.appendChild(option);
       });
       elements.progressExerciseSelect.value = exercises.includes(previous) ? previous : exercises[0];
+      state.settings.progressExercise = elements.progressExerciseSelect.value;
     }
+    renderProgressDomains();
     renderProgressChart();
 
     const records = Object.values(state.daily)
@@ -975,6 +1333,12 @@
         <div><strong>Lesson:</strong> ${escapeHtml(day.aar?.lesson || "—")}</div>
         <div><strong>Tomorrow:</strong> ${escapeHtml(day.aar?.priority || "—")}</div>
       `;
+      const editAarButton = document.createElement("button");
+      editAarButton.type = "button";
+      editAarButton.className = "button secondary edit-aar-button";
+      editAarButton.textContent = "Edit AAR";
+      editAarButton.addEventListener("click", () => openArchivedAarEditor(day.date));
+      details.appendChild(editAarButton);
 
       toggle.addEventListener("click", () => {
         const open = details.hidden;
@@ -985,6 +1349,207 @@
       item.append(toggle, details);
       elements.historyList.appendChild(item);
     });
+  }
+
+  function renderProgressDomains() {
+    const domains = ["Weightlifting", ...Object.keys(state.activityTrackers || {}).sort((a, b) => a.localeCompare(b))];
+    if (!domains.includes(state.settings.archiveDomain)) state.settings.archiveDomain = "Weightlifting";
+    elements.activityDomainTabs.replaceChildren();
+    domains.forEach((name) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `activity-domain-button${state.settings.archiveDomain === name ? " active" : ""}`;
+      button.textContent = name;
+      button.setAttribute("role", "tab");
+      button.setAttribute("aria-selected", String(state.settings.archiveDomain === name));
+      button.addEventListener("click", () => {
+        state.settings.archiveDomain = name;
+        saveState();
+        renderProgressDomains();
+      });
+      elements.activityDomainTabs.appendChild(button);
+    });
+    const weightlifting = state.settings.archiveDomain === "Weightlifting";
+    elements.weightliftingProgressSection.hidden = !weightlifting;
+    elements.activityProgressSection.hidden = weightlifting;
+    if (!weightlifting) renderActivityProgress();
+  }
+
+  function openActivityTrackerDialog() {
+    elements.activityTrackerName.value = "";
+    elements.activityTrackerStatus.textContent = "";
+    elements.activityTrackerDialog.showModal();
+    setTimeout(() => elements.activityTrackerName.focus(), 0);
+  }
+
+  function saveActivityTracker(event) {
+    event.preventDefault();
+    const name = elements.activityTrackerName.value.trim();
+    if (!name) return;
+    if (name.toLowerCase() === "weightlifting" || Object.keys(state.activityTrackers).some((key) => key.toLowerCase() === name.toLowerCase())) {
+      elements.activityTrackerStatus.textContent = "That progress folder already exists.";
+      return;
+    }
+    state.activityTrackers[name] = { name, entries: [] };
+    state.settings.archiveDomain = name;
+    saveState();
+    elements.activityTrackerDialog.close();
+    renderHistory();
+  }
+
+  function openActivityEntryDialog() {
+    const domain = state.settings.archiveDomain;
+    if (!domain || domain === "Weightlifting") return;
+    elements.activityEntryDomain.textContent = domain;
+    elements.activityEntryDate.value = getTodayKey();
+    elements.activityEntryMetric.value = elements.activityMetricSelect.value || "";
+    elements.activityEntryValue.value = "";
+    elements.activityEntryUnit.value = "";
+    elements.activityEntryNote.value = "";
+    elements.activityEntryStatus.textContent = "";
+    elements.activityEntryDialog.showModal();
+  }
+
+  function saveActivityEntry(event) {
+    event.preventDefault();
+    const domain = state.settings.archiveDomain;
+    const tracker = state.activityTrackers?.[domain];
+    if (!tracker) return;
+    const dateKey = elements.activityEntryDate.value;
+    const metric = elements.activityEntryMetric.value.trim();
+    const value = Number(elements.activityEntryValue.value);
+    if (!dateKey || !metric || !Number.isFinite(value)) {
+      elements.activityEntryStatus.textContent = "Enter a date, metric, and numeric value.";
+      return;
+    }
+    tracker.entries.push({
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      date: new Date(`${dateKey}T12:00:00`).toISOString(),
+      metric,
+      value,
+      unit: elements.activityEntryUnit.value.trim(),
+      note: elements.activityEntryNote.value.trim()
+    });
+    saveState();
+    elements.activityEntryDialog.close();
+    renderHistory();
+    elements.activityMetricSelect.value = metric;
+    renderActivityProgress();
+  }
+
+  function renderActivityProgress() {
+    const domain = state.settings.archiveDomain;
+    if (!domain || domain === "Weightlifting") return;
+    const tracker = state.activityTrackers?.[domain] || { entries: [] };
+    elements.activityProgressHeading.textContent = `${domain} progress`;
+    const metrics = [...new Set(tracker.entries.map((entry) => entry.metric).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const previous = elements.activityMetricSelect.value;
+    elements.activityMetricSelect.replaceChildren();
+    if (!metrics.length) {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "No metrics logged";
+      elements.activityMetricSelect.appendChild(option);
+      elements.activityMetricSelect.disabled = true;
+    } else {
+      elements.activityMetricSelect.disabled = false;
+      metrics.forEach((metric) => {
+        const option = document.createElement("option");
+        option.value = metric;
+        option.textContent = metric;
+        elements.activityMetricSelect.appendChild(option);
+      });
+      elements.activityMetricSelect.value = metrics.includes(previous) ? previous : metrics[0];
+    }
+    const metric = elements.activityMetricSelect.value;
+    const logs = tracker.entries.filter((entry) => entry.metric === metric).sort((a, b) => a.date.localeCompare(b.date));
+    elements.activityProgressEmpty.hidden = logs.length > 0;
+    elements.activityProgressChart.hidden = logs.length === 0;
+    elements.activityProgressLogList.replaceChildren();
+    [...logs].reverse().slice(0, 10).forEach((log) => {
+      const row = document.createElement("div");
+      row.className = "progress-log-row";
+      row.innerHTML = `<span>${escapeHtml(formatShortDate(log.date))}</span><strong>${escapeHtml(String(log.value))}${log.unit ? ` ${escapeHtml(log.unit)}` : ""}</strong><small>${log.note ? escapeHtml(log.note) : escapeHtml(log.metric)}</small>`;
+      elements.activityProgressLogList.appendChild(row);
+    });
+    if (logs.length) drawActivityChart(logs);
+  }
+
+  function drawActivityChart(logs) {
+    const canvas = elements.activityProgressChart;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(320, Math.floor(rect.width || 720));
+    const height = Math.max(220, Math.floor(rect.height || 360));
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, width, height);
+    const pad = { left: 48, right: 18, top: 24, bottom: 38 };
+    const values = logs.map((log) => Number(log.value) || 0);
+    let min = Math.min(...values), max = Math.max(...values);
+    if (min === max) { min -= Math.max(1, Math.abs(min) * .05); max += Math.max(1, Math.abs(max) * .05); }
+    const range = max - min || 1;
+    ctx.font = "12px ui-monospace, SFMono-Regular, Menlo, monospace";
+    ctx.strokeStyle = "rgba(150,150,165,.28)";
+    ctx.fillStyle = "#9696a5";
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = pad.top + ((height - pad.top - pad.bottom) * i / 4);
+      const value = max - range * i / 4;
+      ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(width - pad.right, y); ctx.stroke();
+      ctx.fillText(`${Math.round(value * 100) / 100}`, 4, y + 4);
+    }
+    const xFor = (i) => logs.length === 1 ? (pad.left + width - pad.right) / 2 : pad.left + (width - pad.left - pad.right) * i / (logs.length - 1);
+    const yFor = (value) => pad.top + (height - pad.top - pad.bottom) * (max - value) / range;
+    ctx.strokeStyle = "#f34f58";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    logs.forEach((log, i) => { const x = xFor(i), y = yFor(Number(log.value) || 0); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    ctx.stroke();
+    ctx.fillStyle = "#f34f58";
+    logs.forEach((log, i) => { const x = xFor(i), y = yFor(Number(log.value) || 0); ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill(); });
+    ctx.fillStyle = "#9696a5";
+    const first = formatShortDate(logs[0].date), last = formatShortDate(logs[logs.length - 1].date);
+    ctx.fillText(first, pad.left, height - 12);
+    ctx.fillText(last, width - pad.right - ctx.measureText(last).width, height - 12);
+  }
+
+  function openArchivedAarEditor(dateKey) {
+    const day = state.daily?.[dateKey];
+    if (!day) return;
+    editingAarDateKey = dateKey;
+    const date = new Date(`${dateKey}T12:00:00`);
+    elements.editAarDate.textContent = date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+    elements.editAarWentWell.value = day.aar?.wentWell || "";
+    elements.editAarImprove.value = day.aar?.improve || "";
+    elements.editAarLesson.value = day.aar?.lesson || "";
+    elements.editAarPriority.value = day.aar?.priority || "";
+    elements.editAarRating.value = String(day.aar?.rating || 5);
+    elements.editAarStatus.textContent = "";
+    elements.editAarDialog.showModal();
+  }
+
+  function saveArchivedAar(event) {
+    event.preventDefault();
+    const day = editingAarDateKey ? state.daily?.[editingAarDateKey] : null;
+    if (!day) return;
+    const rating = Math.max(1, Math.min(10, Number(elements.editAarRating.value) || 5));
+    day.aar = {
+      ...day.aar,
+      wentWell: elements.editAarWentWell.value.trim(),
+      improve: elements.editAarImprove.value.trim(),
+      lesson: elements.editAarLesson.value.trim(),
+      priority: elements.editAarPriority.value.trim(),
+      rating,
+      savedAt: new Date().toISOString()
+    };
+    day.updatedAt = new Date().toISOString();
+    saveState();
+    elements.editAarDialog.close();
+    editingAarDateKey = null;
+    renderHistory();
   }
 
   function renderSettings() {
@@ -1225,6 +1790,7 @@
     const second = confirm("This is permanent unless you exported a backup. Delete all data now?");
     if (!second) return;
 
+    localStorage.removeItem(BACKUP_STORAGE_KEY);
     state = createInitialState();
     saveAndRender();
     switchView("today");
@@ -1351,10 +1917,41 @@
     return taskTouched || day.workoutComplete || Number(day.protein) > 0 || aarTouched;
   }
 
+  function scoreStoredState(candidate) {
+    if (!candidate || typeof candidate !== "object") return -1;
+    let score = 0;
+    score += Object.keys(candidate.daily || {}).length * 20;
+    score += Object.values(candidate.exerciseLogs || {}).reduce((sum, logs) => sum + (Array.isArray(logs) ? logs.length : 0), 0) * 5;
+    score += Object.values(candidate.activityTrackers || {}).reduce((sum, tracker) => sum + (Array.isArray(tracker?.entries) ? tracker.entries.length : 0), 0) * 4;
+    score += Object.keys(candidate.customWorkouts || {}).length * 2;
+    score += Array.isArray(candidate.operations?.items) ? candidate.operations.items.length * 3 : 0;
+    return score;
+  }
+
+  function parseStoredState(raw) {
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   function loadState() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : createInitialState();
+      const primaryRaw = localStorage.getItem(STORAGE_KEY);
+      const backupRaw = localStorage.getItem(BACKUP_STORAGE_KEY);
+      const primary = parseStoredState(primaryRaw);
+      const backup = parseStoredState(backupRaw);
+
+      if (primary && backup && scoreStoredState(backup) > scoreStoredState(primary)) {
+        console.warn("Restoring richer last-known-good Command Center data.");
+        return backup;
+      }
+      if (primary) return primary;
+      if (backup) return backup;
+      return createInitialState();
     } catch (error) {
       console.error("Could not load local data:", error);
       setTimeout(() => {
@@ -1367,7 +1964,15 @@
 
   function saveState() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const serialized = JSON.stringify(state);
+      const previousRaw = localStorage.getItem(STORAGE_KEY);
+      const previous = parseStoredState(previousRaw);
+      if (previous && scoreStoredState(previous) >= scoreStoredState(state)) {
+        localStorage.setItem(BACKUP_STORAGE_KEY, previousRaw);
+      } else if (!localStorage.getItem(BACKUP_STORAGE_KEY) && previousRaw) {
+        localStorage.setItem(BACKUP_STORAGE_KEY, previousRaw);
+      }
+      localStorage.setItem(STORAGE_KEY, serialized);
       if (elements.storageAlert) elements.storageAlert.hidden = true;
       return true;
     } catch (error) {

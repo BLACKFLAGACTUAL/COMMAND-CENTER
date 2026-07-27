@@ -274,3 +274,159 @@ select {
 .manual-entry-card{border-color:rgba(243,79,88,.65);background:linear-gradient(180deg,rgba(243,79,88,.08),rgba(243,79,88,.02));}
 .manual-entry-card .helper-text{margin:0 0 1rem;line-height:1.55;}
 .manual-entry-card .button{font-size:.9rem;letter-spacing:.1em;}
+
+
+/* Archive progress domains */
+.progress-domains-card{margin-bottom:1rem}
+.activity-domain-tabs{display:flex;gap:.55rem;overflow-x:auto;padding:.15rem 0 .35rem;scrollbar-width:none}
+.activity-domain-tabs::-webkit-scrollbar{display:none}
+.activity-domain-button{flex:0 0 auto;min-height:44px;border:1px solid var(--line);background:var(--panel-3);color:var(--muted);padding:.65rem .85rem;font-family:var(--display);font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+.activity-domain-button.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+#activityProgressChart{display:block;width:100%;height:260px}
+.activity-entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.edit-aar-button{width:auto!important;margin-top:1rem!important;border:1px solid var(--line)!important;background:var(--panel-3)!important;color:var(--text)!important;padding:.7rem 1rem!important}
+.history-details{padding-top:1rem}
+#editAarDialog textarea{width:100%;resize:vertical}
+@media(max-width:520px){.activity-entry-grid{grid-template-columns:1fr}#activityProgressChart{height:230px}.progress-domains-card .section-heading{align-items:flex-start}.progress-domains-card .compact-action{width:auto}}
+
+/* Operations: macro 14-day campaign tracking */
+.operations-card {
+  border-color: rgba(243, 79, 88, 0.35);
+}
+
+.current-operation-card {
+  margin-top: 1rem;
+  padding: 1.1rem;
+  border: 1px solid var(--line, #2d2d36);
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.current-operation-card h4 {
+  margin: .55rem 0 .75rem;
+  font-size: clamp(1.45rem, 5vw, 2rem);
+  text-transform: uppercase;
+}
+
+.current-operation-card p {
+  margin: .45rem 0;
+}
+
+.operation-status-row,
+.operation-metrics,
+.planned-operation-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.operation-status,
+.operation-history-item summary small {
+  color: var(--red, #f34f58);
+  letter-spacing: .16em;
+  font-size: .75rem;
+  font-weight: 800;
+}
+
+.operation-metrics {
+  margin-top: 1rem;
+  justify-content: flex-start;
+}
+
+.operation-metrics span {
+  border: 1px solid var(--line, #2d2d36);
+  padding: .45rem .6rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted, #9696a5);
+}
+
+.operation-actions {
+  margin-top: 1rem;
+}
+
+.planned-operation-note {
+  margin-top: .9rem;
+  padding-top: .9rem;
+  border-top: 1px solid var(--line, #2d2d36);
+}
+
+.planned-operation-note strong {
+  color: var(--red, #f34f58);
+}
+
+.operation-cycle-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .7rem;
+  margin-top: 1rem;
+}
+
+.operation-cycle-block {
+  min-width: 0;
+  padding: .8rem;
+  border: 1px solid var(--line, #2d2d36);
+  display: grid;
+  gap: .25rem;
+}
+
+.operation-cycle-block.active {
+  border-color: var(--red, #f34f58);
+  box-shadow: inset 4px 0 0 var(--red, #f34f58);
+}
+
+.operation-cycle-block span,
+.operation-cycle-block small {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted, #9696a5);
+}
+
+.operation-cycle-block strong {
+  overflow-wrap: anywhere;
+}
+
+.operations-list {
+  margin-top: 1rem;
+  display: grid;
+  gap: .65rem;
+}
+
+.operation-history-item {
+  border: 1px solid var(--line, #2d2d36);
+}
+
+.operation-history-item summary {
+  cursor: pointer;
+  list-style: none;
+  padding: .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.operation-history-item summary::-webkit-details-marker { display: none; }
+
+.operation-history-item summary > span:first-child {
+  display: grid;
+  gap: .25rem;
+  min-width: 0;
+}
+
+.operation-history-item summary strong {
+  overflow-wrap: anywhere;
+}
+
+.operation-history-body {
+  padding: 0 .9rem 1rem;
+  border-top: 1px solid var(--line, #2d2d36);
+}
+
+#operationDialog textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+@media (min-width: 620px) {
+  .operation-cycle-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

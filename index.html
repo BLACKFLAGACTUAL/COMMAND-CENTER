@@ -269,6 +269,21 @@
           </div>
         </div>
 
+
+        <section class="settings-card operations-card" aria-labelledby="operationsHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">MACRO CAMPAIGN TRACKING</p>
+              <h3 id="operationsHeading">Operations</h3>
+            </div>
+            <button id="newOperationButton" class="button secondary compact-action" type="button">+ New operation</button>
+          </div>
+          <p class="helper-text">Each operation contains one or more complete 14-day battle-rhythm blocks. Your daily records stay intact; operations give you the year-level view.</p>
+          <div id="currentOperationCard" class="current-operation-card"></div>
+          <div id="operationCycleStrip" class="operation-cycle-strip" aria-label="14-day operation blocks"></div>
+          <div id="operationsList" class="operations-list"></div>
+        </section>
+
         <section class="settings-card manual-entry-card" aria-labelledby="manualEntryHeading">
           <div class="section-heading">
             <div>
@@ -278,6 +293,18 @@
           </div>
           <p class="helper-text">Enter any workout from an earlier date this year—or any prior year—and it will be added to the selected exercise graph.</p>
           <button id="manualStrengthEntryButton" class="button primary full-width" type="button">+ Add manual strength entry</button>
+        </section>
+
+        <section class="settings-card progress-domains-card" aria-labelledby="domainsHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">PROGRESS DOMAINS</p>
+              <h3 id="domainsHeading">Tracking folders</h3>
+            </div>
+            <button id="addActivityTrackerButton" class="button secondary compact-action" type="button">+ Add activity</button>
+          </div>
+          <p class="helper-text">Weightlifting keeps your lift history permanently. Track MMA, running, rucking, swimming, or any other domain separately.</p>
+          <div id="activityDomainTabs" class="activity-domain-tabs" role="tablist" aria-label="Progress tracking folders"></div>
         </section>
 
         <div class="history-summary">
@@ -295,7 +322,7 @@
           </div>
         </div>
 
-        <section class="settings-card progress-card" aria-labelledby="progressHeading">
+        <section id="weightliftingProgressSection" class="settings-card progress-card" aria-labelledby="progressHeading">
           <div class="section-heading">
             <div>
               <p class="category-kicker">STRENGTH INTELLIGENCE</p>
@@ -314,6 +341,27 @@
           </div>
           <p id="progressChartEmpty" class="empty-state">Log weight from today’s workout to build your progress graph.</p>
           <div id="progressLogList" class="progress-log-list"></div>
+        </section>
+
+        <section id="activityProgressSection" class="settings-card progress-card" aria-labelledby="activityProgressHeading" hidden>
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">DOMAIN INTELLIGENCE</p>
+              <h3 id="activityProgressHeading">Activity progress</h3>
+            </div>
+            <button id="addActivityEntryButton" class="button secondary compact-action" type="button">+ Add entry</button>
+          </div>
+          <div class="progress-toolbar">
+            <div class="progress-select-wrap">
+              <label for="activityMetricSelect">Metric</label>
+              <select id="activityMetricSelect"></select>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="activityProgressChart" width="720" height="360" aria-label="Activity progress graph"></canvas>
+          </div>
+          <p id="activityProgressEmpty" class="empty-state">Add an entry to begin tracking this activity.</p>
+          <div id="activityProgressLogList" class="progress-log-list"></div>
         </section>
 
         <div id="historyList" class="history-list"></div>
@@ -458,6 +506,82 @@
       <div class="button-row">
         <button class="button primary" type="submit">Save log</button>
         <button id="exerciseLogCancel" class="button secondary" type="button">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="activityTrackerDialog">
+    <form id="activityTrackerForm">
+      <h2>Create progress folder</h2>
+      <label for="activityTrackerName">Activity name</label>
+      <input id="activityTrackerName" type="text" maxlength="60" placeholder="MMA, Running, Ruck, Swimming…" required>
+      <p id="activityTrackerStatus" class="save-status" aria-live="polite"></p>
+      <div class="button-row">
+        <button class="button primary" type="submit">Create folder</button>
+        <button id="activityTrackerCancel" class="button secondary" type="button">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="activityEntryDialog">
+    <form id="activityEntryForm">
+      <h2>Log activity progress</h2>
+      <p id="activityEntryDomain" class="dialog-workout-name"></p>
+      <label for="activityEntryDate">Date</label>
+      <input id="activityEntryDate" type="date" required>
+      <label for="activityEntryMetric">Metric</label>
+      <input id="activityEntryMetric" type="text" maxlength="60" placeholder="Rounds, 3-mile time, distance…" required>
+      <div class="activity-entry-grid">
+        <div><label for="activityEntryValue">Value</label><input id="activityEntryValue" type="number" step="0.01" inputmode="decimal" required></div>
+        <div><label for="activityEntryUnit">Unit</label><input id="activityEntryUnit" type="text" maxlength="20" placeholder="rounds, min, mi…"></div>
+      </div>
+      <label for="activityEntryNote">Note (optional)</label>
+      <input id="activityEntryNote" type="text" maxlength="180" placeholder="Sparring quality, pace, result…">
+      <p id="activityEntryStatus" class="save-status" aria-live="polite"></p>
+      <div class="button-row">
+        <button class="button primary" type="submit">Save entry</button>
+        <button id="activityEntryCancel" class="button secondary" type="button">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+
+  <dialog id="operationDialog">
+    <form id="operationForm">
+      <h2 id="operationDialogTitle">Start new operation</h2>
+      <p id="operationTimingNote" class="helper-text"></p>
+      <label for="operationName">Operation name</label>
+      <input id="operationName" type="text" maxlength="80" placeholder="Operation Arete" required>
+      <label for="operationIntent">Commander's intent</label>
+      <textarea id="operationIntent" rows="4" maxlength="600" placeholder="What does success look like, and why does this operation matter?"></textarea>
+      <label for="operationMission">Mission</label>
+      <textarea id="operationMission" rows="4" maxlength="600" placeholder="What will you accomplish during this operation?"></textarea>
+      <p id="operationDialogStatus" class="save-status" aria-live="polite"></p>
+      <div class="button-row">
+        <button class="button primary" type="submit">Save operation</button>
+        <button id="operationDialogCancel" class="button secondary" type="button">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="editAarDialog">
+    <form id="editAarForm">
+      <h2>Edit archived AAR</h2>
+      <p id="editAarDate" class="dialog-workout-name"></p>
+      <label for="editAarWentWell">What went well?</label>
+      <textarea id="editAarWentWell" rows="3"></textarea>
+      <label for="editAarImprove">What needs improvement?</label>
+      <textarea id="editAarImprove" rows="3"></textarea>
+      <label for="editAarLesson">Lesson learned</label>
+      <textarea id="editAarLesson" rows="3"></textarea>
+      <label for="editAarPriority">Tomorrow's main priority</label>
+      <textarea id="editAarPriority" rows="3"></textarea>
+      <label for="editAarRating">Overall rating</label>
+      <input id="editAarRating" type="number" min="1" max="10" step="1" inputmode="numeric" required>
+      <p id="editAarStatus" class="save-status" aria-live="polite"></p>
+      <div class="button-row">
+        <button class="button primary" type="submit">Save changes</button>
+        <button id="editAarCancel" class="button secondary" type="button">Cancel</button>
       </div>
     </form>
   </dialog>

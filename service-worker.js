@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-v4-manual-strength-entry";
+const CACHE_NAME = "command-center-operations-v1";
 const APP_SHELL = [
   "./",
   "./index.html",
