@@ -1214,3 +1214,30 @@ select {
   .nav-button { font-size:.47rem; }
   .nav-icon { font-size:1.05rem; }
 }
+
+
+/* V8 stability release */
+.recovery-status {
+  margin: .9rem 0;
+  padding: .85rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  background: var(--panel-2);
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.recovery-actions {
+  margin-top: .75rem;
+}
+
+@media (max-width: 520px) {
+  .recovery-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .recovery-actions .button {
+    width: 100%;
+  }
+}

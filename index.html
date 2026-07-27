@@ -559,6 +559,27 @@
           </div>
         </section>
 
+        <section class="settings-card" data-collapsible-key="system-recovery" aria-labelledby="recoveryHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">DATA INTEGRITY</p>
+              <h3 id="recoveryHeading">Recovery & snapshots</h3>
+            </div>
+          </div>
+          <p class="helper-text">
+            Command Center now stores redundant snapshots in localStorage and IndexedDB. Updates merge data instead of replacing it.
+          </p>
+          <div id="recoveryStatus" class="recovery-status" aria-live="polite">Checking recovery status…</div>
+          <div class="button-row recovery-actions">
+            <button id="createSnapshotButton" class="button secondary" type="button">Create snapshot</button>
+            <button id="recoverLatestButton" class="button secondary" type="button">Recover latest</button>
+            <button id="emergencyExportButton" class="button primary" type="button">Download backup</button>
+          </div>
+          <p class="helper-text">
+            Clearing Safari website data can still erase all browser-local storage. Download JSON backups periodically for off-device protection.
+          </p>
+        </section>
+
         <section class="settings-card danger-zone">
           <h3>Reset controls</h3>
           <button id="resetTodayButton" class="button danger full-width" type="button">Reset today</button>
@@ -754,6 +775,11 @@
     </form>
   </dialog>
 
-  <script src="./app.js" defer></script>
+  <script src="./js/core/config.js" defer></script>
+  <script src="./js/core/data.js" defer></script>
+  <script src="./js/features/activity-presets.js" defer></script>
+  <script src="./js/core/migrations.js" defer></script>
+  <script src="./js/core/storage.js" defer></script>
+  <script src="./js/app.js" defer></script>
 </body>
 </html>

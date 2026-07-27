@@ -1,8 +1,6 @@
 (() => {
   "use strict";
 
-  const STORAGE_KEY = "myCommandCenter.v1";
-  const BACKUP_STORAGE_KEY = "myCommandCenter.lastKnownGood";
   const DEFAULT_QUOTE =
     "The secret of all victory lies in the organization of the non-obvious.";
 
@@ -41,62 +39,7 @@
     ]
   };
 
-  const ACTIVITY_METRIC_PRESETS = {
-    MMA: [
-      { name: "Training time", unit: "min" },
-      { name: "Rounds", unit: "rounds" },
-      { name: "Sparring rounds", unit: "rounds" },
-      { name: "Performance", unit: "/10" }
-    ],
-    BJJ: [
-      { name: "Training time", unit: "min" },
-      { name: "Rolling rounds", unit: "rounds" },
-      { name: "Submissions", unit: "subs" },
-      { name: "Performance", unit: "/10" }
-    ],
-    Boxing: [
-      { name: "Training time", unit: "min" },
-      { name: "Rounds", unit: "rounds" },
-      { name: "Sparring rounds", unit: "rounds" },
-      { name: "Performance", unit: "/10" }
-    ],
-    Running: [
-      { name: "Distance", unit: "mi" },
-      { name: "Time", unit: "min" },
-      { name: "Pace", unit: "min/mi" },
-      { name: "Heart rate", unit: "bpm" }
-    ],
-    Ruck: [
-      { name: "Distance", unit: "mi" },
-      { name: "Time", unit: "min" },
-      { name: "Load", unit: "lb" },
-      { name: "Pace", unit: "min/mi" }
-    ],
-    Swimming: [
-      { name: "Distance", unit: "yd" },
-      { name: "Time", unit: "min" },
-      { name: "Pace", unit: "min/100yd" }
-    ],
-    Surfing: [
-      { name: "Session time", unit: "min" },
-      { name: "Waves caught", unit: "waves" },
-      { name: "Best wave", unit: "/10" }
-    ],
-    Chess: [
-      { name: "Rating", unit: "Elo" },
-      { name: "Games", unit: "games" },
-      { name: "Wins", unit: "wins" },
-      { name: "Study time", unit: "min" }
-    ],
-    Reading: [
-      { name: "Pages", unit: "pages" },
-      { name: "Study time", unit: "min" }
-    ],
-    "Body Weight": [
-      { name: "Body weight", unit: "lb" }
-    ]
-  };
-
+  const ACTIVITY_METRIC_PRESETS = window.CCActivityPresets;
   const DEFAULT_WORKOUTS = {
     "Strength A": ["Zercher squat", "Incline bench", "Weighted pull-ups"],
     "Strength B": ["Trap-bar deadlift", "Overhead press", "Chest-supported row"],
@@ -106,7 +49,7 @@
     "Rest": ["Recovery, mobility, walking, and sleep"]
   };
 
-  let state = loadState();
+  let state = window.CCStorage.loadSync(createInitialState);
   let activeView = "today";
   let taskDialogCategory = null;
   let scheduleDialogIndex = null;
@@ -122,13 +65,35 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
-  function init() {
+  async function init() {
     cacheElements();
+    state = window.CCMigrations.migrate(state, createInitialState, ACTIVITY_METRIC_PRESETS);
     ensureStateShape();
     bindEvents();
     initializeCollapsibleSections();
     renderAll();
+    renderRecoveryStatus();
     registerServiceWorker();
+
+    // IndexedDB is a second persistence layer. Merge it after the UI is usable.
+    try {
+      const reconciled = await window.CCStorage.reconcileWithIndexedDb(state);
+      const currentFingerprint = window.CCData.fingerprint(state);
+      const reconciledFingerprint = window.CCData.fingerprint(reconciled);
+      if (reconciledFingerprint !== currentFingerprint) {
+        state = window.CCMigrations.migrate(reconciled, createInitialState, ACTIVITY_METRICS_PRESETS_SAFE());
+        const result = window.CCStorage.save(state, "startup-reconcile");
+        state = result.state;
+        renderAll();
+      }
+      renderRecoveryStatus();
+    } catch (error) {
+      console.warn("Background recovery reconciliation failed:", error);
+    }
+  }
+
+  function ACTIVITY_METRICS_PRESETS_SAFE() {
+    return ACTIVITY_METRIC_PRESETS || {};
   }
 
   function cacheElements() {
@@ -175,7 +140,7 @@
       "operationDialogCancel", "operationTrendSummary", "operationObjectives", "operationsYearSelect", "operationsYearTimeline",
       "intelRange", "intelMetricGrid", "intelFindings", "intelExecutionChart", "intelProteinChart", "intelRatingChart", "intelActivitySummary",
       "activityTrackerMetrics", "activityMetricSuggestions", "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext"
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "recoveryStatus", "createSnapshotButton", "recoverLatestButton", "emergencyExportButton"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
@@ -387,11 +352,14 @@
     elements.importDataInput.addEventListener("change", importData);
     elements.resetTodayButton.addEventListener("click", resetToday);
     elements.deleteAllDataButton.addEventListener("click", deleteAllData);
+    elements.createSnapshotButton.addEventListener("click", createManualRecoverySnapshot);
+    elements.recoverLatestButton.addEventListener("click", recoverLatestSnapshot);
+    elements.emergencyExportButton.addEventListener("click", exportData);
   }
 
   function ensureStateShape() {
     if (!state || typeof state !== "object") state = createInitialState();
-    state.version = 7;
+    state.version = 8;
     state.settings = { ...DEFAULT_SETTINGS, ...(state.settings || {}) };
 
     if (!Array.isArray(state.settings.mindTemplates)) {
@@ -445,7 +413,7 @@
 
   function createInitialState() {
     return {
-      version: 7,
+      version: 8,
       settings: structuredCloneSafe(DEFAULT_SETTINGS),
       daily: {},
       quotes: {},
@@ -2774,15 +2742,16 @@
   }
 
   function deleteAllData() {
-    const first = confirm("Delete every stored Command Center record and setting from this browser?");
-    if (!first) return;
-    const second = confirm("This is permanent unless you exported a backup. Delete all data now?");
-    if (!second) return;
+    const phrase = prompt('Type DELETE ALL to erase this browser’s Command Center data. Recovery snapshots are intentionally kept unless you clear Safari website data.');
+    if (phrase !== "DELETE ALL") return;
 
-    localStorage.removeItem(BACKUP_STORAGE_KEY);
     state = createInitialState();
-    saveAndRender();
-    switchView("today");
+    state = window.CCMigrations.migrate(state, createInitialState, ACTIVITY_METRIC_PRESETS);
+    const result = window.CCStorage.save(state, "intentional-reset");
+    state = result.state;
+    renderAll();
+    renderRecoveryStatus();
+    alert("Active data was reset. Recovery snapshots were retained.");
   }
 
   function exportData() {
@@ -2818,11 +2787,12 @@
           throw new Error("This file is not a valid Command Center backup.");
         }
 
-        if (!confirm("Import this backup? It will replace the data currently stored in this browser.")) {
+        if (!confirm("Merge this backup into the data currently stored in this browser? Unique current records will be kept.")) {
           return;
         }
 
-        state = incoming;
+        state = window.CCData.mergeStates(state, incoming);
+        state = window.CCMigrations.migrate(state, createInitialState, ACTIVITY_METRIC_PRESETS);
         ensureStateShape();
         saveAndRender();
         switchView("today");
@@ -2918,189 +2888,16 @@
     }
   }
 
-  function mergeUniqueEntries(a = [], b = []) {
-    const result = [];
-    const seen = new Set();
-    [...a, ...b].forEach((entry) => {
-      if (!entry || typeof entry !== "object") return;
-      const key = entry.id || JSON.stringify([
-        entry.date || "",
-        entry.weight ?? "",
-        entry.reps ?? "",
-        entry.sets ?? "",
-        entry.metric || "",
-        entry.value ?? "",
-        entry.note || ""
-      ]);
-      if (seen.has(key)) return;
-      seen.add(key);
-      result.push(structuredCloneSafe(entry));
-    });
-    return result;
-  }
-
-  function mergeAar(primary = {}, backup = {}) {
-    const result = { ...backup, ...primary };
-    ["wentWell", "improve", "lesson", "priority"].forEach((field) => {
-      if (!String(primary?.[field] || "").trim() && String(backup?.[field] || "").trim()) {
-        result[field] = backup[field];
-      }
-    });
-    if (!primary?.savedAt && backup?.savedAt) result.savedAt = backup.savedAt;
-    if ((!Number.isFinite(Number(primary?.rating)) || Number(primary?.rating) === 5) && Number.isFinite(Number(backup?.rating))) {
-      result.rating = Number(backup.rating);
-    }
-    return result;
-  }
-
-  function mergeDailyRecord(primary, backup) {
-    if (!primary) return structuredCloneSafe(backup);
-    if (!backup) return structuredCloneSafe(primary);
-    const result = { ...backup, ...primary };
-    result.aar = mergeAar(primary.aar, backup.aar);
-
-    ["mindTasks", "spiritTasks"].forEach((field) => {
-      const p = Array.isArray(primary[field]) ? primary[field] : [];
-      const b = Array.isArray(backup[field]) ? backup[field] : [];
-      const byId = new Map();
-      [...b, ...p].forEach((task) => {
-        if (!task) return;
-        const key = task.id || task.text;
-        const existing = byId.get(key);
-        byId.set(key, existing ? { ...existing, ...task } : structuredCloneSafe(task));
-      });
-      result[field] = [...byId.values()];
-    });
-
-    if ((Number(primary.protein) || 0) === 0 && (Number(backup.protein) || 0) > 0) result.protein = backup.protein;
-    if (!primary.workoutComplete && backup.workoutComplete) result.workoutComplete = true;
-    return result;
-  }
-
-  function mergeCommandCenterStates(primary, backup) {
-    if (!primary) return backup ? structuredCloneSafe(backup) : null;
-    if (!backup) return structuredCloneSafe(primary);
-
-    const merged = structuredCloneSafe(primary);
-    merged.settings = { ...(backup.settings || {}), ...(primary.settings || {}) };
-    merged.daily = {};
-    const dates = new Set([...Object.keys(backup.daily || {}), ...Object.keys(primary.daily || {})]);
-    dates.forEach((dateKey) => {
-      merged.daily[dateKey] = mergeDailyRecord(primary.daily?.[dateKey], backup.daily?.[dateKey]);
-    });
-
-    merged.quotes = { ...(backup.quotes || {}), ...(primary.quotes || {}) };
-    merged.customWorkouts = { ...(backup.customWorkouts || {}), ...(primary.customWorkouts || {}) };
-
-    merged.exerciseLogs = {};
-    const exercises = new Set([...Object.keys(backup.exerciseLogs || {}), ...Object.keys(primary.exerciseLogs || {})]);
-    exercises.forEach((name) => {
-      merged.exerciseLogs[name] = mergeUniqueEntries(primary.exerciseLogs?.[name], backup.exerciseLogs?.[name]);
-    });
-
-    merged.activityTrackers = {};
-    const trackers = new Set([...Object.keys(backup.activityTrackers || {}), ...Object.keys(primary.activityTrackers || {})]);
-    trackers.forEach((name) => {
-      const p = primary.activityTrackers?.[name] || {};
-      const b = backup.activityTrackers?.[name] || {};
-      merged.activityTrackers[name] = {
-        ...b,
-        ...p,
-        name: p.name || b.name || name,
-        metrics: Array.isArray(p.metrics) && p.metrics.length ? structuredCloneSafe(p.metrics) : structuredCloneSafe(b.metrics || []),
-        entries: mergeUniqueEntries(p.entries, b.entries)
-      };
-    });
-
-    const pOps = primary.operations || {};
-    const bOps = backup.operations || {};
-    const opMap = new Map();
-    [...(bOps.items || []), ...(pOps.items || [])].forEach((op) => {
-      if (!op) return;
-      const key = op.id || `${op.name}-${op.startCycleIndex}`;
-      const existing = opMap.get(key);
-      if (!existing) {
-        opMap.set(key, structuredCloneSafe(op));
-      } else {
-        const newest = { ...existing, ...op };
-        const oldObjectives = Array.isArray(existing.objectives) ? existing.objectives : [];
-        const newObjectives = Array.isArray(op.objectives) ? op.objectives : [];
-        const objectiveMap = new Map();
-        [...oldObjectives, ...newObjectives].forEach((objective) => {
-          const obj = typeof objective === "string" ? { text: objective } : objective;
-          if (!obj?.text) return;
-          const objKey = obj.id || obj.text.trim().toLowerCase();
-          objectiveMap.set(objKey, { ...(objectiveMap.get(objKey) || {}), ...obj });
-        });
-        newest.objectives = [...objectiveMap.values()];
-        if (!String(newest.overallSummary || "").trim() && String(existing.overallSummary || "").trim()) {
-          newest.overallSummary = existing.overallSummary;
-        }
-        opMap.set(key, newest);
-      }
-    });
-
-    const cycleMap = new Map();
-    [...(bOps.cycles || []), ...(pOps.cycles || [])].forEach((cycle) => {
-      if (!cycle || !Number.isInteger(cycle.cycleIndex)) return;
-      const existing = cycleMap.get(cycle.cycleIndex);
-      cycleMap.set(cycle.cycleIndex, existing ? {
-        ...existing,
-        ...cycle,
-        summary: String(cycle.summary || existing.summary || "")
-      } : structuredCloneSafe(cycle));
-    });
-
-    merged.operations = {
-      ...bOps,
-      ...pOps,
-      items: [...opMap.values()],
-      cycles: [...cycleMap.values()].sort((a, b) => a.cycleIndex - b.cycleIndex),
-      activeOperationId: pOps.activeOperationId || bOps.activeOperationId || null
-    };
-
-    return merged;
-  }
-
-  function loadState() {
-    try {
-      const primary = parseStoredState(localStorage.getItem(STORAGE_KEY));
-      const backup = parseStoredState(localStorage.getItem(BACKUP_STORAGE_KEY));
-      const merged = mergeCommandCenterStates(primary, backup);
-      if (merged) {
-        if (primary && backup) console.info("Merged primary and backup Command Center data without discarding unique records.");
-        return merged;
-      }
-      return createInitialState();
-    } catch (error) {
-      console.error("Could not load local data:", error);
-      setTimeout(() => {
-        const alertBox = document.getElementById("storageAlert");
-        if (alertBox) alertBox.hidden = false;
-      }, 0);
-      return createInitialState();
-    }
-  }
-
-  function saveState() {
-    try {
-      const serialized = JSON.stringify(state);
-      const previousRaw = localStorage.getItem(STORAGE_KEY);
-
-      // Snapshot the complete previous state before every write. We never choose a
-      // "richer" snapshot over current data; loadState merges both non-destructively.
-      if (previousRaw && previousRaw !== serialized) {
-        localStorage.setItem(BACKUP_STORAGE_KEY, previousRaw);
-      }
-      localStorage.setItem(STORAGE_KEY, serialized);
-
+  function saveState(reason = "save") {
+    const result = window.CCStorage.save(state, reason);
+    if (result.ok) {
+      state = result.state;
       if (elements.storageAlert) elements.storageAlert.hidden = true;
+      renderRecoveryStatus();
       return true;
-    } catch (error) {
-      console.error("Could not save local data:", error);
-      if (elements.storageAlert) elements.storageAlert.hidden = false;
-      return false;
     }
+    if (elements.storageAlert) elements.storageAlert.hidden = false;
+    return false;
   }
 
   function saveAndRender() {
