@@ -1242,7 +1242,8 @@
     saveState();
     elements.operationDialog.close();
     editingOperationId = null;
-    renderHistory();
+    renderOperations();
+    if (activeView === "history") renderHistory();
   }
 
   function renderHistory() {
@@ -1333,20 +1334,36 @@
         <div><strong>Lesson:</strong> ${escapeHtml(day.aar?.lesson || "—")}</div>
         <div><strong>Tomorrow:</strong> ${escapeHtml(day.aar?.priority || "—")}</div>
       `;
+      const historyActions = document.createElement("div");
+      historyActions.className = "history-actions";
+
+      const viewAarButton = document.createElement("button");
+      viewAarButton.type = "button";
+      viewAarButton.className = "button secondary history-action-button";
+      viewAarButton.textContent = "View details";
+      viewAarButton.addEventListener("click", () => {
+        const open = details.hidden;
+        details.hidden = !open;
+        toggle.setAttribute("aria-expanded", String(open));
+        viewAarButton.textContent = open ? "Hide details" : "View details";
+      });
+
       const editAarButton = document.createElement("button");
       editAarButton.type = "button";
-      editAarButton.className = "button secondary edit-aar-button";
+      editAarButton.className = "button primary edit-aar-button history-action-button";
       editAarButton.textContent = "Edit AAR";
       editAarButton.addEventListener("click", () => openArchivedAarEditor(day.date));
-      details.appendChild(editAarButton);
+
+      historyActions.append(viewAarButton, editAarButton);
 
       toggle.addEventListener("click", () => {
         const open = details.hidden;
         details.hidden = !open;
         toggle.setAttribute("aria-expanded", String(open));
+        viewAarButton.textContent = open ? "Hide details" : "View details";
       });
 
-      item.append(toggle, details);
+      item.append(toggle, historyActions, details);
       elements.historyList.appendChild(item);
     });
   }
@@ -1518,7 +1535,13 @@
 
   function openArchivedAarEditor(dateKey) {
     const day = state.daily?.[dateKey];
-    if (!day) return;
+    if (!day) {
+      alert("That archived day could not be found.");
+      return;
+    }
+    if (!day.aar || typeof day.aar !== "object") {
+      day.aar = { wentWell: "", improve: "", lesson: "", priority: "", rating: 5 };
+    }
     editingAarDateKey = dateKey;
     const date = new Date(`${dateKey}T12:00:00`);
     elements.editAarDate.textContent = date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
@@ -1871,6 +1894,7 @@
     });
 
     if (target === "history") renderHistory();
+    if (target === "operations") renderOperations();
     if (target === "schedule") renderSchedule();
     if (target === "settings") renderSettings();
 

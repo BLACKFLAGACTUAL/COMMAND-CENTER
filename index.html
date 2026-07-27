@@ -269,21 +269,6 @@
           </div>
         </div>
 
-
-        <section class="settings-card operations-card" aria-labelledby="operationsHeading">
-          <div class="section-heading">
-            <div>
-              <p class="category-kicker">MACRO CAMPAIGN TRACKING</p>
-              <h3 id="operationsHeading">Operations</h3>
-            </div>
-            <button id="newOperationButton" class="button secondary compact-action" type="button">+ New operation</button>
-          </div>
-          <p class="helper-text">Each operation contains one or more complete 14-day battle-rhythm blocks. Your daily records stay intact; operations give you the year-level view.</p>
-          <div id="currentOperationCard" class="current-operation-card"></div>
-          <div id="operationCycleStrip" class="operation-cycle-strip" aria-label="14-day operation blocks"></div>
-          <div id="operationsList" class="operations-list"></div>
-        </section>
-
         <section class="settings-card manual-entry-card" aria-labelledby="manualEntryHeading">
           <div class="section-heading">
             <div>
@@ -368,6 +353,39 @@
         <p id="emptyHistory" class="empty-state">No daily records yet. Complete tasks or save an AAR to begin your history.</p>
       </section>
 
+
+      <!-- OPERATIONS -->
+      <section id="operationsView" class="view" data-view="operations" aria-labelledby="operationsPageHeading" hidden>
+        <div class="view-title-row">
+          <div>
+            <p class="eyebrow">CAMPAIGN // MACRO PROGRESS</p>
+            <h2 id="operationsPageHeading">Operations</h2>
+          </div>
+        </div>
+
+        <p class="helper-text operations-page-intro">
+          Build long-term campaigns from complete 14-day battle-rhythm blocks. Daily records, AARs,
+          strength logs, and activity logs remain stored by their original dates.
+        </p>
+
+
+
+        <section class="settings-card operations-card" aria-labelledby="operationsHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">MACRO CAMPAIGN TRACKING</p>
+              <h3 id="operationsHeading">Operations</h3>
+            </div>
+            <button id="newOperationButton" class="button secondary compact-action" type="button">+ New operation</button>
+          </div>
+          <p class="helper-text">Each operation contains one or more complete 14-day battle-rhythm blocks. Your daily records stay intact; operations give you the year-level view.</p>
+          <div id="currentOperationCard" class="current-operation-card"></div>
+          <div id="operationCycleStrip" class="operation-cycle-strip" aria-label="14-day operation blocks"></div>
+          <div id="operationsList" class="operations-list"></div>
+        </section>
+      </section>
+
+
       <!-- SETTINGS -->
       <section id="settingsView" class="view" data-view="settings" aria-labelledby="settingsHeading" hidden>
         <div class="view-title-row">
@@ -436,6 +454,10 @@
       <button class="nav-button" type="button" data-target="history">
         <span class="nav-icon" aria-hidden="true">◫</span>
         <span>Archive</span>
+      </button>
+      <button class="nav-button" type="button" data-target="operations">
+        <span class="nav-icon" aria-hidden="true">⌁</span>
+        <span>Operations</span>
       </button>
       <button class="nav-button" type="button" data-target="settings">
         <span class="nav-icon" aria-hidden="true">⚙</span>
