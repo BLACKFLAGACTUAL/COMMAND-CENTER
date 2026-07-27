@@ -260,16 +260,20 @@
         </section>
       </section>
 
-      <!-- HISTORY -->
+      <!-- ARCHIVE -->
       <section id="historyView" class="view" data-view="history" aria-labelledby="historyHeading" hidden>
         <div class="view-title-row">
           <div>
-            <p class="eyebrow">PATTERNS & LESSONS</p>
-            <h2 id="historyHeading">History</h2>
+            <p class="eyebrow">WRITTEN RECORD // LESSONS LEARNED</p>
+            <h2 id="historyHeading">Archive</h2>
           </div>
         </div>
 
-        <section class="settings-card archive-calendar-card" data-collapsible-key="archive-calendar" aria-labelledby="archiveCalendarHeading">
+        <p class="helper-text archive-purpose">
+          Your written record: daily AARs, lessons learned, priorities, ratings, and historical day edits.
+        </p>
+
+<section class="settings-card archive-calendar-card" data-collapsible-key="archive-calendar" aria-labelledby="archiveCalendarHeading">
           <div class="section-heading calendar-heading-row">
             <div>
               <p class="category-kicker">DAILY ARCHIVE</p>
@@ -301,29 +305,6 @@
           </div>
         </section>
 
-        <section class="settings-card manual-entry-card" data-collapsible-key="archive-manual-lifts" aria-labelledby="manualEntryHeading">
-          <div class="section-heading">
-            <div>
-              <p class="category-kicker">MANUAL ENTRY</p>
-              <h3 id="manualEntryHeading">Add previous lift</h3>
-            </div>
-          </div>
-          <p class="helper-text">Enter any workout from an earlier date this year—or any prior year—and it will be added to the selected exercise graph.</p>
-          <button id="manualStrengthEntryButton" class="button primary full-width" type="button">+ Add manual strength entry</button>
-        </section>
-
-        <section class="settings-card progress-domains-card" data-collapsible-key="archive-progress-folders" aria-labelledby="domainsHeading">
-          <div class="section-heading">
-            <div>
-              <p class="category-kicker">PROGRESS DOMAINS</p>
-              <h3 id="domainsHeading">Tracking folders</h3>
-            </div>
-            <button id="addActivityTrackerButton" class="button secondary compact-action" type="button">+ Add activity</button>
-          </div>
-          <p class="helper-text">Weightlifting keeps your lift history permanently. Track MMA, running, rucking, swimming, or any other domain separately.</p>
-          <div id="activityDomainTabs" class="activity-domain-tabs" role="tablist" aria-label="Progress tracking folders"></div>
-        </section>
-
         <div class="history-summary">
           <div class="metric-card">
             <span class="data-label">DAYS LOGGED</span>
@@ -339,7 +320,56 @@
           </div>
         </div>
 
-        <section id="weightliftingProgressSection" class="settings-card progress-card" data-collapsible-key="archive-weightlifting-progress" aria-labelledby="progressHeading">
+<section class="settings-card daily-aar-archive-card" data-collapsible-key="archive-daily-aars" aria-labelledby="dailyAarArchiveHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">DAILY RECORDS</p>
+              <h3 id="dailyAarArchiveHeading">AAR archive</h3>
+            </div>
+          </div>
+          <p class="helper-text">Open any day to review the written record. Expand an entry to edit the AAR, lessons learned, priority, or rating.</p>
+          <div id="historyList" class="history-list"></div>
+          <p id="emptyHistory" class="empty-state">No daily records yet. Complete tasks or save an AAR to begin your history.</p>
+        </section>
+      </section>
+
+      <!-- ACTIVITY TRACKER -->
+      <section id="activityView" class="view" data-view="activity" aria-labelledby="activityPageHeading" hidden>
+        <div class="view-title-row">
+          <div>
+            <p class="eyebrow">PERFORMANCE LOG // PHYSICAL DOMAINS</p>
+            <h2 id="activityPageHeading">Activity</h2>
+          </div>
+        </div>
+
+        <p class="helper-text activity-purpose">
+          Log sessions once, review performance by activity, swipe through metrics, and edit or delete bad or test entries.
+        </p>
+
+<section class="settings-card progress-domains-card" data-collapsible-key="archive-progress-folders" aria-labelledby="domainsHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">PROGRESS DOMAINS</p>
+              <h3 id="domainsHeading">Tracking folders</h3>
+            </div>
+            <button id="addActivityTrackerButton" class="button secondary compact-action" type="button">+ Add activity</button>
+          </div>
+          <p class="helper-text">Weightlifting keeps your lift history permanently. Track MMA, running, rucking, swimming, or any other domain separately.</p>
+          <div id="activityDomainTabs" class="activity-domain-tabs" role="tablist" aria-label="Progress tracking folders"></div>
+        </section>
+
+<section class="settings-card manual-entry-card" data-collapsible-key="archive-manual-lifts" aria-labelledby="manualEntryHeading">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">MANUAL ENTRY</p>
+              <h3 id="manualEntryHeading">Add previous lift</h3>
+            </div>
+          </div>
+          <p class="helper-text">Enter any workout from an earlier date this year—or any prior year—and it will be added to the selected exercise graph.</p>
+          <button id="manualStrengthEntryButton" class="button primary full-width" type="button">+ Add manual strength entry</button>
+        </section>
+
+<section id="weightliftingProgressSection" class="settings-card progress-card" data-collapsible-key="archive-weightlifting-progress" aria-labelledby="progressHeading">
           <div class="section-heading">
             <div>
               <p class="category-kicker">STRENGTH INTELLIGENCE</p>
@@ -360,7 +390,7 @@
           <div id="progressLogList" class="progress-log-list"></div>
         </section>
 
-        <section id="activityProgressSection" class="settings-card progress-card" data-collapsible-key="archive-activity-progress" aria-labelledby="activityProgressHeading" hidden>
+<section id="activityProgressSection" class="settings-card progress-card" data-collapsible-key="archive-activity-progress" aria-labelledby="activityProgressHeading" hidden>
           <div class="section-heading">
             <div>
               <p class="category-kicker">DOMAIN INTELLIGENCE</p>
@@ -398,6 +428,9 @@
             <button id="activitySwipeNext" class="activity-swipe-arrow" type="button" aria-label="Next metric">→</button>
           </div>
 
+          <div class="activity-entry-management">
+            <span class="helper-text">Tap Edit or Delete on an entry below the active graph.</span>
+          </div>
           <p id="activityTrendSummary" class="activity-trend-summary"></p>
           <div id="activitySwipeTrack" class="activity-swipe-track"></div>
 
@@ -406,20 +439,7 @@
           <p id="activityProgressEmpty" class="empty-state" hidden></p>
           <div id="activityProgressLogList" hidden></div>
         </section>
-
-        <section class="settings-card daily-aar-archive-card" data-collapsible-key="archive-daily-aars" aria-labelledby="dailyAarArchiveHeading">
-          <div class="section-heading">
-            <div>
-              <p class="category-kicker">DAILY RECORDS</p>
-              <h3 id="dailyAarArchiveHeading">AAR archive</h3>
-            </div>
-          </div>
-          <p class="helper-text">Collapse this section when you only need the calendar, graphs, or macro Operation review.</p>
-          <div id="historyList" class="history-list"></div>
-          <p id="emptyHistory" class="empty-state">No daily records yet. Complete tasks or save an AAR to begin your history.</p>
-        </section>
       </section>
-
 
 
       <!-- INTEL -->
@@ -614,6 +634,10 @@
       <button class="nav-button" type="button" data-target="history">
         <span class="nav-icon" aria-hidden="true">◫</span>
         <span>Archive</span>
+      </button>
+      <button class="nav-button" type="button" data-target="activity">
+        <span class="nav-icon" aria-hidden="true">▦</span>
+        <span>Activity</span>
       </button>
       <button class="nav-button" type="button" data-target="intel">
         <span class="nav-icon" aria-hidden="true">⌁</span>

@@ -1506,3 +1506,173 @@ select {
   width:100%;
   min-width:0;
 }
+
+
+/* Activity entry management + fluid metric swiping */
+.progress-log-row {
+  align-items: stretch;
+}
+
+.progress-log-main {
+  display: grid;
+  grid-template-columns: minmax(72px,.7fr) minmax(110px,1fr) minmax(120px,1.4fr);
+  gap: .55rem;
+  align-items: center;
+  width: 100%;
+}
+
+.progress-log-actions {
+  display: flex;
+  gap: .4rem;
+  justify-content: flex-end;
+  margin-top: .55rem;
+}
+
+.progress-log-edit,
+.progress-log-delete {
+  min-height: 36px;
+  padding: .35rem .6rem;
+}
+
+.danger-text {
+  color: var(--accent);
+}
+
+.activity-entry-management {
+  margin: .75rem 0 0;
+  padding: .65rem .75rem;
+  border-left: 3px solid var(--accent);
+  background: rgba(239,75,80,.06);
+}
+
+.activity-swipe-track {
+  position: relative;
+  overflow: hidden;
+  min-height: 320px;
+}
+
+.activity-metric-slide {
+  display: none;
+  opacity: 0;
+  transform: translateX(0);
+}
+
+.activity-metric-slide.active {
+  display: block;
+  opacity: 1;
+  transition:
+    transform .32s cubic-bezier(.22,.61,.36,1),
+    opacity .26s ease;
+  will-change: transform, opacity;
+}
+
+.activity-metric-slide.active.slide-in-right {
+  transform: translateX(18%);
+  opacity: .25;
+}
+
+.activity-metric-slide.active.slide-in-left {
+  transform: translateX(-18%);
+  opacity: .25;
+}
+
+.activity-swipe-arrow {
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    background .18s ease;
+}
+
+.activity-swipe-arrow:active:not(:disabled) {
+  transform: scale(.94);
+  border-color: var(--accent);
+  background: rgba(239,75,80,.08);
+}
+
+.activity-swipe-dot {
+  transition: transform .2s ease, background .2s ease, border-color .2s ease;
+}
+
+.activity-swipe-dot.active {
+  transform: scale(1.25);
+}
+
+@media (max-width: 600px) {
+  .progress-log-main {
+    grid-template-columns: 1fr auto;
+  }
+
+  .progress-log-main small {
+    grid-column: 1 / -1;
+  }
+
+  .progress-log-actions {
+    justify-content: stretch;
+  }
+
+  .progress-log-actions button {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activity-metric-slide.active,
+  .activity-swipe-arrow,
+  .activity-swipe-dot {
+    transition: none !important;
+  }
+}
+
+
+/* Streamlined navigation: Archive = written record, Activity = performance tracker */
+.archive-purpose,
+.activity-purpose {
+  margin: -.35rem 0 1rem;
+  line-height: 1.5;
+}
+
+.bottom-nav {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.nav-button {
+  min-width: 0;
+  font-size: .46rem;
+  letter-spacing: .015em;
+}
+
+.nav-icon {
+  font-size: 1.02rem;
+}
+
+#activityView .activity-domain-tabs {
+  display: flex;
+  overflow-x: auto;
+  gap: .55rem;
+  padding-bottom: .4rem;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+#activityView .activity-domain-button {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+#activityView .manual-entry-card {
+  margin-top: .8rem;
+}
+
+#activityView .activity-metric-slide.active {
+  border-top: 1px solid rgba(239,75,80,.35);
+  padding-top: .8rem;
+}
+
+@media (max-width: 430px) {
+  .nav-button {
+    font-size: .40rem;
+  }
+  .nav-icon {
+    font-size: .94rem;
+  }
+}

@@ -348,9 +348,13 @@
     elements.activityEntryForm.addEventListener("submit", saveActivityEntry);
     elements.activityMetricSelect.addEventListener("change", () => {
       const domain = state.settings.archiveDomain;
-      state.settings.activityMetricByDomain[domain] = elements.activityMetricSelect.value;
-      saveState();
-      renderActivityProgress();
+      const metrics = getTrackerMetrics(domain);
+      const selectedName = elements.activityMetricSelect.value;
+      const index = metrics.findIndex((metric) => metric.name === selectedName);
+      const current = Number(state.settings.activitySlideByDomain?.[domain] || 0);
+      if (index >= 0) {
+        setActivityMetricSlide(index, index > current ? 1 : index < current ? -1 : 0);
+      }
     });
 
     elements.activitySwipePrev.addEventListener("click", () => moveActivityMetricSlide(-1));
@@ -532,6 +536,7 @@
     renderToday();
     renderSchedule();
     renderHistory();
+    renderActivityTracker();
     renderIntel();
     renderSettings();
   }
@@ -2079,26 +2084,6 @@
     syncOperationCycles();
     renderOperations();
     renderArchiveCalendar();
-    const exercises = Object.keys(state.exerciseLogs || {}).filter((name) => Array.isArray(state.exerciseLogs[name]) && state.exerciseLogs[name].length).sort();
-    const previous = state.settings.progressExercise || elements.progressExerciseSelect.value;
-    elements.progressExerciseSelect.replaceChildren();
-    if (!exercises.length) {
-      const option = document.createElement("option");
-      option.value = ""; option.textContent = "No exercises logged";
-      elements.progressExerciseSelect.appendChild(option);
-      elements.progressExerciseSelect.disabled = true;
-    } else {
-      elements.progressExerciseSelect.disabled = false;
-      exercises.forEach((name) => {
-        const option = document.createElement("option");
-        option.value = name; option.textContent = name;
-        elements.progressExerciseSelect.appendChild(option);
-      });
-      elements.progressExerciseSelect.value = exercises.includes(previous) ? previous : exercises[0];
-      state.settings.progressExercise = elements.progressExerciseSelect.value;
-    }
-    renderProgressDomains();
-    renderProgressChart();
 
     const records = Object.values(state.daily)
       .filter(hasMeaningfulData)
@@ -2207,6 +2192,37 @@
     initializeCollapsibleSections();
   }
 
+  function renderActivityTracker() {
+    const exercises = Object.keys(state.exerciseLogs || {})
+      .filter((name) => Array.isArray(state.exerciseLogs[name]) && state.exerciseLogs[name].length)
+      .sort();
+
+    const previous = state.settings.progressExercise || elements.progressExerciseSelect.value;
+    elements.progressExerciseSelect.replaceChildren();
+
+    if (!exercises.length) {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "No exercises logged";
+      elements.progressExerciseSelect.appendChild(option);
+      elements.progressExerciseSelect.disabled = true;
+    } else {
+      elements.progressExerciseSelect.disabled = false;
+      exercises.forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        elements.progressExerciseSelect.appendChild(option);
+      });
+      elements.progressExerciseSelect.value = exercises.includes(previous) ? previous : exercises[0];
+      state.settings.progressExercise = elements.progressExerciseSelect.value;
+    }
+
+    renderProgressDomains();
+    renderProgressChart();
+    initializeCollapsibleSections();
+  }
+
   function renderProgressDomains() {
     const domains = ["Weightlifting", ...Object.keys(state.activityTrackers || {}).sort((a, b) => a.localeCompare(b))];
     if (!domains.includes(state.settings.archiveDomain)) state.settings.archiveDomain = "Weightlifting";
@@ -2220,8 +2236,14 @@
       button.setAttribute("aria-selected", String(state.settings.archiveDomain === name));
       button.addEventListener("click", () => {
         state.settings.archiveDomain = name;
+        if (!state.settings.activitySlideByDomain || typeof state.settings.activitySlideByDomain !== "object") {
+          state.settings.activitySlideByDomain = {};
+        }
+        if (!state.settings.activityMetricByDomain || typeof state.settings.activityMetricByDomain !== "object") {
+          state.settings.activityMetricByDomain = {};
+        }
         saveState();
-        renderProgressDomains();
+        renderActivityTracker();
       });
       elements.activityDomainTabs.appendChild(button);
     });
@@ -2633,14 +2655,17 @@
       state.settings.activityMetricByDomain[domain] = metrics[0].name;
     }
 
-    const activeIndex = Math.max(
-      0,
-      Math.min(
-        metrics.length - 1,
-        Number(state.settings.activitySlideByDomain?.[domain] ?? metrics.findIndex((metric) => metric.name === elements.activityMetricSelect.value))
-      )
+    const selectedByName = metrics.findIndex(
+      (metric) => metric.name === state.settings.activityMetricByDomain?.[domain]
     );
-    state.settings.activitySlideByDomain[domain] = Number.isFinite(activeIndex) ? activeIndex : 0;
+    const storedSlide = Number(state.settings.activitySlideByDomain?.[domain]);
+    const preferredIndex = selectedByName >= 0
+      ? selectedByName
+      : Number.isInteger(storedSlide) && storedSlide >= 0 && storedSlide < metrics.length
+        ? storedSlide
+        : 0;
+    const activeIndex = Math.max(0, Math.min(metrics.length - 1, preferredIndex));
+    state.settings.activitySlideByDomain[domain] = activeIndex;
 
     elements.activitySwipeTrack.replaceChildren();
     elements.activitySwipeDots.replaceChildren();
@@ -2650,6 +2675,9 @@
     metrics.forEach((metric, index) => {
       const slide = document.createElement("article");
       slide.className = `activity-metric-slide${index === activeIndex ? " active" : ""}`;
+      if (index === activeIndex && activitySwipeDirection !== 0) {
+        slide.classList.add(activitySwipeDirection > 0 ? "slide-in-right" : "slide-in-left");
+      }
       slide.dataset.metricIndex = String(index);
 
       const logs = metricLogsForWindow(tracker, metric.name, days);
@@ -2689,11 +2717,31 @@
         const zoneLabel = log.metric === "Heart rate" && log.zone
           ? ` · Zone ${log.zone}${log.zoneName ? ` (${log.zoneName})` : ""}`
           : "";
-        row.innerHTML = `
+        const main = document.createElement("div");
+        main.className = "progress-log-main";
+        main.innerHTML = `
           <span>${escapeHtml(formatShortDate(log.date))}</span>
           <strong>${escapeHtml(formatMetricValue(metric, log.value))}</strong>
           <small>${escapeHtml(log.note || metric.name)}${escapeHtml(zoneLabel)}</small>
         `;
+
+        const actions = document.createElement("div");
+        actions.className = "progress-log-actions";
+
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "text-button progress-log-edit";
+        editButton.textContent = "Edit";
+        editButton.addEventListener("click", () => editActivityEntry(domain, log.id));
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "text-button danger-text progress-log-delete";
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", () => deleteActivityEntry(domain, log.id));
+
+        actions.append(editButton, deleteButton);
+        row.append(main, actions);
         recentList.appendChild(row);
       });
 
@@ -2704,7 +2752,10 @@
       dot.type = "button";
       dot.className = `activity-swipe-dot${index === activeIndex ? " active" : ""}`;
       dot.setAttribute("aria-label", `Show ${metric.name}`);
-      dot.addEventListener("click", () => setActivityMetricSlide(index));
+      dot.addEventListener("click", () => {
+        const currentIndex = Number(state.settings.activitySlideByDomain?.[domain] || 0);
+        setActivityMetricSlide(index, index > currentIndex ? 1 : index < currentIndex ? -1 : 0);
+      });
       elements.activitySwipeDots.appendChild(dot);
 
       requestAnimationFrame(() => {
@@ -2736,6 +2787,101 @@
 
     if (isRunningDomain(domain)) renderHeartRateZonePanel();
     else if (elements.runningHeartRatePanel) elements.runningHeartRatePanel.hidden = true;
+  }
+
+  function findActivityEntry(domain, entryId) {
+    const tracker = state.activityTrackers?.[domain];
+    if (!tracker) return { tracker: null, entry: null, index: -1 };
+    const index = (tracker.entries || []).findIndex((entry) => entry.id === entryId);
+    return {
+      tracker,
+      entry: index >= 0 ? tracker.entries[index] : null,
+      index
+    };
+  }
+
+  function editActivityEntry(domain, entryId) {
+    const { tracker, entry, index } = findActivityEntry(domain, entryId);
+    if (!tracker || !entry || index < 0) return;
+
+    const metric = getTrackerMetrics(domain).find((item) => item.name === entry.metric) || {
+      name: entry.metric,
+      unit: entry.unit || "",
+      type: "number"
+    };
+
+    const dateKey = String(entry.date || "").slice(0, 10);
+    const valueLabel = metric.name === "Pace"
+      ? `${formatPaceMinutes(Number(entry.value))} (${Math.round(Number(entry.value) * 100) / 100} min/unit)`
+      : String(entry.value);
+
+    const nextDate = prompt(`Edit ${metric.name} date (YYYY-MM-DD)`, dateKey);
+    if (nextDate === null) return;
+
+    let nextValue;
+    if (metric.name === "Effort zone") {
+      const next = prompt("Effort zone: 1 Very easy, 2 Easy, 3 Moderate, 4 Hard, 5 Very hard", String(entry.value));
+      if (next === null) return;
+      nextValue = Number(next);
+      if (!Number.isInteger(nextValue) || nextValue < 1 || nextValue > 5) {
+        alert("Effort zone must be 1 through 5.");
+        return;
+      }
+    } else {
+      const next = prompt(`Edit ${metric.name}. Current: ${valueLabel}`, String(entry.value));
+      if (next === null) return;
+      nextValue = Number(next);
+      if (!Number.isFinite(nextValue)) {
+        alert("Enter a valid number.");
+        return;
+      }
+    }
+
+    const nextNote = prompt("Edit note", entry.note || "");
+    if (nextNote === null) return;
+
+    entry.date = new Date(`${nextDate}T12:00:00`).toISOString();
+    entry.value = nextValue;
+    entry.note = nextNote.trim();
+
+    // If this is part of a grouped session, keep the session mirror synchronized.
+    if (entry.sessionId && Array.isArray(tracker.sessions)) {
+      const session = tracker.sessions.find((item) => item.id === entry.sessionId);
+      if (session) {
+        session.date = entry.date;
+        session.note = entry.note;
+        session.metrics = session.metrics && typeof session.metrics === "object" ? session.metrics : {};
+        session.metrics[entry.metric] = nextValue;
+      }
+    }
+
+    saveState();
+    renderHistory();
+    renderActivityProgress();
+  }
+
+  function deleteActivityEntry(domain, entryId) {
+    const { tracker, entry, index } = findActivityEntry(domain, entryId);
+    if (!tracker || !entry || index < 0) return;
+
+    const label = `${entry.metric}: ${entry.value}${entry.unit ? ` ${entry.unit}` : ""} on ${formatShortDate(entry.date)}`;
+    if (!confirm(`Delete this activity entry?\n\n${label}`)) return;
+
+    tracker.entries.splice(index, 1);
+
+    if (entry.sessionId && Array.isArray(tracker.sessions)) {
+      const session = tracker.sessions.find((item) => item.id === entry.sessionId);
+      if (session?.metrics && typeof session.metrics === "object") {
+        delete session.metrics[entry.metric];
+        if (!Object.keys(session.metrics).length) {
+          tracker.sessions = tracker.sessions.filter((item) => item.id !== entry.sessionId);
+        }
+      }
+    }
+
+    saveState();
+    renderHistory();
+    renderActivityProgress();
   }
 
   function drawActivityChartOnCanvas(canvas, logs, metric) {
@@ -2804,25 +2950,36 @@
     });
   }
 
-  function setActivityMetricSlide(index) {
+  function setActivityMetricSlide(index, direction = 0) {
     const domain = state.settings.archiveDomain;
     const metrics = getTrackerMetrics(domain);
     const safeIndex = Math.max(0, Math.min(metrics.length - 1, index));
+    activitySwipeDirection = direction;
     state.settings.activitySlideByDomain[domain] = safeIndex;
     if (metrics[safeIndex]) {
       state.settings.activityMetricByDomain[domain] = metrics[safeIndex].name;
     }
     saveState();
     renderActivityProgress();
+
+    const active = elements.activitySwipeTrack?.querySelector(".activity-metric-slide.active");
+    if (active && direction !== 0) {
+      active.classList.add(direction > 0 ? "slide-in-right" : "slide-in-left");
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => active.classList.remove("slide-in-right", "slide-in-left"));
+      });
+    }
+    activitySwipeDirection = 0;
   }
 
   function moveActivityMetricSlide(direction) {
     const domain = state.settings.archiveDomain;
     const current = Number(state.settings.activitySlideByDomain?.[domain] || 0);
-    setActivityMetricSlide(current + direction);
+    setActivityMetricSlide(current + direction, direction);
   }
 
   let activitySwipeStartX = null;
+  let activitySwipeDirection = 0;
   function bindActivitySwipeGesture() {
     const track = elements.activitySwipeTrack;
     if (!track || track.dataset.swipeBound === "true") return;
@@ -3416,6 +3573,7 @@
     });
 
     if (target === "history") renderHistory();
+    if (target === "activity") renderActivityTracker();
     if (target === "intel") renderIntel();
     if (target === "operations") renderOperations();
     if (target === "schedule") renderSchedule();
