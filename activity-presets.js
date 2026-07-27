@@ -24,7 +24,8 @@
       { name: "Distance", unit: "mi" },
       { name: "Time", unit: "min" },
       { name: "Pace", unit: "min/mi" },
-      { name: "Heart rate", unit: "bpm" }
+      { name: "Heart rate", unit: "bpm" },
+      { name: "Heart rate zone", unit: "zone" }
     ],
     Ruck: [
       { name: "Distance", unit: "mi" },

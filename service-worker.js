@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-v8-stability";
+const CACHE_NAME = "command-center-v8-2-stable-functional";
 const ASSETS = ["./","./index.html","./styles.css","./manifest.json","./js/core/config.js","./js/core/data.js","./js/core/migrations.js","./js/core/storage.js","./js/features/activity-presets.js","./js/app.js"];
 const APP_SHELL = [
   "./",

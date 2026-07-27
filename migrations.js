@@ -63,7 +63,31 @@
     Object.values(source.activityTrackers).forEach((tracker) => {
       if (!Array.isArray(tracker.entries)) tracker.entries = [];
       if (!Array.isArray(tracker.metrics)) tracker.metrics = [];
+
+      const presetEntry = Object.entries(presets).find(([name]) => {
+        const trackerName = String(tracker.name || "").trim().toLowerCase();
+        const presetName = String(name).trim().toLowerCase();
+        return trackerName === presetName || trackerName.includes(presetName) || presetName.includes(trackerName);
+      });
+
+      if (presetEntry) {
+        const existingNames = new Set(
+          tracker.metrics.map((metric) => String(metric?.name || "").trim().toLowerCase())
+        );
+        presetEntry[1].forEach((metric) => {
+          if (!existingNames.has(String(metric.name).trim().toLowerCase())) {
+            tracker.metrics.push(window.CCData.clone(metric));
+          }
+        });
+      }
     });
+
+    if (!source.settings.activityMetricByDomain || typeof source.settings.activityMetricByDomain !== "object") {
+      source.settings.activityMetricByDomain = {};
+    }
+    if (!Number.isFinite(Number(source.settings.maxHeartRate))) {
+      source.settings.maxHeartRate = 0;
+    }
 
     if (!source.settings.collapsedSections || typeof source.settings.collapsedSections !== "object") {
       source.settings.collapsedSections = {};

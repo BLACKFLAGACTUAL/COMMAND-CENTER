@@ -63,9 +63,27 @@
 
   const elements = {};
 
-  document.addEventListener("DOMContentLoaded", init);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 
   async function init() {
+    const missing = [
+      ["CCConfig", window.CCConfig],
+      ["CCData", window.CCData],
+      ["CCActivityPresets", window.CCActivityPresets],
+      ["CCMigrations", window.CCMigrations],
+      ["CCStorage", window.CCStorage]
+    ].filter(([, value]) => !value);
+
+    if (missing.length) {
+      console.error("Command Center failed to load required modules:", missing.map(([name]) => name));
+      const alertBox = document.getElementById("storageAlert");
+      if (alertBox) {
+        alertBox.hidden = false;
+        alertBox.textContent = "Command Center module load failed. Refresh once after GitHub Pages finishes deploying all files.";
+      }
+      return;
+    }
+
     cacheElements();
     state = window.CCMigrations.migrate(state, createInitialState, ACTIVITY_METRIC_PRESETS);
     ensureStateShape();
@@ -75,13 +93,13 @@
     renderRecoveryStatus();
     registerServiceWorker();
 
-    // IndexedDB is a second persistence layer. Merge it after the UI is usable.
+    // Reconcile IndexedDB only after the live app is functional.
     try {
       const reconciled = await window.CCStorage.reconcileWithIndexedDb(state);
       const currentFingerprint = window.CCData.fingerprint(state);
       const reconciledFingerprint = window.CCData.fingerprint(reconciled);
       if (reconciledFingerprint !== currentFingerprint) {
-        state = window.CCMigrations.migrate(reconciled, createInitialState, ACTIVITY_METRICS_PRESETS_SAFE());
+        state = window.CCMigrations.migrate(reconciled, createInitialState, ACTIVITY_METRIC_PRESETS);
         const result = window.CCStorage.save(state, "startup-reconcile");
         state = result.state;
         renderAll();
@@ -90,10 +108,6 @@
     } catch (error) {
       console.warn("Background recovery reconciliation failed:", error);
     }
-  }
-
-  function ACTIVITY_METRICS_PRESETS_SAFE() {
-    return ACTIVITY_METRIC_PRESETS || {};
   }
 
   function cacheElements() {
@@ -139,7 +153,8 @@
       "operationTimingNote", "operationName", "operationIntent", "operationMission", "operationDialogStatus",
       "operationDialogCancel", "operationTrendSummary", "operationObjectives", "operationsYearSelect", "operationsYearTimeline",
       "intelRange", "intelMetricGrid", "intelFindings", "intelExecutionChart", "intelProteinChart", "intelRatingChart", "intelActivitySummary",
-      "activityTrackerMetrics", "activityMetricSuggestions", "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
+      "activityTrackerMetrics", "activityMetricSuggestions", "runningHeartRatePanel", "maxHeartRateInput",
+      "heartRateZoneGrid", "heartRateZoneCurrent", "heartRateZonePicker", "heartRateZoneButtons", "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
       "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "recoveryStatus", "createSnapshotButton", "recoverLatestButton", "emergencyExportButton"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
@@ -203,6 +218,10 @@
 
       section.dataset.collapseReady = "true";
     });
+  }
+
+  function on(element, eventName, handler, options) {
+    if (element) element.addEventListener(eventName, handler, options);
   }
 
   function bindEvents() {
@@ -307,16 +326,35 @@
     elements.addActivityEntryButton.addEventListener("click", openActivityEntryDialog);
     elements.activityEntryCancel.addEventListener("click", () => elements.activityEntryDialog.close());
     elements.activityEntryForm.addEventListener("submit", saveActivityEntry);
-    elements.activityMetricSelect.addEventListener("change", renderActivityProgress);
+    elements.activityMetricSelect.addEventListener("change", () => {
+      const domain = state.settings.archiveDomain;
+      if (!state.settings.activityMetricByDomain || typeof state.settings.activityMetricByDomain !== "object") {
+        state.settings.activityMetricByDomain = {};
+      }
+      state.settings.activityMetricByDomain[domain] = elements.activityMetricSelect.value;
+      saveState("activity-metric-filter");
+      renderActivityProgress();
+    });
+
+    elements.maxHeartRateInput.addEventListener("change", () => {
+      const value = Number(elements.maxHeartRateInput.value);
+      state.settings.maxHeartRate =
+        Number.isFinite(value) && value >= 100 && value <= 240 ? Math.round(value) : 0;
+      saveState("max-heart-rate");
+      renderHeartRateZonePanel();
+      renderActivityProgress();
+    });
     elements.editAarCancel.addEventListener("click", () => elements.editAarDialog.close());
     elements.editAarForm.addEventListener("submit", saveArchivedAar);
     elements.newOperationButton.addEventListener("click", () => openOperationDialog());
     elements.operationDialogCancel.addEventListener("click", () => elements.operationDialog.close());
     elements.operationForm.addEventListener("submit", saveOperation);
-    [elements.taskDialog, elements.scheduleDialog, elements.workoutDialog, elements.exerciseLogDialog, elements.activityTrackerDialog, elements.activityEntryDialog, elements.editAarDialog, elements.operationDialog].forEach((dialog) => {
-      dialog.addEventListener("cancel", (event) => { event.preventDefault(); dialog.close(); });
-      dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
-    });
+    [elements.taskDialog, elements.scheduleDialog, elements.workoutDialog, elements.exerciseLogDialog, elements.activityTrackerDialog, elements.activityEntryDialog, elements.editAarDialog, elements.operationDialog]
+      .filter(Boolean)
+      .forEach((dialog) => {
+        dialog.addEventListener("cancel", (event) => { event.preventDefault(); dialog.close(); });
+        dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+      });
 
     elements.aarRating.addEventListener("input", () => {
       elements.aarRatingOutput.value = elements.aarRating.value;
@@ -398,6 +436,10 @@
       }
     });
     if (!state.settings.intelRange) state.settings.intelRange = "365";
+    if (!state.settings.activityMetricByDomain || typeof state.settings.activityMetricByDomain !== "object") {
+      state.settings.activityMetricByDomain = {};
+    }
+    if (!Number.isFinite(Number(state.settings.maxHeartRate))) state.settings.maxHeartRate = 0;
     if (!state.settings.archiveDomain) state.settings.archiveDomain = "Weightlifting";
     if (typeof state.settings.progressExercise !== "string") state.settings.progressExercise = "";
     if (typeof state.settings.scheduleCollapsed !== "boolean") state.settings.scheduleCollapsed = false;
@@ -2144,6 +2186,101 @@
     initializeCollapsibleSections();
   }
 
+  const HEART_RATE_ZONES = [
+    { zone: 1, name: "Recovery", min: 0.50, max: 0.60, description: "Very easy aerobic work and recovery." },
+    { zone: 2, name: "Aerobic base", min: 0.60, max: 0.70, description: "Easy sustainable endurance work." },
+    { zone: 3, name: "Tempo", min: 0.70, max: 0.80, description: "Moderate, comfortably hard effort." },
+    { zone: 4, name: "Threshold", min: 0.80, max: 0.90, description: "Hard threshold-focused work." },
+    { zone: 5, name: "Maximum", min: 0.90, max: 1.01, description: "Very hard to near-maximal effort." }
+  ];
+
+  function isRunningDomain(domain = state.settings.archiveDomain) {
+    return String(domain || "").trim().toLowerCase().includes("running");
+  }
+
+  function bpmRangeForZone(zone) {
+    const maxHr = Number(state.settings.maxHeartRate) || 0;
+    if (!maxHr) return `${Math.round(zone.min * 100)}–${Math.round(Math.min(zone.max, 1) * 100)}% Max HR`;
+    const low = Math.round(maxHr * zone.min);
+    const high = zone.zone === 5 ? maxHr : Math.max(low, Math.round(maxHr * zone.max) - 1);
+    return `${low}–${high} bpm`;
+  }
+
+  function zoneForHeartRate(bpm) {
+    const maxHr = Number(state.settings.maxHeartRate) || 0;
+    const value = Number(bpm);
+    if (!maxHr || !Number.isFinite(value) || value <= 0) return null;
+    const ratio = value / maxHr;
+    return HEART_RATE_ZONES.find((zone) => ratio >= zone.min && ratio < zone.max) || null;
+  }
+
+  function renderHeartRateZonePanel() {
+    if (!elements.runningHeartRatePanel) return;
+    const running = isRunningDomain();
+    elements.runningHeartRatePanel.hidden = !running;
+    if (!running) return;
+
+    const maxHr = Number(state.settings.maxHeartRate) || 0;
+    elements.maxHeartRateInput.value = maxHr || "";
+    elements.heartRateZoneGrid.replaceChildren();
+
+    HEART_RATE_ZONES.forEach((zone) => {
+      const card = document.createElement("div");
+      card.className = `heart-rate-zone-card zone-${zone.zone}`;
+      card.innerHTML = `
+        <span class="zone-number">ZONE ${zone.zone}</span>
+        <strong>${escapeHtml(zone.name)}</strong>
+        <span class="zone-range">${escapeHtml(bpmRangeForZone(zone))}</span>
+        <small>${escapeHtml(zone.description)}</small>
+      `;
+      elements.heartRateZoneGrid.appendChild(card);
+    });
+
+    if (!maxHr) {
+      elements.heartRateZoneCurrent.textContent =
+        "Set Max HR above to convert the percentage zones into personalized BPM ranges.";
+      return;
+    }
+
+    const tracker = state.activityTrackers?.[state.settings.archiveDomain];
+    const latestHeartRate = [...(tracker?.entries || [])]
+      .filter((entry) => String(entry.metric || "").trim().toLowerCase() === "heart rate")
+      .sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
+
+    if (latestHeartRate) {
+      const zone = zoneForHeartRate(latestHeartRate.value);
+      elements.heartRateZoneCurrent.textContent = zone
+        ? `Latest HR: ${latestHeartRate.value} bpm · Zone ${zone.zone} (${zone.name})`
+        : `Latest HR: ${latestHeartRate.value} bpm`;
+    } else {
+      elements.heartRateZoneCurrent.textContent = `Max HR set to ${maxHr} bpm.`;
+    }
+  }
+
+  function renderHeartRateZonePicker(metricName) {
+    if (!elements.heartRateZonePicker) return;
+    const zoneMetric = String(metricName || "").trim().toLowerCase() === "heart rate zone";
+    elements.heartRateZonePicker.hidden = !zoneMetric;
+    elements.heartRateZoneButtons.replaceChildren();
+    if (!zoneMetric) return;
+
+    HEART_RATE_ZONES.forEach((zone) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "zone-pick-button";
+      button.textContent = `Z${zone.zone}`;
+      button.title = `${zone.name}: ${bpmRangeForZone(zone)}`;
+      button.addEventListener("click", () => {
+        elements.activityEntryValue.value = String(zone.zone);
+        elements.activityEntryUnit.value = "zone";
+        if (!elements.activityEntryNote.value.trim()) {
+          elements.activityEntryNote.value = `${zone.name} · ${bpmRangeForZone(zone)}`;
+        }
+      });
+      elements.heartRateZoneButtons.appendChild(button);
+    });
+  }
+
   function renderProgressDomains() {
     const domains = ["Weightlifting", ...Object.keys(state.activityTrackers || {}).sort((a, b) => a.localeCompare(b))];
     if (!domains.includes(state.settings.archiveDomain)) state.settings.archiveDomain = "Weightlifting";
@@ -2165,11 +2302,12 @@
     const weightlifting = state.settings.archiveDomain === "Weightlifting";
     elements.weightliftingProgressSection.hidden = !weightlifting;
     elements.activityProgressSection.hidden = weightlifting;
-    if (!weightlifting) renderActivityProgress();
+    if (!weightlifting) { renderActivityProgress(); renderHeartRateZonePanel(); } else if (elements.runningHeartRatePanel) { elements.runningHeartRatePanel.hidden = true; }
   }
 
   function openActivityTrackerDialog() {
     elements.activityTrackerName.value = "";
+    elements.activityTrackerMetrics.value = "";
     elements.activityTrackerStatus.textContent = "";
     elements.activityTrackerDialog.showModal();
     setTimeout(() => elements.activityTrackerName.focus(), 0);
@@ -2242,12 +2380,21 @@
       button.addEventListener("click", () => {
         elements.activityEntryMetric.value = metric.name;
         elements.activityEntryUnit.value = metric.unit || "";
+        renderHeartRateZonePicker(metric.name);
       });
       elements.activityMetricSuggestions.appendChild(button);
     });
 
     const selectedMetric = metrics.find((metric) => metric.name === elements.activityEntryMetric.value);
     if (selectedMetric) elements.activityEntryUnit.value = selectedMetric.unit || "";
+    renderHeartRateZonePicker(elements.activityEntryMetric.value);
+    elements.activityEntryMetric.oninput = () => {
+      const matched = metrics.find(
+        (item) => item.name.toLowerCase() === elements.activityEntryMetric.value.trim().toLowerCase()
+      );
+      if (matched) elements.activityEntryUnit.value = matched.unit || "";
+      renderHeartRateZonePicker(elements.activityEntryMetric.value);
+    };
     elements.activityEntryDialog.showModal();
   }
 
@@ -2263,14 +2410,29 @@
       elements.activityEntryStatus.textContent = "Enter a date, metric, and numeric value.";
       return;
     }
-    tracker.entries.push({
+    if (metric.toLowerCase() === "heart rate zone" && (value < 1 || value > 5 || !Number.isInteger(value))) {
+      elements.activityEntryStatus.textContent = "Heart rate zone must be a whole number from 1 to 5.";
+      return;
+    }
+
+    const entry = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       date: new Date(`${dateKey}T12:00:00`).toISOString(),
       metric,
       value,
       unit: elements.activityEntryUnit.value.trim(),
       note: elements.activityEntryNote.value.trim()
-    });
+    };
+
+    if (metric.toLowerCase() === "heart rate") {
+      const zone = zoneForHeartRate(value);
+      if (zone) {
+        entry.zone = zone.zone;
+        entry.zoneName = zone.name;
+      }
+    }
+
+    tracker.entries.push(entry);
     saveState();
     elements.activityEntryDialog.close();
     renderHistory();
@@ -2283,34 +2445,56 @@
     if (!domain || domain === "Weightlifting") return;
     const tracker = state.activityTrackers?.[domain] || { entries: [] };
     elements.activityProgressHeading.textContent = `${domain} progress`;
-    const metrics = [...new Set(tracker.entries.map((entry) => entry.metric).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-    const previous = elements.activityMetricSelect.value;
+
+    const configuredMetrics = (Array.isArray(tracker.metrics) ? tracker.metrics : inferActivityMetrics(domain))
+      .map((metric) => String(metric?.name || "").trim())
+      .filter(Boolean);
+    const loggedMetrics = tracker.entries
+      .map((entry) => String(entry.metric || "").trim())
+      .filter(Boolean);
+    const metrics = [...new Set([...configuredMetrics, ...loggedMetrics])];
+
+    const savedMetric = state.settings.activityMetricByDomain?.[domain];
+    const previous = savedMetric || elements.activityMetricSelect.value;
     elements.activityMetricSelect.replaceChildren();
+
     if (!metrics.length) {
       const option = document.createElement("option");
       option.value = "";
-      option.textContent = "No metrics logged";
+      option.textContent = "No metrics configured";
       elements.activityMetricSelect.appendChild(option);
       elements.activityMetricSelect.disabled = true;
     } else {
       elements.activityMetricSelect.disabled = false;
-      metrics.forEach((metric) => {
+      metrics.forEach((metricName) => {
         const option = document.createElement("option");
-        option.value = metric;
-        option.textContent = metric;
+        option.value = metricName;
+        const count = tracker.entries.filter((entry) => entry.metric === metricName).length;
+        option.textContent = count ? `${metricName} (${count})` : `${metricName} · no entries`;
         elements.activityMetricSelect.appendChild(option);
       });
-      elements.activityMetricSelect.value = metrics.includes(previous) ? previous : metrics[0];
+
+      const selected = metrics.includes(previous) ? previous : metrics[0];
+      elements.activityMetricSelect.value = selected;
+      state.settings.activityMetricByDomain[domain] = selected;
     }
+
+    renderHeartRateZonePanel();
     const metric = elements.activityMetricSelect.value;
     const logs = tracker.entries.filter((entry) => entry.metric === metric).sort((a, b) => a.date.localeCompare(b.date));
     elements.activityProgressEmpty.hidden = logs.length > 0;
+    elements.activityProgressEmpty.textContent = logs.length
+      ? ""
+      : `No ${metric || "metric"} entries yet. Use + Add entry to log one.`;
     elements.activityProgressChart.hidden = logs.length === 0;
     elements.activityProgressLogList.replaceChildren();
     [...logs].reverse().slice(0, 10).forEach((log) => {
       const row = document.createElement("div");
       row.className = "progress-log-row";
-      row.innerHTML = `<span>${escapeHtml(formatShortDate(log.date))}</span><strong>${escapeHtml(String(log.value))}${log.unit ? ` ${escapeHtml(log.unit)}` : ""}</strong><small>${log.note ? escapeHtml(log.note) : escapeHtml(log.metric)}</small>`;
+      const zoneLabel = log.metric?.toLowerCase() === "heart rate" && log.zone
+        ? ` · Zone ${log.zone}${log.zoneName ? ` (${log.zoneName})` : ""}`
+        : "";
+      row.innerHTML = `<span>${escapeHtml(formatShortDate(log.date))}</span><strong>${escapeHtml(String(log.value))}${log.unit ? ` ${escapeHtml(log.unit)}` : ""}</strong><small>${log.note ? escapeHtml(log.note) : escapeHtml(log.metric)}${escapeHtml(zoneLabel)}</small>`;
       elements.activityProgressLogList.appendChild(row);
     });
     if (logs.length) drawActivityChart(logs);
