@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-activity-overhaul-v1";
+const CACHE_NAME = "command-center-activity-effort-zones-v3";
 const APP_SHELL = [
   "./",
   "./index.html",

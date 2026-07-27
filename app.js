@@ -64,8 +64,7 @@
       { name: "Distance", unit: "mi", type: "number" },
       { name: "Time", unit: "min", type: "number" },
       { name: "Pace", unit: "min/mi", type: "calculated", dependsOn: ["Distance", "Time"] },
-      { name: "Heart rate", unit: "bpm", type: "number" },
-      { name: "Heart rate zone", unit: "zone", type: "number" }
+      { name: "Effort zone", unit: "zone", type: "effort" }
     ],
     Ruck: [
       { name: "Distance", unit: "mi", type: "number" },
@@ -357,13 +356,6 @@
     elements.activitySwipePrev.addEventListener("click", () => moveActivityMetricSlide(-1));
     elements.activitySwipeNext.addEventListener("click", () => moveActivityMetricSlide(1));
     elements.activityTrendWindow.addEventListener("change", renderActivityProgress);
-    elements.maxHeartRateInput.addEventListener("change", () => {
-      const value = Number(elements.maxHeartRateInput.value);
-      state.settings.maxHeartRate = Number.isFinite(value) && value >= 100 && value <= 240 ? Math.round(value) : 0;
-      saveState();
-      renderHeartRateZonePanel();
-      renderActivityProgress();
-    });
     elements.editAarCancel.addEventListener("click", () => elements.editAarDialog.close());
     elements.editAarForm.addEventListener("submit", saveArchivedAar);
     elements.newOperationButton.addEventListener("click", () => openOperationDialog());
@@ -2353,10 +2345,6 @@
       derived.Pace = pace;
     }
 
-    if (Number.isFinite(Number(values["Heart rate"])) && Number(state.settings.maxHeartRate) > 0) {
-      const zone = zoneForHeartRate(Number(values["Heart rate"]));
-      if (zone) derived["Heart rate zone"] = zone.zone;
-    }
 
     return derived;
   }
@@ -2382,31 +2370,55 @@
         ? metric.name === "Pace"
           ? "Calculated automatically after Time and Distance are entered."
           : "Calculated automatically."
-        : metric.unit
-          ? metric.unit
-          : "Custom metric";
+        : metric.type === "effort"
+          ? "Choose how the run felt; the app converts it to Zone 1–5."
+          : metric.unit
+            ? metric.unit
+            : "Custom metric";
 
       copy.append(label, helper);
 
       const control = document.createElement("div");
       control.className = "activity-session-control";
 
-      const input = document.createElement("input");
-      input.id = `activityMetric-${slugifyMetric(metric.name)}`;
-      input.dataset.metricName = metric.name;
-      input.dataset.metricUnit = metric.unit || "";
-      input.dataset.metricType = metric.type || "number";
-      input.type = "number";
-      input.step = "any";
-      input.inputMode = "decimal";
-      input.placeholder = metric.type === "calculated" ? "AUTO" : metric.unit || "value";
-      if (metric.type === "calculated") {
-        input.readOnly = true;
-        input.classList.add("calculated-field");
+      let input;
+      if (metric.type === "effort") {
+        input = document.createElement("select");
+        input.id = `activityMetric-${slugifyMetric(metric.name)}`;
+        input.dataset.metricName = metric.name;
+        input.dataset.metricUnit = metric.unit || "zone";
+        input.dataset.metricType = "effort";
+        [
+          ["", "How did the run feel?"],
+          ["1", "Very easy · Zone 1"],
+          ["2", "Easy / sustainable · Zone 2"],
+          ["3", "Moderate / steady · Zone 3"],
+          ["4", "Hard · Zone 4"],
+          ["5", "Very hard / max effort · Zone 5"]
+        ].forEach(([value, labelText]) => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = labelText;
+          input.appendChild(option);
+        });
+      } else {
+        input = document.createElement("input");
+        input.id = `activityMetric-${slugifyMetric(metric.name)}`;
+        input.dataset.metricName = metric.name;
+        input.dataset.metricUnit = metric.unit || "";
+        input.dataset.metricType = metric.type || "number";
+        input.type = "number";
+        input.step = "any";
+        input.inputMode = "decimal";
+        input.placeholder = metric.type === "calculated" ? "AUTO" : metric.unit || "value";
+        if (metric.type === "calculated") {
+          input.readOnly = true;
+          input.classList.add("calculated-field");
+        }
       }
 
       const unit = document.createElement("span");
-      unit.textContent = metric.unit || "";
+      unit.textContent = metric.type === "effort" ? "" : (metric.unit || "");
 
       control.append(input, unit);
       row.append(copy, control);
@@ -2431,7 +2443,7 @@
 
   function sessionFieldValues() {
     const values = {};
-    elements.activitySessionFields.querySelectorAll("input[data-metric-name]").forEach((input) => {
+    elements.activitySessionFields.querySelectorAll("[data-metric-name]").forEach((input) => {
       const raw = input.value.trim();
       if (raw === "") return;
       const value = Number(raw);
@@ -2445,13 +2457,13 @@
     const derived = calculateDerivedActivityMetrics(domain, values);
 
     Object.entries(derived).forEach(([metricName, value]) => {
-      const input = [...elements.activitySessionFields.querySelectorAll("input[data-metric-name]")]
+      const input = [...elements.activitySessionFields.querySelectorAll("[data-metric-name]")]
         .find((field) => field.dataset.metricName === metricName);
       if (!input) return;
       input.value = String(Math.round(value * 100) / 100);
     });
 
-    const paceInput = [...elements.activitySessionFields.querySelectorAll("input[data-metric-name]")]
+    const paceInput = [...elements.activitySessionFields.querySelectorAll("[data-metric-name]")]
       .find((field) => field.dataset.metricName === "Pace");
     if (paceInput && Number.isFinite(derived.Pace)) {
       paceInput.title = `Pace: ${formatPaceMinutes(derived.Pace)}`;
@@ -2540,7 +2552,9 @@
   }
 
   function activityTrendDays() {
-    const raw = Number(elements.activityTrendWindow?.value || 42);
+    const rawValue = elements.activityTrendWindow?.value || "42";
+    if (rawValue === "all") return 0;
+    const raw = Number(rawValue);
     return Number.isFinite(raw) && raw > 0 ? raw : 42;
   }
 
@@ -2582,6 +2596,16 @@
     const number = Number(value);
     if (!Number.isFinite(number)) return "—";
     if (metric.name === "Pace") return formatPaceMinutes(number);
+    if (metric.name === "Effort zone") {
+      const labels = {
+        1: "Zone 1 · Very easy",
+        2: "Zone 2 · Easy",
+        3: "Zone 3 · Moderate",
+        4: "Zone 4 · Hard",
+        5: "Zone 5 · Very hard"
+      };
+      return labels[Math.round(number)] || `Zone ${Math.round(number)}`;
+    }
     return `${Math.round(number * 100) / 100}${metric.unit ? ` ${metric.unit}` : ""}`;
   }
 
@@ -2698,8 +2722,14 @@
     elements.activityProgressEmpty.hidden = metrics.length > 0;
     elements.activityProgressChart.hidden = true;
     elements.activityProgressLogList.replaceChildren();
+    const periodLabel =
+      days === 0 ? "your lifetime history" :
+      days === 42 ? "6 weeks" :
+      days === 365 ? "1 year" :
+      `${days} days`;
+
     elements.activityTrendSummary.textContent = metrics[activeIndex]
-      ? `${metrics[activeIndex].name} trends over ${days === 42 ? "6 weeks" : `${days} days`}. Swipe left/right for other metrics.`
+      ? `${metrics[activeIndex].name} trends over ${periodLabel}. Swipe left/right for other metrics.`
       : "Add metrics to begin tracking.";
 
     bindActivitySwipeGesture();
@@ -2839,30 +2869,7 @@
   }
 
   function renderHeartRateZonePanel() {
-    if (!elements.runningHeartRatePanel) return;
-    const running = isRunningDomain();
-    elements.runningHeartRatePanel.hidden = !running;
-    if (!running) return;
-
-    const maxHr = Number(state.settings.maxHeartRate) || 0;
-    elements.maxHeartRateInput.value = maxHr || "";
-    elements.heartRateZoneGrid.replaceChildren();
-
-    HEART_RATE_ZONES.forEach((zone) => {
-      const card = document.createElement("div");
-      card.className = "heart-rate-zone-card";
-      card.innerHTML = `
-        <span class="zone-number">ZONE ${zone.zone}</span>
-        <strong>${escapeHtml(zone.name)}</strong>
-        <span class="zone-range">${escapeHtml(bpmRangeForZone(zone))}</span>
-        <small>${escapeHtml(zone.description)}</small>
-      `;
-      elements.heartRateZoneGrid.appendChild(card);
-    });
-
-    elements.heartRateZoneCurrent.textContent = maxHr
-      ? `Max HR set to ${maxHr} bpm. Heart-rate sessions will also be tagged with their calculated zone.`
-      : "Set Max HR to show personalized BPM ranges and auto-tag heart-rate sessions.";
+    if (elements.runningHeartRatePanel) elements.runningHeartRatePanel.hidden = true;
   }
 
   function renderProgressDomains() {

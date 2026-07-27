@@ -1501,3 +1501,8 @@ select {
     flex-direction:column;
   }
 }
+
+.activity-session-control select {
+  width:100%;
+  min-width:0;
+}

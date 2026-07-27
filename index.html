@@ -381,28 +381,16 @@
                 <option value="42" selected>6 weeks</option>
                 <option value="90">90 days</option>
                 <option value="365">1 year</option>
+                <option value="all">Lifetime</option>
               </select>
             </div>
           </div>
 
-          <section id="runningHeartRatePanel" class="running-heart-rate-panel" hidden>
-            <div class="running-zone-header">
-              <div>
-                <p class="category-kicker">HEART RATE INTELLIGENCE</p>
-                <h4>Training zones</h4>
-              </div>
-              <div class="max-hr-control">
-                <label for="maxHeartRateInput">Max HR</label>
-                <div>
-                  <input id="maxHeartRateInput" type="number" min="100" max="240" step="1" inputmode="numeric" placeholder="195">
-                  <span>bpm</span>
-                </div>
-              </div>
-            </div>
-            <p class="helper-text">Zones use percentage of Max HR. Set Max HR once to show your personalized BPM ranges.</p>
-            <div id="heartRateZoneGrid" class="heart-rate-zone-grid"></div>
-            <p id="heartRateZoneCurrent" class="heart-rate-zone-current"></p>
-          </section>
+          <div id="runningHeartRatePanel" hidden>
+            <input id="maxHeartRateInput" type="hidden">
+            <div id="heartRateZoneGrid"></div>
+            <p id="heartRateZoneCurrent"></p>
+          </div>
 
           <div class="activity-swipe-controls">
             <button id="activitySwipePrev" class="activity-swipe-arrow" type="button" aria-label="Previous metric">←</button>
@@ -741,7 +729,7 @@
 
       <p id="activityEntryDomain" class="dialog-workout-name"></p>
       <p class="helper-text activity-entry-instructions">
-        Enter the session once, then save once. Calculated metrics such as pace fill automatically when the required fields are entered.
+        Enter the session once, then save once. Pace calculates automatically from Time + Distance. For Running, choose how the effort felt and the app assigns Zone 1–5.
       </p>
 
       <div id="activitySessionFields" class="activity-session-fields"></div>
