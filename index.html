@@ -269,6 +269,38 @@
           </div>
         </div>
 
+        <section class="settings-card archive-calendar-card" aria-labelledby="archiveCalendarHeading">
+          <div class="section-heading calendar-heading-row">
+            <div>
+              <p class="category-kicker">DAILY ARCHIVE</p>
+              <h3 id="archiveCalendarHeading">Calendar</h3>
+            </div>
+            <button id="archiveCalendarToday" class="button secondary compact-action" type="button">Today</button>
+          </div>
+
+          <p class="helper-text">
+            Tap any date to add or edit that day's AAR. Existing daily records stay attached to their
+            original calendar date and the Operation active during that period.
+          </p>
+
+          <div class="calendar-toolbar">
+            <button id="archiveCalendarPrev" class="calendar-nav-button" type="button" aria-label="Previous month">←</button>
+            <strong id="archiveCalendarMonth" class="calendar-month-label"></strong>
+            <button id="archiveCalendarNext" class="calendar-nav-button" type="button" aria-label="Next month">→</button>
+          </div>
+
+          <div class="calendar-weekdays" aria-hidden="true">
+            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+          </div>
+          <div id="archiveCalendarGrid" class="archive-calendar-grid" role="grid" aria-label="Archived daily records calendar"></div>
+
+          <div class="calendar-legend">
+            <span><i class="calendar-dot has-aar"></i>AAR saved</span>
+            <span><i class="calendar-dot has-day"></i>Day logged</span>
+            <span><i class="calendar-dot today"></i>Today</span>
+          </div>
+        </section>
+
         <section class="settings-card manual-entry-card" aria-labelledby="manualEntryHeading">
           <div class="section-heading">
             <div>
@@ -588,8 +620,9 @@
 
   <dialog id="editAarDialog">
     <form id="editAarForm">
-      <h2>Edit archived AAR</h2>
+      <h2 id="editAarTitle">Edit archived AAR</h2>
       <p id="editAarDate" class="dialog-workout-name"></p>
+      <p id="editAarOperationContext" class="aar-operation-context"></p>
       <label for="editAarWentWell">What went well?</label>
       <textarea id="editAarWentWell" rows="3"></textarea>
       <label for="editAarImprove">What needs improvement?</label>

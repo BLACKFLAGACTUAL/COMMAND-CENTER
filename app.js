@@ -60,6 +60,7 @@
   let lastRenderedDateKey = getTodayKey();
   let editingAarDateKey = null;
   let editingOperationId = null;
+  let archiveCalendarCursor = new Date(new Date().getFullYear(), new Date().getMonth(), 1, 12);
 
   const elements = {};
 
@@ -114,7 +115,8 @@
       "editAarRating", "editAarStatus", "editAarCancel", "newOperationButton", "currentOperationCard",
       "operationCycleStrip", "operationsList", "operationDialog", "operationForm", "operationDialogTitle",
       "operationTimingNote", "operationName", "operationIntent", "operationMission", "operationDialogStatus",
-      "operationDialogCancel"
+      "operationDialogCancel", "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
@@ -123,6 +125,30 @@
   function bindEvents() {
     document.querySelectorAll(".nav-button").forEach((button) => {
       button.addEventListener("click", () => switchView(button.dataset.target));
+    });
+
+    elements.archiveCalendarPrev.addEventListener("click", () => {
+      archiveCalendarCursor = new Date(
+        archiveCalendarCursor.getFullYear(),
+        archiveCalendarCursor.getMonth() - 1,
+        1,
+        12
+      );
+      renderArchiveCalendar();
+    });
+    elements.archiveCalendarNext.addEventListener("click", () => {
+      archiveCalendarCursor = new Date(
+        archiveCalendarCursor.getFullYear(),
+        archiveCalendarCursor.getMonth() + 1,
+        1,
+        12
+      );
+      renderArchiveCalendar();
+    });
+    elements.archiveCalendarToday.addEventListener("click", () => {
+      const today = new Date();
+      archiveCalendarCursor = new Date(today.getFullYear(), today.getMonth(), 1, 12);
+      renderArchiveCalendar();
     });
 
     elements.editQuoteButton.addEventListener("click", openQuoteEditor);
@@ -1249,6 +1275,7 @@
   function renderHistory() {
     syncOperationCycles();
     renderOperations();
+    renderArchiveCalendar();
     const exercises = Object.keys(state.exerciseLogs || {}).filter((name) => Array.isArray(state.exerciseLogs[name]) && state.exerciseLogs[name].length).sort();
     const previous = state.settings.progressExercise || elements.progressExerciseSelect.value;
     elements.progressExerciseSelect.replaceChildren();
@@ -1313,7 +1340,15 @@
       const sub = document.createElement("p");
       sub.className = "helper-text";
       sub.textContent = `${day.protein || 0} g protein · Rating ${day.aar?.rating || 5}/10`;
-      dateBlock.append(strongDate, sub);
+
+      const archiveContext = operationContextForDateKey(day.date);
+      const operationTag = document.createElement("span");
+      operationTag.className = "history-operation-tag";
+      operationTag.textContent = archiveContext.operation?.name
+        ? `${archiveContext.operation.name} · Day ${archiveContext.dayInCycle || "—"}/14`
+        : `Unassigned operation · Day ${archiveContext.dayInCycle || "—"}/14`;
+
+      dateBlock.append(strongDate, sub, operationTag);
 
       const score = document.createElement("span");
       score.className = "history-score";
@@ -1533,18 +1568,127 @@
     ctx.fillText(last, width - pad.right - ctx.measureText(last).width, height - 12);
   }
 
-  function openArchivedAarEditor(dateKey) {
-    const day = state.daily?.[dateKey];
-    if (!day) {
-      alert("That archived day could not be found.");
-      return;
+  function aarHasContent(day) {
+    const aar = day?.aar;
+    if (!aar || typeof aar !== "object") return false;
+    return Boolean(
+      aar.savedAt ||
+      String(aar.wentWell || "").trim() ||
+      String(aar.improve || "").trim() ||
+      String(aar.lesson || "").trim() ||
+      String(aar.priority || "").trim()
+    );
+  }
+
+  function operationContextForDateKey(dateKey) {
+    const date = parseLocalDate(dateKey);
+    const cycleIndex = getCycleIndexForDate(date);
+    const operation = cycleIndex >= 0 ? operationForCycle(cycleIndex) : null;
+    const bounds = cycleIndex >= 0 ? getCycleBounds(cycleIndex) : null;
+    const dayInCycle = cycleIndex >= 0 && bounds
+      ? Math.floor((Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) -
+          Date.UTC(bounds.start.getFullYear(), bounds.start.getMonth(), bounds.start.getDate())) / 86400000) + 1
+      : null;
+    return { cycleIndex, operation, bounds, dayInCycle };
+  }
+
+  function renderArchiveCalendar() {
+    if (!elements.archiveCalendarGrid || !elements.archiveCalendarMonth) return;
+
+    const year = archiveCalendarCursor.getFullYear();
+    const month = archiveCalendarCursor.getMonth();
+    const first = new Date(year, month, 1, 12);
+    const daysInMonth = new Date(year, month + 1, 0, 12).getDate();
+    const firstWeekday = first.getDay();
+    const todayKey = getTodayKey();
+
+    elements.archiveCalendarMonth.textContent = first.toLocaleDateString(undefined, {
+      month: "long",
+      year: "numeric"
+    });
+    elements.archiveCalendarGrid.replaceChildren();
+
+    for (let i = 0; i < firstWeekday; i += 1) {
+      const spacer = document.createElement("span");
+      spacer.className = "calendar-day-spacer";
+      spacer.setAttribute("aria-hidden", "true");
+      elements.archiveCalendarGrid.appendChild(spacer);
     }
+
+    for (let dayNumber = 1; dayNumber <= daysInMonth; dayNumber += 1) {
+      const date = new Date(year, month, dayNumber, 12);
+      const dateKey = formatDateKey(date);
+      const record = state.daily?.[dateKey];
+      const meaningful = Boolean(record && hasMeaningfulData(record));
+      const hasAar = aarHasContent(record);
+      const context = operationContextForDateKey(dateKey);
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "calendar-day";
+      button.dataset.date = dateKey;
+      button.setAttribute("role", "gridcell");
+
+      if (dateKey === todayKey) button.classList.add("is-today");
+      if (meaningful) button.classList.add("has-day");
+      if (hasAar) button.classList.add("has-aar");
+
+      const dayLabel = document.createElement("span");
+      dayLabel.className = "calendar-day-number";
+      dayLabel.textContent = String(dayNumber);
+
+      const meta = document.createElement("span");
+      meta.className = "calendar-day-meta";
+      if (hasAar) {
+        meta.textContent = "AAR";
+      } else if (meaningful) {
+        meta.textContent = "LOG";
+      } else if (context.dayInCycle) {
+        meta.textContent = `D${context.dayInCycle}`;
+      } else {
+        meta.textContent = "";
+      }
+
+      const op = document.createElement("span");
+      op.className = "calendar-day-operation";
+      op.textContent = context.operation?.name
+        ? context.operation.name.replace(/^Operation\s+/i, "").slice(0, 8)
+        : "";
+
+      button.append(dayLabel, meta, op);
+      button.setAttribute(
+        "aria-label",
+        `${date.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}. ` +
+        `${hasAar ? "AAR saved. " : meaningful ? "Day logged. " : "No AAR yet. "}` +
+        `${context.operation?.name ? context.operation.name + ". " : ""}Tap to edit.`
+      );
+      button.addEventListener("click", () => openArchivedAarEditor(dateKey));
+      elements.archiveCalendarGrid.appendChild(button);
+    }
+  }
+
+  function openArchivedAarEditor(dateKey) {
+    if (!state.daily[dateKey]) {
+      state.daily[dateKey] = createDailyRecord(dateKey);
+    }
+    const day = state.daily[dateKey];
     if (!day.aar || typeof day.aar !== "object") {
-      day.aar = { wentWell: "", improve: "", lesson: "", priority: "", rating: 5 };
+      day.aar = { wentWell: "", improve: "", lesson: "", priority: "", rating: 5, savedAt: null };
     }
     editingAarDateKey = dateKey;
     const date = new Date(`${dateKey}T12:00:00`);
+    const hasExistingAar = aarHasContent(day);
+    const context = operationContextForDateKey(dateKey);
+    elements.editAarTitle.textContent = hasExistingAar ? "Edit archived AAR" : "Add archived AAR";
     elements.editAarDate.textContent = date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+    const operationName = context.operation?.name || "No operation assigned";
+    const blockNumber = context.operation && context.cycleIndex >= context.operation.startCycleIndex
+      ? context.cycleIndex - context.operation.startCycleIndex + 1
+      : null;
+    elements.editAarOperationContext.textContent =
+      `${operationName}` +
+      `${blockNumber ? ` · Block ${blockNumber}` : ""}` +
+      `${context.dayInCycle ? ` · Day ${context.dayInCycle}/14` : ""}`;
     elements.editAarWentWell.value = day.aar?.wentWell || "";
     elements.editAarImprove.value = day.aar?.improve || "";
     elements.editAarLesson.value = day.aar?.lesson || "";
@@ -1573,6 +1717,7 @@
     elements.editAarDialog.close();
     editingAarDateKey = null;
     renderHistory();
+    renderOperations();
   }
 
   function renderSettings() {
