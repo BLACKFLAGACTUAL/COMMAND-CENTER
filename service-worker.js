@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-activity-tab-v5";
+const CACHE_NAME = "command-center-system-hamburger-v6";
 const APP_SHELL = [
   "./",
   "./index.html",

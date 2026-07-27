@@ -539,7 +539,7 @@ select {
 .calendar-weekdays,
 .archive-calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 5px;
 }
 
@@ -1632,7 +1632,7 @@ select {
 }
 
 .bottom-nav {
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
 .nav-button {
@@ -1674,5 +1674,46 @@ select {
   }
   .nav-icon {
     font-size: .94rem;
+  }
+}
+
+
+/* System moved to dashboard hamburger */
+.system-menu-button {
+  position: absolute;
+  top: max(1rem, env(safe-area-inset-top));
+  right: 1rem;
+  z-index: 20;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: rgba(8,8,12,.94);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.system-menu-button:active,
+.system-menu-button:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(239,75,80,.08);
+}
+
+#todayView {
+  position: relative;
+}
+
+@media (max-width: 520px) {
+  .system-menu-button {
+    top: max(.8rem, env(safe-area-inset-top));
+    right: .8rem;
+    width: 42px;
+    height: 42px;
+    font-size: 1.3rem;
   }
 }

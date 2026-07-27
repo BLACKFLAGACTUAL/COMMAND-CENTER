@@ -179,7 +179,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext"
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
@@ -248,6 +248,7 @@
     document.querySelectorAll(".nav-button").forEach((button) => {
       button.addEventListener("click", () => switchView(button.dataset.target));
     });
+    elements.systemMenuButton.addEventListener("click", () => switchView("settings"));
 
     elements.archiveCalendarPrev.addEventListener("click", () => {
       archiveCalendarCursor = new Date(
