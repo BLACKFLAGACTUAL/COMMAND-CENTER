@@ -820,5 +820,18 @@
   </dialog>
 
   <script src="./app.js" defer></script>
+
+  <dialog id="systemConfirmDialog" class="system-confirm-dialog">
+    <form method="dialog">
+      <p class="category-kicker">SYSTEM ACCESS</p>
+      <h2>Open System Settings?</h2>
+      <p class="helper-text">This will open app settings, backups, data controls, and system options.</p>
+      <div class="button-row">
+        <button id="systemConfirmYes" class="button primary" type="button">Yes, open System</button>
+        <button id="systemConfirmCancel" class="button secondary" type="button">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
 </body>
 </html>

@@ -179,8 +179,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton"
-    ].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -248,7 +247,20 @@
     document.querySelectorAll(".nav-button").forEach((button) => {
       button.addEventListener("click", () => switchView(button.dataset.target));
     });
-    elements.systemMenuButton.addEventListener("click", () => switchView("settings"));
+    elements.systemMenuButton.addEventListener("click", () => {
+      elements.systemConfirmDialog.showModal();
+    });
+    elements.systemConfirmYes.addEventListener("click", () => {
+      elements.systemConfirmDialog.close();
+      switchView("settings");
+    });
+    elements.systemConfirmCancel.addEventListener("click", () => {
+      elements.systemConfirmDialog.close();
+    });
+    elements.systemConfirmDialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      elements.systemConfirmDialog.close();
+    });
 
     elements.archiveCalendarPrev.addEventListener("click", () => {
       archiveCalendarCursor = new Date(
@@ -2336,7 +2348,12 @@
     state.settings.archiveDomain = name;
     saveState();
     elements.activityTrackerDialog.close();
+
+    // Immediately refresh the Activity workspace so a newly created folder
+    // appears without requiring the user to switch tabs or views.
     renderHistory();
+    if (typeof renderActivityWorkspace === "function") renderActivityWorkspace();
+    if (typeof renderActivity === "function") renderActivity();
   }
 
   function formatPaceMinutes(minutesPerUnit) {
