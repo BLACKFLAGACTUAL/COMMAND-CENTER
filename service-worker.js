@@ -1,5 +1,4 @@
-const CACHE_NAME = "command-center-v8-2-flat-hotfix";
-const ASSETS = ["./","./index.html","./styles.css","./manifest.json","./config.js","./data.js","./migrations.js","./storage.js","./activity-presets.js","./app.js"];
+const CACHE_NAME = "command-center-v7-data-safe-intel";
 const APP_SHELL = [
   "./",
   "./index.html",

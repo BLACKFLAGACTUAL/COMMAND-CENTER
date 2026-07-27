@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  const STORAGE_KEY = "myCommandCenter.v1";
+  const BACKUP_STORAGE_KEY = "myCommandCenter.lastKnownGood";
   const DEFAULT_QUOTE =
     "The secret of all victory lies in the organization of the non-obvious.";
 
@@ -39,7 +41,62 @@
     ]
   };
 
-  const ACTIVITY_METRIC_PRESETS = window.CCActivityPresets;
+  const ACTIVITY_METRIC_PRESETS = {
+    MMA: [
+      { name: "Training time", unit: "min" },
+      { name: "Rounds", unit: "rounds" },
+      { name: "Sparring rounds", unit: "rounds" },
+      { name: "Performance", unit: "/10" }
+    ],
+    BJJ: [
+      { name: "Training time", unit: "min" },
+      { name: "Rolling rounds", unit: "rounds" },
+      { name: "Submissions", unit: "subs" },
+      { name: "Performance", unit: "/10" }
+    ],
+    Boxing: [
+      { name: "Training time", unit: "min" },
+      { name: "Rounds", unit: "rounds" },
+      { name: "Sparring rounds", unit: "rounds" },
+      { name: "Performance", unit: "/10" }
+    ],
+    Running: [
+      { name: "Distance", unit: "mi" },
+      { name: "Time", unit: "min" },
+      { name: "Pace", unit: "min/mi" },
+      { name: "Heart rate", unit: "bpm" }
+    ],
+    Ruck: [
+      { name: "Distance", unit: "mi" },
+      { name: "Time", unit: "min" },
+      { name: "Load", unit: "lb" },
+      { name: "Pace", unit: "min/mi" }
+    ],
+    Swimming: [
+      { name: "Distance", unit: "yd" },
+      { name: "Time", unit: "min" },
+      { name: "Pace", unit: "min/100yd" }
+    ],
+    Surfing: [
+      { name: "Session time", unit: "min" },
+      { name: "Waves caught", unit: "waves" },
+      { name: "Best wave", unit: "/10" }
+    ],
+    Chess: [
+      { name: "Rating", unit: "Elo" },
+      { name: "Games", unit: "games" },
+      { name: "Wins", unit: "wins" },
+      { name: "Study time", unit: "min" }
+    ],
+    Reading: [
+      { name: "Pages", unit: "pages" },
+      { name: "Study time", unit: "min" }
+    ],
+    "Body Weight": [
+      { name: "Body weight", unit: "lb" }
+    ]
+  };
+
   const DEFAULT_WORKOUTS = {
     "Strength A": ["Zercher squat", "Incline bench", "Weighted pull-ups"],
     "Strength B": ["Trap-bar deadlift", "Overhead press", "Chest-supported row"],
@@ -49,7 +106,7 @@
     "Rest": ["Recovery, mobility, walking, and sleep"]
   };
 
-  let state = window.CCStorage.loadSync(createInitialState);
+  let state = loadState();
   let activeView = "today";
   let taskDialogCategory = null;
   let scheduleDialogIndex = null;
@@ -63,51 +120,15 @@
 
   const elements = {};
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+  document.addEventListener("DOMContentLoaded", init);
 
-  async function init() {
-    const missing = [
-      ["CCConfig", window.CCConfig],
-      ["CCData", window.CCData],
-      ["CCActivityPresets", window.CCActivityPresets],
-      ["CCMigrations", window.CCMigrations],
-      ["CCStorage", window.CCStorage]
-    ].filter(([, value]) => !value);
-
-    if (missing.length) {
-      console.error("Command Center failed to load required modules:", missing.map(([name]) => name));
-      const alertBox = document.getElementById("storageAlert");
-      if (alertBox) {
-        alertBox.hidden = false;
-        alertBox.textContent = "Command Center module load failed. Refresh once after GitHub Pages finishes deploying all files.";
-      }
-      return;
-    }
-
+  function init() {
     cacheElements();
-    state = window.CCMigrations.migrate(state, createInitialState, ACTIVITY_METRIC_PRESETS);
     ensureStateShape();
     bindEvents();
     initializeCollapsibleSections();
     renderAll();
-    renderRecoveryStatus();
     registerServiceWorker();
-
-    // Reconcile IndexedDB only after the live app is functional.
-    try {
-      const reconciled = await window.CCStorage.reconcileWithIndexedDb(state);
-      const currentFingerprint = window.CCData.fingerprint(state);
-      const reconciledFingerprint = window.CCData.fingerprint(reconciled);
-      if (reconciledFingerprint !== currentFingerprint) {
-        state = window.CCMigrations.migrate(reconciled, createInitialState, ACTIVITY_METRIC_PRESETS);
-        const result = window.CCStorage.save(state, "startup-reconcile");
-        state = result.state;
-        renderAll();
-      }
-      renderRecoveryStatus();
-    } catch (error) {
-      console.warn("Background recovery reconciliation failed:", error);
-    }
   }
 
   function cacheElements() {
@@ -153,9 +174,8 @@
       "operationTimingNote", "operationName", "operationIntent", "operationMission", "operationDialogStatus",
       "operationDialogCancel", "operationTrendSummary", "operationObjectives", "operationsYearSelect", "operationsYearTimeline",
       "intelRange", "intelMetricGrid", "intelFindings", "intelExecutionChart", "intelProteinChart", "intelRatingChart", "intelActivitySummary",
-      "activityTrackerMetrics", "activityMetricSuggestions", "runningHeartRatePanel", "maxHeartRateInput",
-      "heartRateZoneGrid", "heartRateZoneCurrent", "heartRateZonePicker", "heartRateZoneButtons", "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "recoveryStatus", "createSnapshotButton", "recoverLatestButton", "emergencyExportButton"
+      "activityTrackerMetrics", "activityMetricSuggestions", "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext"
     ].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
@@ -218,10 +238,6 @@
 
       section.dataset.collapseReady = "true";
     });
-  }
-
-  function on(element, eventName, handler, options) {
-    if (element) element.addEventListener(eventName, handler, options);
   }
 
   function bindEvents() {
@@ -326,35 +342,16 @@
     elements.addActivityEntryButton.addEventListener("click", openActivityEntryDialog);
     elements.activityEntryCancel.addEventListener("click", () => elements.activityEntryDialog.close());
     elements.activityEntryForm.addEventListener("submit", saveActivityEntry);
-    elements.activityMetricSelect.addEventListener("change", () => {
-      const domain = state.settings.archiveDomain;
-      if (!state.settings.activityMetricByDomain || typeof state.settings.activityMetricByDomain !== "object") {
-        state.settings.activityMetricByDomain = {};
-      }
-      state.settings.activityMetricByDomain[domain] = elements.activityMetricSelect.value;
-      saveState("activity-metric-filter");
-      renderActivityProgress();
-    });
-
-    elements.maxHeartRateInput.addEventListener("change", () => {
-      const value = Number(elements.maxHeartRateInput.value);
-      state.settings.maxHeartRate =
-        Number.isFinite(value) && value >= 100 && value <= 240 ? Math.round(value) : 0;
-      saveState("max-heart-rate");
-      renderHeartRateZonePanel();
-      renderActivityProgress();
-    });
+    elements.activityMetricSelect.addEventListener("change", renderActivityProgress);
     elements.editAarCancel.addEventListener("click", () => elements.editAarDialog.close());
     elements.editAarForm.addEventListener("submit", saveArchivedAar);
     elements.newOperationButton.addEventListener("click", () => openOperationDialog());
     elements.operationDialogCancel.addEventListener("click", () => elements.operationDialog.close());
     elements.operationForm.addEventListener("submit", saveOperation);
-    [elements.taskDialog, elements.scheduleDialog, elements.workoutDialog, elements.exerciseLogDialog, elements.activityTrackerDialog, elements.activityEntryDialog, elements.editAarDialog, elements.operationDialog]
-      .filter(Boolean)
-      .forEach((dialog) => {
-        dialog.addEventListener("cancel", (event) => { event.preventDefault(); dialog.close(); });
-        dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
-      });
+    [elements.taskDialog, elements.scheduleDialog, elements.workoutDialog, elements.exerciseLogDialog, elements.activityTrackerDialog, elements.activityEntryDialog, elements.editAarDialog, elements.operationDialog].forEach((dialog) => {
+      dialog.addEventListener("cancel", (event) => { event.preventDefault(); dialog.close(); });
+      dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+    });
 
     elements.aarRating.addEventListener("input", () => {
       elements.aarRatingOutput.value = elements.aarRating.value;
@@ -390,14 +387,11 @@
     elements.importDataInput.addEventListener("change", importData);
     elements.resetTodayButton.addEventListener("click", resetToday);
     elements.deleteAllDataButton.addEventListener("click", deleteAllData);
-    elements.createSnapshotButton.addEventListener("click", createManualRecoverySnapshot);
-    elements.recoverLatestButton.addEventListener("click", recoverLatestSnapshot);
-    elements.emergencyExportButton.addEventListener("click", exportData);
   }
 
   function ensureStateShape() {
     if (!state || typeof state !== "object") state = createInitialState();
-    state.version = 8;
+    state.version = 7;
     state.settings = { ...DEFAULT_SETTINGS, ...(state.settings || {}) };
 
     if (!Array.isArray(state.settings.mindTemplates)) {
@@ -436,10 +430,6 @@
       }
     });
     if (!state.settings.intelRange) state.settings.intelRange = "365";
-    if (!state.settings.activityMetricByDomain || typeof state.settings.activityMetricByDomain !== "object") {
-      state.settings.activityMetricByDomain = {};
-    }
-    if (!Number.isFinite(Number(state.settings.maxHeartRate))) state.settings.maxHeartRate = 0;
     if (!state.settings.archiveDomain) state.settings.archiveDomain = "Weightlifting";
     if (typeof state.settings.progressExercise !== "string") state.settings.progressExercise = "";
     if (typeof state.settings.scheduleCollapsed !== "boolean") state.settings.scheduleCollapsed = false;
@@ -455,7 +445,7 @@
 
   function createInitialState() {
     return {
-      version: 8,
+      version: 7,
       settings: structuredCloneSafe(DEFAULT_SETTINGS),
       daily: {},
       quotes: {},
@@ -2186,101 +2176,6 @@
     initializeCollapsibleSections();
   }
 
-  const HEART_RATE_ZONES = [
-    { zone: 1, name: "Recovery", min: 0.50, max: 0.60, description: "Very easy aerobic work and recovery." },
-    { zone: 2, name: "Aerobic base", min: 0.60, max: 0.70, description: "Easy sustainable endurance work." },
-    { zone: 3, name: "Tempo", min: 0.70, max: 0.80, description: "Moderate, comfortably hard effort." },
-    { zone: 4, name: "Threshold", min: 0.80, max: 0.90, description: "Hard threshold-focused work." },
-    { zone: 5, name: "Maximum", min: 0.90, max: 1.01, description: "Very hard to near-maximal effort." }
-  ];
-
-  function isRunningDomain(domain = state.settings.archiveDomain) {
-    return String(domain || "").trim().toLowerCase().includes("running");
-  }
-
-  function bpmRangeForZone(zone) {
-    const maxHr = Number(state.settings.maxHeartRate) || 0;
-    if (!maxHr) return `${Math.round(zone.min * 100)}–${Math.round(Math.min(zone.max, 1) * 100)}% Max HR`;
-    const low = Math.round(maxHr * zone.min);
-    const high = zone.zone === 5 ? maxHr : Math.max(low, Math.round(maxHr * zone.max) - 1);
-    return `${low}–${high} bpm`;
-  }
-
-  function zoneForHeartRate(bpm) {
-    const maxHr = Number(state.settings.maxHeartRate) || 0;
-    const value = Number(bpm);
-    if (!maxHr || !Number.isFinite(value) || value <= 0) return null;
-    const ratio = value / maxHr;
-    return HEART_RATE_ZONES.find((zone) => ratio >= zone.min && ratio < zone.max) || null;
-  }
-
-  function renderHeartRateZonePanel() {
-    if (!elements.runningHeartRatePanel) return;
-    const running = isRunningDomain();
-    elements.runningHeartRatePanel.hidden = !running;
-    if (!running) return;
-
-    const maxHr = Number(state.settings.maxHeartRate) || 0;
-    elements.maxHeartRateInput.value = maxHr || "";
-    elements.heartRateZoneGrid.replaceChildren();
-
-    HEART_RATE_ZONES.forEach((zone) => {
-      const card = document.createElement("div");
-      card.className = `heart-rate-zone-card zone-${zone.zone}`;
-      card.innerHTML = `
-        <span class="zone-number">ZONE ${zone.zone}</span>
-        <strong>${escapeHtml(zone.name)}</strong>
-        <span class="zone-range">${escapeHtml(bpmRangeForZone(zone))}</span>
-        <small>${escapeHtml(zone.description)}</small>
-      `;
-      elements.heartRateZoneGrid.appendChild(card);
-    });
-
-    if (!maxHr) {
-      elements.heartRateZoneCurrent.textContent =
-        "Set Max HR above to convert the percentage zones into personalized BPM ranges.";
-      return;
-    }
-
-    const tracker = state.activityTrackers?.[state.settings.archiveDomain];
-    const latestHeartRate = [...(tracker?.entries || [])]
-      .filter((entry) => String(entry.metric || "").trim().toLowerCase() === "heart rate")
-      .sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
-
-    if (latestHeartRate) {
-      const zone = zoneForHeartRate(latestHeartRate.value);
-      elements.heartRateZoneCurrent.textContent = zone
-        ? `Latest HR: ${latestHeartRate.value} bpm · Zone ${zone.zone} (${zone.name})`
-        : `Latest HR: ${latestHeartRate.value} bpm`;
-    } else {
-      elements.heartRateZoneCurrent.textContent = `Max HR set to ${maxHr} bpm.`;
-    }
-  }
-
-  function renderHeartRateZonePicker(metricName) {
-    if (!elements.heartRateZonePicker) return;
-    const zoneMetric = String(metricName || "").trim().toLowerCase() === "heart rate zone";
-    elements.heartRateZonePicker.hidden = !zoneMetric;
-    elements.heartRateZoneButtons.replaceChildren();
-    if (!zoneMetric) return;
-
-    HEART_RATE_ZONES.forEach((zone) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "zone-pick-button";
-      button.textContent = `Z${zone.zone}`;
-      button.title = `${zone.name}: ${bpmRangeForZone(zone)}`;
-      button.addEventListener("click", () => {
-        elements.activityEntryValue.value = String(zone.zone);
-        elements.activityEntryUnit.value = "zone";
-        if (!elements.activityEntryNote.value.trim()) {
-          elements.activityEntryNote.value = `${zone.name} · ${bpmRangeForZone(zone)}`;
-        }
-      });
-      elements.heartRateZoneButtons.appendChild(button);
-    });
-  }
-
   function renderProgressDomains() {
     const domains = ["Weightlifting", ...Object.keys(state.activityTrackers || {}).sort((a, b) => a.localeCompare(b))];
     if (!domains.includes(state.settings.archiveDomain)) state.settings.archiveDomain = "Weightlifting";
@@ -2302,12 +2197,11 @@
     const weightlifting = state.settings.archiveDomain === "Weightlifting";
     elements.weightliftingProgressSection.hidden = !weightlifting;
     elements.activityProgressSection.hidden = weightlifting;
-    if (!weightlifting) { renderActivityProgress(); renderHeartRateZonePanel(); } else if (elements.runningHeartRatePanel) { elements.runningHeartRatePanel.hidden = true; }
+    if (!weightlifting) renderActivityProgress();
   }
 
   function openActivityTrackerDialog() {
     elements.activityTrackerName.value = "";
-    elements.activityTrackerMetrics.value = "";
     elements.activityTrackerStatus.textContent = "";
     elements.activityTrackerDialog.showModal();
     setTimeout(() => elements.activityTrackerName.focus(), 0);
@@ -2380,21 +2274,12 @@
       button.addEventListener("click", () => {
         elements.activityEntryMetric.value = metric.name;
         elements.activityEntryUnit.value = metric.unit || "";
-        renderHeartRateZonePicker(metric.name);
       });
       elements.activityMetricSuggestions.appendChild(button);
     });
 
     const selectedMetric = metrics.find((metric) => metric.name === elements.activityEntryMetric.value);
     if (selectedMetric) elements.activityEntryUnit.value = selectedMetric.unit || "";
-    renderHeartRateZonePicker(elements.activityEntryMetric.value);
-    elements.activityEntryMetric.oninput = () => {
-      const matched = metrics.find(
-        (item) => item.name.toLowerCase() === elements.activityEntryMetric.value.trim().toLowerCase()
-      );
-      if (matched) elements.activityEntryUnit.value = matched.unit || "";
-      renderHeartRateZonePicker(elements.activityEntryMetric.value);
-    };
     elements.activityEntryDialog.showModal();
   }
 
@@ -2410,29 +2295,14 @@
       elements.activityEntryStatus.textContent = "Enter a date, metric, and numeric value.";
       return;
     }
-    if (metric.toLowerCase() === "heart rate zone" && (value < 1 || value > 5 || !Number.isInteger(value))) {
-      elements.activityEntryStatus.textContent = "Heart rate zone must be a whole number from 1 to 5.";
-      return;
-    }
-
-    const entry = {
+    tracker.entries.push({
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       date: new Date(`${dateKey}T12:00:00`).toISOString(),
       metric,
       value,
       unit: elements.activityEntryUnit.value.trim(),
       note: elements.activityEntryNote.value.trim()
-    };
-
-    if (metric.toLowerCase() === "heart rate") {
-      const zone = zoneForHeartRate(value);
-      if (zone) {
-        entry.zone = zone.zone;
-        entry.zoneName = zone.name;
-      }
-    }
-
-    tracker.entries.push(entry);
+    });
     saveState();
     elements.activityEntryDialog.close();
     renderHistory();
@@ -2445,56 +2315,34 @@
     if (!domain || domain === "Weightlifting") return;
     const tracker = state.activityTrackers?.[domain] || { entries: [] };
     elements.activityProgressHeading.textContent = `${domain} progress`;
-
-    const configuredMetrics = (Array.isArray(tracker.metrics) ? tracker.metrics : inferActivityMetrics(domain))
-      .map((metric) => String(metric?.name || "").trim())
-      .filter(Boolean);
-    const loggedMetrics = tracker.entries
-      .map((entry) => String(entry.metric || "").trim())
-      .filter(Boolean);
-    const metrics = [...new Set([...configuredMetrics, ...loggedMetrics])];
-
-    const savedMetric = state.settings.activityMetricByDomain?.[domain];
-    const previous = savedMetric || elements.activityMetricSelect.value;
+    const metrics = [...new Set(tracker.entries.map((entry) => entry.metric).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const previous = elements.activityMetricSelect.value;
     elements.activityMetricSelect.replaceChildren();
-
     if (!metrics.length) {
       const option = document.createElement("option");
       option.value = "";
-      option.textContent = "No metrics configured";
+      option.textContent = "No metrics logged";
       elements.activityMetricSelect.appendChild(option);
       elements.activityMetricSelect.disabled = true;
     } else {
       elements.activityMetricSelect.disabled = false;
-      metrics.forEach((metricName) => {
+      metrics.forEach((metric) => {
         const option = document.createElement("option");
-        option.value = metricName;
-        const count = tracker.entries.filter((entry) => entry.metric === metricName).length;
-        option.textContent = count ? `${metricName} (${count})` : `${metricName} · no entries`;
+        option.value = metric;
+        option.textContent = metric;
         elements.activityMetricSelect.appendChild(option);
       });
-
-      const selected = metrics.includes(previous) ? previous : metrics[0];
-      elements.activityMetricSelect.value = selected;
-      state.settings.activityMetricByDomain[domain] = selected;
+      elements.activityMetricSelect.value = metrics.includes(previous) ? previous : metrics[0];
     }
-
-    renderHeartRateZonePanel();
     const metric = elements.activityMetricSelect.value;
     const logs = tracker.entries.filter((entry) => entry.metric === metric).sort((a, b) => a.date.localeCompare(b.date));
     elements.activityProgressEmpty.hidden = logs.length > 0;
-    elements.activityProgressEmpty.textContent = logs.length
-      ? ""
-      : `No ${metric || "metric"} entries yet. Use + Add entry to log one.`;
     elements.activityProgressChart.hidden = logs.length === 0;
     elements.activityProgressLogList.replaceChildren();
     [...logs].reverse().slice(0, 10).forEach((log) => {
       const row = document.createElement("div");
       row.className = "progress-log-row";
-      const zoneLabel = log.metric?.toLowerCase() === "heart rate" && log.zone
-        ? ` · Zone ${log.zone}${log.zoneName ? ` (${log.zoneName})` : ""}`
-        : "";
-      row.innerHTML = `<span>${escapeHtml(formatShortDate(log.date))}</span><strong>${escapeHtml(String(log.value))}${log.unit ? ` ${escapeHtml(log.unit)}` : ""}</strong><small>${log.note ? escapeHtml(log.note) : escapeHtml(log.metric)}${escapeHtml(zoneLabel)}</small>`;
+      row.innerHTML = `<span>${escapeHtml(formatShortDate(log.date))}</span><strong>${escapeHtml(String(log.value))}${log.unit ? ` ${escapeHtml(log.unit)}` : ""}</strong><small>${log.note ? escapeHtml(log.note) : escapeHtml(log.metric)}</small>`;
       elements.activityProgressLogList.appendChild(row);
     });
     if (logs.length) drawActivityChart(logs);
@@ -2926,16 +2774,15 @@
   }
 
   function deleteAllData() {
-    const phrase = prompt('Type DELETE ALL to erase this browser’s Command Center data. Recovery snapshots are intentionally kept unless you clear Safari website data.');
-    if (phrase !== "DELETE ALL") return;
+    const first = confirm("Delete every stored Command Center record and setting from this browser?");
+    if (!first) return;
+    const second = confirm("This is permanent unless you exported a backup. Delete all data now?");
+    if (!second) return;
 
+    localStorage.removeItem(BACKUP_STORAGE_KEY);
     state = createInitialState();
-    state = window.CCMigrations.migrate(state, createInitialState, ACTIVITY_METRIC_PRESETS);
-    const result = window.CCStorage.save(state, "intentional-reset");
-    state = result.state;
-    renderAll();
-    renderRecoveryStatus();
-    alert("Active data was reset. Recovery snapshots were retained.");
+    saveAndRender();
+    switchView("today");
   }
 
   function exportData() {
@@ -2971,12 +2818,11 @@
           throw new Error("This file is not a valid Command Center backup.");
         }
 
-        if (!confirm("Merge this backup into the data currently stored in this browser? Unique current records will be kept.")) {
+        if (!confirm("Import this backup? It will replace the data currently stored in this browser.")) {
           return;
         }
 
-        state = window.CCData.mergeStates(state, incoming);
-        state = window.CCMigrations.migrate(state, createInitialState, ACTIVITY_METRIC_PRESETS);
+        state = incoming;
         ensureStateShape();
         saveAndRender();
         switchView("today");
@@ -3072,16 +2918,189 @@
     }
   }
 
-  function saveState(reason = "save") {
-    const result = window.CCStorage.save(state, reason);
-    if (result.ok) {
-      state = result.state;
-      if (elements.storageAlert) elements.storageAlert.hidden = true;
-      renderRecoveryStatus();
-      return true;
+  function mergeUniqueEntries(a = [], b = []) {
+    const result = [];
+    const seen = new Set();
+    [...a, ...b].forEach((entry) => {
+      if (!entry || typeof entry !== "object") return;
+      const key = entry.id || JSON.stringify([
+        entry.date || "",
+        entry.weight ?? "",
+        entry.reps ?? "",
+        entry.sets ?? "",
+        entry.metric || "",
+        entry.value ?? "",
+        entry.note || ""
+      ]);
+      if (seen.has(key)) return;
+      seen.add(key);
+      result.push(structuredCloneSafe(entry));
+    });
+    return result;
+  }
+
+  function mergeAar(primary = {}, backup = {}) {
+    const result = { ...backup, ...primary };
+    ["wentWell", "improve", "lesson", "priority"].forEach((field) => {
+      if (!String(primary?.[field] || "").trim() && String(backup?.[field] || "").trim()) {
+        result[field] = backup[field];
+      }
+    });
+    if (!primary?.savedAt && backup?.savedAt) result.savedAt = backup.savedAt;
+    if ((!Number.isFinite(Number(primary?.rating)) || Number(primary?.rating) === 5) && Number.isFinite(Number(backup?.rating))) {
+      result.rating = Number(backup.rating);
     }
-    if (elements.storageAlert) elements.storageAlert.hidden = false;
-    return false;
+    return result;
+  }
+
+  function mergeDailyRecord(primary, backup) {
+    if (!primary) return structuredCloneSafe(backup);
+    if (!backup) return structuredCloneSafe(primary);
+    const result = { ...backup, ...primary };
+    result.aar = mergeAar(primary.aar, backup.aar);
+
+    ["mindTasks", "spiritTasks"].forEach((field) => {
+      const p = Array.isArray(primary[field]) ? primary[field] : [];
+      const b = Array.isArray(backup[field]) ? backup[field] : [];
+      const byId = new Map();
+      [...b, ...p].forEach((task) => {
+        if (!task) return;
+        const key = task.id || task.text;
+        const existing = byId.get(key);
+        byId.set(key, existing ? { ...existing, ...task } : structuredCloneSafe(task));
+      });
+      result[field] = [...byId.values()];
+    });
+
+    if ((Number(primary.protein) || 0) === 0 && (Number(backup.protein) || 0) > 0) result.protein = backup.protein;
+    if (!primary.workoutComplete && backup.workoutComplete) result.workoutComplete = true;
+    return result;
+  }
+
+  function mergeCommandCenterStates(primary, backup) {
+    if (!primary) return backup ? structuredCloneSafe(backup) : null;
+    if (!backup) return structuredCloneSafe(primary);
+
+    const merged = structuredCloneSafe(primary);
+    merged.settings = { ...(backup.settings || {}), ...(primary.settings || {}) };
+    merged.daily = {};
+    const dates = new Set([...Object.keys(backup.daily || {}), ...Object.keys(primary.daily || {})]);
+    dates.forEach((dateKey) => {
+      merged.daily[dateKey] = mergeDailyRecord(primary.daily?.[dateKey], backup.daily?.[dateKey]);
+    });
+
+    merged.quotes = { ...(backup.quotes || {}), ...(primary.quotes || {}) };
+    merged.customWorkouts = { ...(backup.customWorkouts || {}), ...(primary.customWorkouts || {}) };
+
+    merged.exerciseLogs = {};
+    const exercises = new Set([...Object.keys(backup.exerciseLogs || {}), ...Object.keys(primary.exerciseLogs || {})]);
+    exercises.forEach((name) => {
+      merged.exerciseLogs[name] = mergeUniqueEntries(primary.exerciseLogs?.[name], backup.exerciseLogs?.[name]);
+    });
+
+    merged.activityTrackers = {};
+    const trackers = new Set([...Object.keys(backup.activityTrackers || {}), ...Object.keys(primary.activityTrackers || {})]);
+    trackers.forEach((name) => {
+      const p = primary.activityTrackers?.[name] || {};
+      const b = backup.activityTrackers?.[name] || {};
+      merged.activityTrackers[name] = {
+        ...b,
+        ...p,
+        name: p.name || b.name || name,
+        metrics: Array.isArray(p.metrics) && p.metrics.length ? structuredCloneSafe(p.metrics) : structuredCloneSafe(b.metrics || []),
+        entries: mergeUniqueEntries(p.entries, b.entries)
+      };
+    });
+
+    const pOps = primary.operations || {};
+    const bOps = backup.operations || {};
+    const opMap = new Map();
+    [...(bOps.items || []), ...(pOps.items || [])].forEach((op) => {
+      if (!op) return;
+      const key = op.id || `${op.name}-${op.startCycleIndex}`;
+      const existing = opMap.get(key);
+      if (!existing) {
+        opMap.set(key, structuredCloneSafe(op));
+      } else {
+        const newest = { ...existing, ...op };
+        const oldObjectives = Array.isArray(existing.objectives) ? existing.objectives : [];
+        const newObjectives = Array.isArray(op.objectives) ? op.objectives : [];
+        const objectiveMap = new Map();
+        [...oldObjectives, ...newObjectives].forEach((objective) => {
+          const obj = typeof objective === "string" ? { text: objective } : objective;
+          if (!obj?.text) return;
+          const objKey = obj.id || obj.text.trim().toLowerCase();
+          objectiveMap.set(objKey, { ...(objectiveMap.get(objKey) || {}), ...obj });
+        });
+        newest.objectives = [...objectiveMap.values()];
+        if (!String(newest.overallSummary || "").trim() && String(existing.overallSummary || "").trim()) {
+          newest.overallSummary = existing.overallSummary;
+        }
+        opMap.set(key, newest);
+      }
+    });
+
+    const cycleMap = new Map();
+    [...(bOps.cycles || []), ...(pOps.cycles || [])].forEach((cycle) => {
+      if (!cycle || !Number.isInteger(cycle.cycleIndex)) return;
+      const existing = cycleMap.get(cycle.cycleIndex);
+      cycleMap.set(cycle.cycleIndex, existing ? {
+        ...existing,
+        ...cycle,
+        summary: String(cycle.summary || existing.summary || "")
+      } : structuredCloneSafe(cycle));
+    });
+
+    merged.operations = {
+      ...bOps,
+      ...pOps,
+      items: [...opMap.values()],
+      cycles: [...cycleMap.values()].sort((a, b) => a.cycleIndex - b.cycleIndex),
+      activeOperationId: pOps.activeOperationId || bOps.activeOperationId || null
+    };
+
+    return merged;
+  }
+
+  function loadState() {
+    try {
+      const primary = parseStoredState(localStorage.getItem(STORAGE_KEY));
+      const backup = parseStoredState(localStorage.getItem(BACKUP_STORAGE_KEY));
+      const merged = mergeCommandCenterStates(primary, backup);
+      if (merged) {
+        if (primary && backup) console.info("Merged primary and backup Command Center data without discarding unique records.");
+        return merged;
+      }
+      return createInitialState();
+    } catch (error) {
+      console.error("Could not load local data:", error);
+      setTimeout(() => {
+        const alertBox = document.getElementById("storageAlert");
+        if (alertBox) alertBox.hidden = false;
+      }, 0);
+      return createInitialState();
+    }
+  }
+
+  function saveState() {
+    try {
+      const serialized = JSON.stringify(state);
+      const previousRaw = localStorage.getItem(STORAGE_KEY);
+
+      // Snapshot the complete previous state before every write. We never choose a
+      // "richer" snapshot over current data; loadState merges both non-destructively.
+      if (previousRaw && previousRaw !== serialized) {
+        localStorage.setItem(BACKUP_STORAGE_KEY, previousRaw);
+      }
+      localStorage.setItem(STORAGE_KEY, serialized);
+
+      if (elements.storageAlert) elements.storageAlert.hidden = true;
+      return true;
+    } catch (error) {
+      console.error("Could not save local data:", error);
+      if (elements.storageAlert) elements.storageAlert.hidden = false;
+      return false;
+    }
   }
 
   function saveAndRender() {
