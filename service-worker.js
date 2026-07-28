@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-section-banners-v9";
+const CACHE_NAME = "command-center-hamburger-aligned-v10";
 const APP_SHELL = [
   "./",
   "./index.html",
