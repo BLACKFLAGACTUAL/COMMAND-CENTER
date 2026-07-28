@@ -179,7 +179,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel"].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -544,6 +544,8 @@
   }
 
   function renderAll() {
+    const activeView = document.querySelector(".view.active")?.dataset.view || "today";
+    renderHeaderForView(activeView);
     lastRenderedDateKey = getTodayKey();
     renderHeader();
     renderToday();
@@ -3571,7 +3573,32 @@
     reader.readAsText(file);
   }
 
+  const SECTION_IDENTITIES = {
+    schedule: { title: "PROTOCOL", kicker: "14-DAY BATTLE RHYTHM // TRAINING PLAN" },
+    history: { title: "ARCHIVE", kicker: "WRITTEN RECORD // LESSONS LEARNED" },
+    activity: { title: "ACTIVITY", kicker: "PERFORMANCE LOG // TRACKING" },
+    intel: { title: "INTEL", kicker: "PATTERNS // TREND ANALYSIS" },
+    operations: { title: "OPERATIONS", kicker: "CAMPAIGN // MACRO PROGRESS" },
+    settings: { title: "SYSTEM", kicker: "CONTROL // SETTINGS" }
+  };
+
+  function renderHeaderForView(target) {
+    const dashboard = target === "today";
+    elements.dashboardDirectivePanel.hidden = !dashboard;
+    elements.sectionIdentityBanner.hidden = dashboard;
+
+    if (!dashboard) {
+      const identity = SECTION_IDENTITIES[target] || {
+        title: String(target || "COMMAND CENTER").toUpperCase(),
+        kicker: "COMMAND CENTER"
+      };
+      elements.sectionIdentityTitle.textContent = identity.title;
+      elements.sectionIdentityKicker.textContent = identity.kicker;
+    }
+  }
+
   function switchView(target) {
+    renderHeaderForView(target);
     activeView = target;
 
     document.querySelectorAll(".view").forEach((view) => {

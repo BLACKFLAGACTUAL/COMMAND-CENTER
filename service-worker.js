@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-folder-live-refresh-v8";
+const CACHE_NAME = "command-center-section-banners-v9";
 const APP_SHELL = [
   "./",
   "./index.html",

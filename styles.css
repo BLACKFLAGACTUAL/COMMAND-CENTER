@@ -1798,3 +1798,53 @@ select {
     font-size: 1.45rem;
   }
 }
+
+
+/* Section identity banner replaces Daily Directive outside Dashboard */
+.section-identity-banner {
+  margin-top: 1rem;
+  min-height: 150px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(rgba(239,75,80,.035), rgba(239,75,80,.015)),
+    var(--panel);
+  padding: 1.4rem;
+}
+
+.section-identity-banner[hidden] {
+  display: none !important;
+}
+
+.section-identity-banner .data-label {
+  color: var(--accent);
+  letter-spacing: .2em;
+  margin-bottom: .55rem;
+}
+
+.section-identity-banner h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(2.6rem, 10vw, 5.4rem);
+  line-height: .92;
+  letter-spacing: -.035em;
+  text-transform: uppercase;
+}
+
+#dashboardDirectivePanel[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 520px) {
+  .section-identity-banner {
+    min-height: 125px;
+    padding: 1rem;
+  }
+
+  .section-identity-banner h2 {
+    font-size: clamp(2.35rem, 11vw, 4rem);
+  }
+}
