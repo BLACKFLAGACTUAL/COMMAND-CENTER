@@ -24,8 +24,8 @@
   <div class="app-shell">
     <header class="command-header">
       <div class="brand-lockup">
-        <p class="eyebrow">OPERATION ARETE // PERSONAL OPERATING SYSTEM</p>
-        <h1>MY COMMAND CENTER</h1>
+        <p id="brandEyebrow" class="eyebrow">OPERATION ARETE // PERSONAL OPERATING SYSTEM</p>
+        <h1 id="brandTitle">MY COMMAND CENTER</h1>
         <button id="systemMenuButton" class="system-menu-button" type="button" aria-label="Open System settings">
           <span aria-hidden="true">☰</span>
         </button>
@@ -574,6 +574,168 @@
       </section>
 
 
+
+      <!-- WORK DASHBOARD -->
+      <section id="workDashboardView" class="view work-view" data-view="work-dashboard" aria-labelledby="workDashboardHeading" hidden>
+        <div class="view-title-row">
+          <div>
+            <p class="eyebrow">WORK COMMAND // LIVE STATUS</p>
+            <h2 id="workDashboardHeading">Workboard</h2>
+          </div>
+          <div class="overall-ring work-ring" aria-label="Work task completion">
+            <span id="workCompletionPercent">0%</span>
+          </div>
+        </div>
+
+        <section class="settings-card work-command-card">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">CURRENT OPERATION</p>
+              <h3 id="workCurrentOperationName">No active operation</h3>
+            </div>
+          </div>
+          <p id="workCurrentOperationMission" class="helper-text">Create a Work Operation when you want tasks grouped under a larger mission.</p>
+        </section>
+
+        <section class="settings-card">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">TODAY</p>
+              <h3>Priority tasks</h3>
+            </div>
+            <button id="workQuickAddTask" class="button primary compact-action" type="button">+ Task</button>
+          </div>
+          <div id="workPriorityTasks" class="work-task-list"></div>
+          <p id="workPriorityEmpty" class="empty-state">No active work tasks.</p>
+        </section>
+
+        <section class="settings-card work-stat-grid">
+          <div><span class="data-label">ACTIVE</span><strong id="workActiveCount">0</strong></div>
+          <div><span class="data-label">DUE TODAY</span><strong id="workDueTodayCount">0</strong></div>
+          <div><span class="data-label">WAITING</span><strong id="workWaitingCount">0</strong></div>
+          <div><span class="data-label">COMPLETE</span><strong id="workCompleteCount">0</strong></div>
+        </section>
+      </section>
+
+      <!-- WORK TASKS -->
+      <section id="workTasksView" class="view work-view" data-view="work-tasks" aria-labelledby="workTasksHeading" hidden>
+        <div class="view-title-row">
+          <div>
+            <p class="eyebrow">EXECUTION // TASK CONTROL</p>
+            <h2 id="workTasksHeading">Tasks</h2>
+          </div>
+          <button id="workAddTaskButton" class="button primary compact-action" type="button">+ Task</button>
+        </div>
+
+        <div class="work-filter-bar" role="group" aria-label="Work task filters">
+          <button class="work-filter active" type="button" data-work-filter="open">Open</button>
+          <button class="work-filter" type="button" data-work-filter="today">Today</button>
+          <button class="work-filter" type="button" data-work-filter="waiting">Waiting</button>
+          <button class="work-filter" type="button" data-work-filter="complete">Complete</button>
+          <button class="work-filter" type="button" data-work-filter="all">All</button>
+        </div>
+
+        <div id="workTaskList" class="work-task-list"></div>
+        <p id="workTaskEmpty" class="empty-state">No tasks in this view.</p>
+      </section>
+
+      <!-- WORK OPERATIONS -->
+      <section id="workOperationsView" class="view work-view" data-view="work-operations" aria-labelledby="workOperationsHeading" hidden>
+        <div class="view-title-row">
+          <div>
+            <p class="eyebrow">MISSION // PROFESSIONAL OPERATIONS</p>
+            <h2 id="workOperationsHeading">Work Ops</h2>
+          </div>
+          <button id="workAddOperationButton" class="button primary compact-action" type="button">+ Operation</button>
+        </div>
+        <p class="helper-text">Work Operations are completely separate from Operation Arete and your personal 14-day cycles.</p>
+        <div id="workOperationList" class="operations-list"></div>
+        <p id="workOperationEmpty" class="empty-state">No Work Operations yet.</p>
+      </section>
+
+      <!-- WORK ARCHIVE -->
+      <section id="workArchiveView" class="view work-view" data-view="work-archive" aria-labelledby="workArchiveHeading" hidden>
+        <div class="view-title-row">
+          <div>
+            <p class="eyebrow">PROFESSIONAL RECORD // DAILY LOG</p>
+            <h2 id="workArchiveHeading">Work Archive</h2>
+          </div>
+          <button id="workAddLogButton" class="button secondary compact-action" type="button">+ Work Log</button>
+        </div>
+        <p class="helper-text">Keep work decisions, follow-ups, issues, and accomplishments separate from your personal AAR archive.</p>
+        <div id="workArchiveList" class="history-list"></div>
+        <p id="workArchiveEmpty" class="empty-state">No work logs or completed tasks yet.</p>
+      </section>
+
+      <!-- WORK INTEL -->
+      <section id="workIntelView" class="view work-view" data-view="work-intel" aria-labelledby="workIntelHeading" hidden>
+        <div class="view-title-row">
+          <div>
+            <p class="eyebrow">WORK INTELLIGENCE // TRENDS</p>
+            <h2 id="workIntelHeading">Work Intel</h2>
+          </div>
+        </div>
+
+        <section class="settings-card work-stat-grid">
+          <div><span class="data-label">TOTAL TASKS</span><strong id="workIntelTotal">0</strong></div>
+          <div><span class="data-label">COMPLETE</span><strong id="workIntelComplete">0</strong></div>
+          <div><span class="data-label">ON TIME</span><strong id="workIntelOnTime">—</strong></div>
+          <div><span class="data-label">OPS</span><strong id="workIntelOps">0</strong></div>
+        </section>
+
+        <section class="settings-card">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">STATUS DISTRIBUTION</p>
+              <h3>Current workload</h3>
+            </div>
+          </div>
+          <div id="workIntelStatusBars" class="work-intel-bars"></div>
+        </section>
+
+        <section class="settings-card">
+          <div class="section-heading">
+            <div>
+              <p class="category-kicker">RECENT OUTPUT</p>
+              <h3>Last 30 days</h3>
+            </div>
+          </div>
+          <div id="workIntelRecent" class="intel-findings"></div>
+        </section>
+      </section>
+
+      <!-- WORK SYSTEM -->
+      <section id="workSettingsView" class="view work-view" data-view="work-settings" aria-labelledby="workSettingsHeading" hidden>
+        <div class="view-title-row">
+          <div>
+            <p class="eyebrow">WORK SYSTEM // CONTROL</p>
+            <h2 id="workSettingsHeading">Work Settings</h2>
+          </div>
+        </div>
+
+        <section class="settings-card">
+          <h3>Work mode</h3>
+          <p class="helper-text">This System controls only Work Command. Personal data and Operation Arete remain separate.</p>
+          <label for="workDefaultCategory">Default task category</label>
+          <input id="workDefaultCategory" type="text" maxlength="60" placeholder="Admin, Training, Operations…">
+          <button id="saveWorkSettings" class="button primary full-width" type="button">Save work settings</button>
+          <p id="workSettingsStatus" class="save-status"></p>
+        </section>
+
+        <section class="settings-card">
+          <h3>Work backup</h3>
+          <p class="helper-text">Export Work Command by itself without changing your personal backup.</p>
+          <button id="exportWorkDataButton" class="button secondary full-width" type="button">Export work data</button>
+        </section>
+
+        <section class="settings-card danger-zone">
+          <h3>Reset Work Command</h3>
+          <p class="helper-text">This does not touch personal Command Center data.</p>
+          <button id="resetWorkDataButton" class="button danger full-width" type="button">Delete work data</button>
+        </section>
+      </section>
+
+
       <!-- SETTINGS -->
       <section id="settingsView" class="view" data-view="settings" aria-labelledby="settingsHeading" hidden>
         <div class="view-title-row">
@@ -630,7 +792,7 @@
       </section>
     </main>
 
-    <nav class="bottom-nav" aria-label="Primary navigation">
+    <nav id="personalNav" class="bottom-nav mode-nav" aria-label="Personal navigation">
       <button class="nav-button active" type="button" data-target="today" aria-current="page">
         <span class="nav-icon" aria-hidden="true">⌖</span>
         <span>Dashboard</span>
@@ -656,6 +818,24 @@
         <span>Operations</span>
       </button>
 </nav>
+    <nav id="workNav" class="bottom-nav mode-nav" aria-label="Work navigation" hidden>
+      <button class="nav-button work-nav-button active" type="button" data-target="work-dashboard" aria-current="page">
+        <span class="nav-icon" aria-hidden="true">⌖</span><span>Dashboard</span>
+      </button>
+      <button class="nav-button work-nav-button" type="button" data-target="work-tasks">
+        <span class="nav-icon" aria-hidden="true">☷</span><span>Tasks</span>
+      </button>
+      <button class="nav-button work-nav-button" type="button" data-target="work-operations">
+        <span class="nav-icon" aria-hidden="true">⌁</span><span>Operations</span>
+      </button>
+      <button class="nav-button work-nav-button" type="button" data-target="work-archive">
+        <span class="nav-icon" aria-hidden="true">◫</span><span>Archive</span>
+      </button>
+      <button class="nav-button work-nav-button" type="button" data-target="work-intel">
+        <span class="nav-icon" aria-hidden="true">⌁</span><span>Intel</span>
+      </button>
+    </nav>
+
   </div>
 
   <dialog id="taskDialog">
@@ -826,14 +1006,96 @@
 
   <script src="./app.js" defer></script>
 
-  <dialog id="systemConfirmDialog" class="system-confirm-dialog">
-    <form method="dialog">
-      <p class="category-kicker">SYSTEM ACCESS</p>
-      <h2>Open System Settings?</h2>
-      <p class="helper-text">This will open app settings, backups, data controls, and system options.</p>
+  <dialog id="systemConfirmDialog" class="command-menu-dialog">
+    <div class="command-menu-shell">
+      <p class="category-kicker">COMMAND MENU</p>
+      <h2>Mode & System</h2>
+
+      <div class="command-menu-section">
+        <span class="data-label">MODE</span>
+        <button id="commandPersonalMode" class="command-menu-option" type="button">
+          <strong>PERSONAL MODE</strong><small>Operation Arete</small>
+        </button>
+        <button id="commandWorkMode" class="command-menu-option" type="button">
+          <strong>WORK MODE</strong><small>Professional operating system</small>
+        </button>
+      </div>
+
+      <div class="command-menu-section">
+        <span class="data-label">SYSTEM</span>
+        <button id="systemConfirmYes" class="command-menu-option" type="button">
+          <strong>MODE SYSTEM</strong><small id="commandModeSystemLabel">Personal settings</small>
+        </button>
+        <button id="commandGlobalBackup" class="command-menu-option" type="button">
+          <strong>GLOBAL BACKUP</strong><small>Export Personal + Work together</small>
+        </button>
+      </div>
+
+      <button id="systemConfirmCancel" class="button secondary full-width" type="button">Cancel</button>
+    </div>
+  </dialog>
+
+
+  <dialog id="workTaskDialog" class="work-dialog">
+    <form id="workTaskForm">
+      <h2 id="workTaskDialogTitle">New Work Task</h2>
+      <input id="workTaskId" type="hidden">
+      <label for="workTaskTitle">Task</label>
+      <input id="workTaskTitle" type="text" maxlength="160" required>
+      <div class="work-form-grid">
+        <div><label for="workTaskPriority">Priority</label><select id="workTaskPriority"><option>High</option><option selected>Medium</option><option>Low</option></select></div>
+        <div><label for="workTaskStatus">Status</label><select id="workTaskStatus"><option value="todo">Todo</option><option value="active">Active</option><option value="waiting">Waiting</option><option value="complete">Complete</option></select></div>
+        <div><label for="workTaskDue">Due</label><input id="workTaskDue" type="date"></div>
+        <div><label for="workTaskCategory">Category</label><input id="workTaskCategory" type="text" maxlength="60"></div>
+      </div>
+      <label for="workTaskOperation">Operation</label>
+      <select id="workTaskOperation"></select>
+      <label for="workTaskNotes">Notes</label>
+      <textarea id="workTaskNotes" rows="3" maxlength="1000"></textarea>
       <div class="button-row">
-        <button id="systemConfirmYes" class="button primary" type="button">Yes, open System</button>
-        <button id="systemConfirmCancel" class="button secondary" type="button">Cancel</button>
+        <button class="button primary" type="submit">Save task</button>
+        <button id="workTaskCancel" class="button secondary" type="button">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="workOperationDialog" class="work-dialog">
+    <form id="workOperationForm">
+      <h2>Work Operation</h2>
+      <input id="workOperationId" type="hidden">
+      <label for="workOperationName">Operation name</label>
+      <input id="workOperationName" type="text" maxlength="100" required>
+      <label for="workOperationIntent">Intent</label>
+      <textarea id="workOperationIntent" rows="2" maxlength="800"></textarea>
+      <label for="workOperationMission">Mission</label>
+      <textarea id="workOperationMission" rows="3" maxlength="1000"></textarea>
+      <label for="workOperationObjectives">Objectives</label>
+      <textarea id="workOperationObjectives" rows="5" maxlength="1800" placeholder="One objective per line"></textarea>
+      <div class="button-row">
+        <button class="button primary" type="submit">Save operation</button>
+        <button id="workOperationCancel" class="button secondary" type="button">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="workLogDialog" class="work-dialog">
+    <form id="workLogForm">
+      <h2>Work Log</h2>
+      <label for="workLogDate">Date</label>
+      <input id="workLogDate" type="date" required>
+      <label for="workLogCompleted">Completed</label>
+      <textarea id="workLogCompleted" rows="3" maxlength="1200"></textarea>
+      <label for="workLogIssues">Issues</label>
+      <textarea id="workLogIssues" rows="3" maxlength="1200"></textarea>
+      <label for="workLogDecisions">Decisions</label>
+      <textarea id="workLogDecisions" rows="3" maxlength="1200"></textarea>
+      <label for="workLogFollowUp">Follow-up</label>
+      <textarea id="workLogFollowUp" rows="3" maxlength="1200"></textarea>
+      <label for="workLogNotes">Notes</label>
+      <textarea id="workLogNotes" rows="3" maxlength="1200"></textarea>
+      <div class="button-row">
+        <button class="button primary" type="submit">Save work log</button>
+        <button id="workLogCancel" class="button secondary" type="button">Cancel</button>
       </div>
     </form>
   </dialog>

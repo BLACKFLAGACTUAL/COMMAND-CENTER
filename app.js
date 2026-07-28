@@ -120,6 +120,52 @@
   let archiveCalendarCursor = new Date(new Date().getFullYear(), new Date().getMonth(), 1, 12);
 
   const elements = {};
+  const WORK_STORAGE_KEY = "myCommandCenter.work.v1";
+  const APP_MODE_KEY = "myCommandCenter.activeMode";
+  let appMode = localStorage.getItem(APP_MODE_KEY) === "work" ? "work" : "personal";
+  let workTaskFilter = "open";
+  let workState = loadWorkState();
+
+  function createInitialWorkState() {
+    return {
+      version: 1,
+      settings: { defaultCategory: "" },
+      tasks: [],
+      operations: [],
+      logs: [],
+      activeOperationId: null
+    };
+  }
+
+  function loadWorkState() {
+    try {
+      const raw = localStorage.getItem(WORK_STORAGE_KEY);
+      if (!raw) return createInitialWorkState();
+      const parsed = JSON.parse(raw);
+      return {
+        ...createInitialWorkState(),
+        ...parsed,
+        settings: { ...createInitialWorkState().settings, ...(parsed.settings || {}) },
+        tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
+        operations: Array.isArray(parsed.operations) ? parsed.operations : [],
+        logs: Array.isArray(parsed.logs) ? parsed.logs : []
+      };
+    } catch (error) {
+      console.warn("Could not load Work Command data:", error);
+      return createInitialWorkState();
+    }
+  }
+
+  function saveWorkState() {
+    try {
+      localStorage.setItem(WORK_STORAGE_KEY, JSON.stringify(workState));
+      return true;
+    } catch (error) {
+      console.error("Could not save Work Command data:", error);
+      return false;
+    }
+  }
+
 
   document.addEventListener("DOMContentLoaded", init);
 
@@ -129,6 +175,7 @@
     bindEvents();
     initializeCollapsibleSections();
     renderAll();
+    applyModeUI();
     registerServiceWorker();
   }
 
@@ -179,7 +226,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle"].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -247,20 +294,50 @@
     document.querySelectorAll(".nav-button").forEach((button) => {
       button.addEventListener("click", () => switchView(button.dataset.target));
     });
-    elements.systemMenuButton.addEventListener("click", () => {
-      elements.systemConfirmDialog.showModal();
-    });
+    elements.systemMenuButton.addEventListener("click", openCommandMenu);
+    elements.commandPersonalMode.addEventListener("click", () => setAppMode("personal"));
+    elements.commandWorkMode.addEventListener("click", () => setAppMode("work"));
     elements.systemConfirmYes.addEventListener("click", () => {
       elements.systemConfirmDialog.close();
-      switchView("settings");
+      switchView(appMode === "work" ? "work-settings" : "settings");
     });
-    elements.systemConfirmCancel.addEventListener("click", () => {
-      elements.systemConfirmDialog.close();
-    });
+    elements.commandGlobalBackup.addEventListener("click", exportGlobalBackup);
+    elements.systemConfirmCancel.addEventListener("click", () => elements.systemConfirmDialog.close());
     elements.systemConfirmDialog.addEventListener("cancel", (event) => {
       event.preventDefault();
       elements.systemConfirmDialog.close();
     });
+
+    elements.workQuickAddTask.addEventListener("click", () => openWorkTaskDialog());
+    elements.workAddTaskButton.addEventListener("click", () => openWorkTaskDialog());
+    elements.workTaskCancel.addEventListener("click", () => elements.workTaskDialog.close());
+    elements.workTaskForm.addEventListener("submit", saveWorkTaskFromDialog);
+
+    elements.workAddOperationButton.addEventListener("click", () => openWorkOperationDialog());
+    elements.workOperationCancel.addEventListener("click", () => elements.workOperationDialog.close());
+    elements.workOperationForm.addEventListener("submit", saveWorkOperationFromDialog);
+
+    elements.workAddLogButton.addEventListener("click", openWorkLogDialog);
+    elements.workLogCancel.addEventListener("click", () => elements.workLogDialog.close());
+    elements.workLogForm.addEventListener("submit", saveWorkLogFromDialog);
+
+    document.querySelectorAll(".work-filter").forEach((button) => {
+      button.addEventListener("click", () => {
+        workTaskFilter = button.dataset.workFilter || "open";
+        document.querySelectorAll(".work-filter").forEach((item) => item.classList.toggle("active", item === button));
+        renderWorkTasks();
+      });
+    });
+
+    elements.saveWorkSettings.addEventListener("click", () => {
+      workState.settings.defaultCategory = elements.workDefaultCategory.value.trim();
+      saveWorkState();
+      elements.workSettingsStatus.textContent = "Work settings saved.";
+      setTimeout(() => { elements.workSettingsStatus.textContent = ""; }, 1500);
+    });
+    elements.exportWorkDataButton.addEventListener("click", exportWorkBackup);
+    elements.resetWorkDataButton.addEventListener("click", resetWorkData);
+
 
     elements.archiveCalendarPrev.addEventListener("click", () => {
       archiveCalendarCursor = new Date(
@@ -554,6 +631,7 @@
     renderActivityTracker();
     renderIntel();
     renderSettings();
+    renderWorkAll();
   }
 
   function renderHeader() {
@@ -3573,24 +3651,485 @@
     reader.readAsText(file);
   }
 
+
+  function openCommandMenu() {
+    elements.commandPersonalMode.classList.toggle("selected", appMode === "personal");
+    elements.commandWorkMode.classList.toggle("selected", appMode === "work");
+    elements.commandModeSystemLabel.textContent = appMode === "work" ? "Work settings" : "Personal settings";
+    elements.systemConfirmDialog.showModal();
+  }
+
+  function setAppMode(mode) {
+    appMode = mode === "work" ? "work" : "personal";
+    localStorage.setItem(APP_MODE_KEY, appMode);
+    elements.systemConfirmDialog.close();
+    applyModeUI();
+    switchView(appMode === "work" ? "work-dashboard" : "today");
+  }
+
+  function applyModeUI() {
+    const work = appMode === "work";
+    elements.personalNav.hidden = work;
+    elements.workNav.hidden = !work;
+    elements.brandEyebrow.textContent = work
+      ? "WORK COMMAND // PROFESSIONAL OPERATING SYSTEM"
+      : "OPERATION ARETE // PERSONAL OPERATING SYSTEM";
+    elements.brandTitle.textContent = work ? "WORK COMMAND" : "MY COMMAND CENTER";
+
+    if (work) {
+      renderWorkAll();
+    }
+  }
+
+  function workTodayKey() {
+    return formatDateKey(new Date());
+  }
+
+  function getActiveWorkOperation() {
+    return workState.operations.find((op) => op.id === workState.activeOperationId && op.status !== "complete") || null;
+  }
+
+  function workTaskDueToday(task) {
+    return task.due === workTodayKey() && task.status !== "complete";
+  }
+
+  function workStatusLabel(status) {
+    return ({ todo: "TODO", active: "ACTIVE", waiting: "WAITING", complete: "COMPLETE" })[status] || String(status || "TODO").toUpperCase();
+  }
+
+  function renderWorkAll() {
+    renderWorkDashboard();
+    renderWorkTasks();
+    renderWorkOperations();
+    renderWorkArchive();
+    renderWorkIntel();
+    renderWorkSettings();
+  }
+
+  function renderWorkDashboard() {
+    const active = workState.tasks.filter((task) => task.status !== "complete");
+    const complete = workState.tasks.filter((task) => task.status === "complete");
+    const total = workState.tasks.length;
+    const pct = total ? Math.round((complete.length / total) * 100) : 0;
+    elements.workCompletionPercent.textContent = `${pct}%`;
+    elements.workActiveCount.textContent = String(active.filter((task) => task.status === "active" || task.status === "todo").length);
+    elements.workDueTodayCount.textContent = String(active.filter(workTaskDueToday).length);
+    elements.workWaitingCount.textContent = String(active.filter((task) => task.status === "waiting").length);
+    elements.workCompleteCount.textContent = String(complete.length);
+
+    const op = getActiveWorkOperation();
+    elements.workCurrentOperationName.textContent = op ? op.name : "No active operation";
+    elements.workCurrentOperationMission.textContent = op
+      ? (op.mission || op.intent || "No mission statement entered.")
+      : "Create a Work Operation when you want tasks grouped under a larger mission.";
+
+    const priorityRank = { High: 0, Medium: 1, Low: 2 };
+    const tasks = [...active].sort((a,b) => {
+      const dueA = a.due || "9999-99-99";
+      const dueB = b.due || "9999-99-99";
+      return (priorityRank[a.priority] ?? 9) - (priorityRank[b.priority] ?? 9) || dueA.localeCompare(dueB);
+    }).slice(0, 6);
+
+    elements.workPriorityTasks.replaceChildren();
+    tasks.forEach((task) => elements.workPriorityTasks.appendChild(createWorkTaskCard(task, true)));
+    elements.workPriorityEmpty.hidden = tasks.length > 0;
+  }
+
+  function taskMatchesWorkFilter(task) {
+    if (workTaskFilter === "all") return true;
+    if (workTaskFilter === "complete") return task.status === "complete";
+    if (workTaskFilter === "waiting") return task.status === "waiting";
+    if (workTaskFilter === "today") return workTaskDueToday(task);
+    return task.status !== "complete";
+  }
+
+  function renderWorkTasks() {
+    const tasks = [...workState.tasks]
+      .filter(taskMatchesWorkFilter)
+      .sort((a,b) => (a.status === "complete") - (b.status === "complete") || String(a.due || "9999").localeCompare(String(b.due || "9999")));
+
+    elements.workTaskList.replaceChildren();
+    tasks.forEach((task) => elements.workTaskList.appendChild(createWorkTaskCard(task, false)));
+    elements.workTaskEmpty.hidden = tasks.length > 0;
+  }
+
+  function createWorkTaskCard(task, compact) {
+    const card = document.createElement("article");
+    card.className = `work-task-card priority-${String(task.priority || "medium").toLowerCase()}${compact ? " compact" : ""}`;
+
+    const top = document.createElement("div");
+    top.className = "work-task-top";
+    const info = document.createElement("div");
+    const op = workState.operations.find((item) => item.id === task.operationId);
+    info.innerHTML = `
+      <span class="work-task-priority">${escapeHtml(task.priority || "Medium")}</span>
+      <strong>${escapeHtml(task.title)}</strong>
+      <small>${escapeHtml(task.category || "General")}${task.due ? ` · Due ${escapeHtml(formatShortDate(task.due))}` : ""}${op ? ` · ${escapeHtml(op.name)}` : ""}</small>
+    `;
+    const status = document.createElement("span");
+    status.className = `work-status status-${task.status}`;
+    status.textContent = workStatusLabel(task.status);
+    top.append(info, status);
+
+    const actions = document.createElement("div");
+    actions.className = "work-task-actions";
+
+    if (task.status !== "complete") {
+      const advance = document.createElement("button");
+      advance.type = "button";
+      advance.className = "text-button";
+      advance.textContent = task.status === "waiting" ? "Resume" : task.status === "active" ? "Complete" : "Start";
+      advance.addEventListener("click", () => {
+        if (task.status === "waiting") task.status = "active";
+        else if (task.status === "active") {
+          task.status = "complete";
+          task.completedAt = new Date().toISOString();
+        } else task.status = "active";
+        saveWorkState();
+        renderWorkAll();
+      });
+      actions.appendChild(advance);
+    }
+
+    if (!compact) {
+      const edit = document.createElement("button");
+      edit.type = "button";
+      edit.className = "text-button";
+      edit.textContent = "Edit";
+      edit.addEventListener("click", () => openWorkTaskDialog(task.id));
+
+      const waiting = document.createElement("button");
+      waiting.type = "button";
+      waiting.className = "text-button";
+      waiting.textContent = "Waiting";
+      waiting.addEventListener("click", () => {
+        task.status = "waiting";
+        saveWorkState();
+        renderWorkAll();
+      });
+
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "text-button danger-text";
+      remove.textContent = "Delete";
+      remove.addEventListener("click", () => {
+        if (!confirm(`Delete "${task.title}"?`)) return;
+        workState.tasks = workState.tasks.filter((item) => item.id !== task.id);
+        saveWorkState();
+        renderWorkAll();
+      });
+      actions.append(edit, waiting, remove);
+    }
+
+    card.append(top, actions);
+    return card;
+  }
+
+  function openWorkTaskDialog(taskId = null) {
+    const task = taskId ? workState.tasks.find((item) => item.id === taskId) : null;
+    elements.workTaskDialogTitle.textContent = task ? "Edit Work Task" : "New Work Task";
+    elements.workTaskId.value = task?.id || "";
+    elements.workTaskTitle.value = task?.title || "";
+    elements.workTaskPriority.value = task?.priority || "Medium";
+    elements.workTaskStatus.value = task?.status || "todo";
+    elements.workTaskDue.value = task?.due || "";
+    elements.workTaskCategory.value = task?.category || workState.settings.defaultCategory || "";
+    elements.workTaskNotes.value = task?.notes || "";
+
+    elements.workTaskOperation.replaceChildren();
+    const none = document.createElement("option");
+    none.value = "";
+    none.textContent = "No operation";
+    elements.workTaskOperation.appendChild(none);
+    workState.operations.filter((op) => op.status !== "complete").forEach((op) => {
+      const option = document.createElement("option");
+      option.value = op.id;
+      option.textContent = op.name;
+      elements.workTaskOperation.appendChild(option);
+    });
+    elements.workTaskOperation.value = task?.operationId || "";
+    elements.workTaskDialog.showModal();
+  }
+
+  function saveWorkTaskFromDialog(event) {
+    event.preventDefault();
+    const id = elements.workTaskId.value;
+    const existing = id ? workState.tasks.find((task) => task.id === id) : null;
+    const priorStatus = existing?.status;
+    const task = existing || {
+      id: `wt-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      createdAt: new Date().toISOString()
+    };
+
+    task.title = elements.workTaskTitle.value.trim();
+    task.priority = elements.workTaskPriority.value;
+    task.status = elements.workTaskStatus.value;
+    task.due = elements.workTaskDue.value;
+    task.category = elements.workTaskCategory.value.trim();
+    task.operationId = elements.workTaskOperation.value;
+    task.notes = elements.workTaskNotes.value.trim();
+
+    if (!task.title) return;
+    if (task.status === "complete" && priorStatus !== "complete") task.completedAt = new Date().toISOString();
+    if (task.status !== "complete") task.completedAt = null;
+    if (!existing) workState.tasks.push(task);
+
+    saveWorkState();
+    elements.workTaskDialog.close();
+    renderWorkAll();
+  }
+
+  function renderWorkOperations() {
+    elements.workOperationList.replaceChildren();
+    const operations = [...workState.operations].sort((a,b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+    operations.forEach((op) => {
+      const card = document.createElement("article");
+      card.className = `operation-card${workState.activeOperationId === op.id ? " active-operation" : ""}`;
+      const linked = workState.tasks.filter((task) => task.operationId === op.id);
+      const complete = linked.filter((task) => task.status === "complete").length;
+      const pct = linked.length ? Math.round(complete / linked.length * 100) : 0;
+      card.innerHTML = `
+        <div class="section-heading">
+          <div><p class="category-kicker">${op.status === "complete" ? "COMPLETED" : workState.activeOperationId === op.id ? "ACTIVE OPERATION" : "WORK OPERATION"}</p><h3>${escapeHtml(op.name)}</h3></div>
+          <strong>${pct}%</strong>
+        </div>
+        <p class="helper-text">${escapeHtml(op.mission || op.intent || "No mission statement.")}</p>
+        <div class="work-objective-list">${(op.objectives || []).map((item) => `<span>• ${escapeHtml(item)}</span>`).join("")}</div>
+        <p class="helper-text">${linked.length} linked tasks · ${complete} complete</p>
+      `;
+
+      const actions = document.createElement("div");
+      actions.className = "button-row";
+      if (op.status !== "complete") {
+        const activate = document.createElement("button");
+        activate.className = "button secondary";
+        activate.type = "button";
+        activate.textContent = workState.activeOperationId === op.id ? "Active" : "Make Active";
+        activate.disabled = workState.activeOperationId === op.id;
+        activate.addEventListener("click", () => {
+          workState.activeOperationId = op.id;
+          saveWorkState();
+          renderWorkAll();
+        });
+        actions.appendChild(activate);
+      }
+
+      const edit = document.createElement("button");
+      edit.className = "button secondary";
+      edit.type = "button";
+      edit.textContent = "Edit";
+      edit.addEventListener("click", () => openWorkOperationDialog(op.id));
+      actions.appendChild(edit);
+
+      if (op.status !== "complete") {
+        const conclude = document.createElement("button");
+        conclude.className = "button secondary";
+        conclude.type = "button";
+        conclude.textContent = "Conclude";
+        conclude.addEventListener("click", () => {
+          if (!confirm(`Conclude ${op.name}?`)) return;
+          op.status = "complete";
+          op.completedAt = new Date().toISOString();
+          if (workState.activeOperationId === op.id) workState.activeOperationId = null;
+          saveWorkState();
+          renderWorkAll();
+        });
+        actions.appendChild(conclude);
+      }
+
+      card.appendChild(actions);
+      elements.workOperationList.appendChild(card);
+    });
+    elements.workOperationEmpty.hidden = operations.length > 0;
+  }
+
+  function openWorkOperationDialog(operationId = null) {
+    const op = operationId ? workState.operations.find((item) => item.id === operationId) : null;
+    elements.workOperationId.value = op?.id || "";
+    elements.workOperationName.value = op?.name || "";
+    elements.workOperationIntent.value = op?.intent || "";
+    elements.workOperationMission.value = op?.mission || "";
+    elements.workOperationObjectives.value = (op?.objectives || []).join("\n");
+    elements.workOperationDialog.showModal();
+  }
+
+  function saveWorkOperationFromDialog(event) {
+    event.preventDefault();
+    const id = elements.workOperationId.value;
+    const existing = id ? workState.operations.find((op) => op.id === id) : null;
+    const op = existing || {
+      id: `wop-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      createdAt: new Date().toISOString(),
+      status: "active"
+    };
+    op.name = elements.workOperationName.value.trim();
+    op.intent = elements.workOperationIntent.value.trim();
+    op.mission = elements.workOperationMission.value.trim();
+    op.objectives = elements.workOperationObjectives.value.split(/\n+/).map((x) => x.trim()).filter(Boolean);
+    if (!op.name) return;
+    if (!existing) {
+      workState.operations.push(op);
+      if (!workState.activeOperationId) workState.activeOperationId = op.id;
+    }
+    saveWorkState();
+    elements.workOperationDialog.close();
+    renderWorkAll();
+  }
+
+  function openWorkLogDialog() {
+    elements.workLogDate.value = workTodayKey();
+    ["workLogCompleted","workLogIssues","workLogDecisions","workLogFollowUp","workLogNotes"].forEach((id) => elements[id].value = "");
+    elements.workLogDialog.showModal();
+  }
+
+  function saveWorkLogFromDialog(event) {
+    event.preventDefault();
+    workState.logs.push({
+      id: `wl-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      date: elements.workLogDate.value,
+      completed: elements.workLogCompleted.value.trim(),
+      issues: elements.workLogIssues.value.trim(),
+      decisions: elements.workLogDecisions.value.trim(),
+      followUp: elements.workLogFollowUp.value.trim(),
+      notes: elements.workLogNotes.value.trim(),
+      createdAt: new Date().toISOString()
+    });
+    saveWorkState();
+    elements.workLogDialog.close();
+    renderWorkAll();
+  }
+
+  function renderWorkArchive() {
+    const records = [];
+    workState.logs.forEach((log) => records.push({ type: "log", date: log.date, item: log }));
+    workState.tasks.filter((task) => task.status === "complete" && task.completedAt).forEach((task) => {
+      records.push({ type: "task", date: String(task.completedAt).slice(0,10), item: task });
+    });
+    records.sort((a,b) => b.date.localeCompare(a.date));
+
+    elements.workArchiveList.replaceChildren();
+    records.forEach((record) => {
+      const card = document.createElement("article");
+      card.className = "history-card";
+      if (record.type === "task") {
+        const task = record.item;
+        card.innerHTML = `<strong>${escapeHtml(formatShortDate(record.date))}</strong><span class="work-status status-complete">TASK COMPLETE</span><h3>${escapeHtml(task.title)}</h3><p class="helper-text">${escapeHtml(task.notes || task.category || "Completed work task.")}</p>`;
+      } else {
+        const log = record.item;
+        card.innerHTML = `
+          <strong>${escapeHtml(formatShortDate(log.date))}</strong>
+          <span class="work-status">WORK LOG</span>
+          ${log.completed ? `<p><b>Completed:</b> ${escapeHtml(log.completed)}</p>` : ""}
+          ${log.issues ? `<p><b>Issues:</b> ${escapeHtml(log.issues)}</p>` : ""}
+          ${log.decisions ? `<p><b>Decisions:</b> ${escapeHtml(log.decisions)}</p>` : ""}
+          ${log.followUp ? `<p><b>Follow-up:</b> ${escapeHtml(log.followUp)}</p>` : ""}
+          ${log.notes ? `<p><b>Notes:</b> ${escapeHtml(log.notes)}</p>` : ""}
+        `;
+      }
+      elements.workArchiveList.appendChild(card);
+    });
+    elements.workArchiveEmpty.hidden = records.length > 0;
+  }
+
+  function renderWorkIntel() {
+    const total = workState.tasks.length;
+    const complete = workState.tasks.filter((task) => task.status === "complete");
+    const onTimeEligible = complete.filter((task) => task.due);
+    const onTime = onTimeEligible.filter((task) => String(task.completedAt || "").slice(0,10) <= task.due).length;
+    elements.workIntelTotal.textContent = String(total);
+    elements.workIntelComplete.textContent = String(complete.length);
+    elements.workIntelOnTime.textContent = onTimeEligible.length ? `${Math.round(onTime / onTimeEligible.length * 100)}%` : "—";
+    elements.workIntelOps.textContent = String(workState.operations.length);
+
+    const statuses = [
+      ["Todo", workState.tasks.filter((t) => t.status === "todo").length],
+      ["Active", workState.tasks.filter((t) => t.status === "active").length],
+      ["Waiting", workState.tasks.filter((t) => t.status === "waiting").length],
+      ["Complete", complete.length]
+    ];
+    const max = Math.max(1, ...statuses.map(([,n]) => n));
+    elements.workIntelStatusBars.innerHTML = statuses.map(([name,n]) => `
+      <div class="work-intel-bar"><span>${name}</span><div><i style="width:${Math.round(n/max*100)}%"></i></div><strong>${n}</strong></div>
+    `).join("");
+
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    const recentComplete = complete.filter((task) => new Date(task.completedAt) >= cutoff);
+    const recentLogs = workState.logs.filter((log) => new Date(`${log.date}T12:00:00`) >= cutoff);
+    elements.workIntelRecent.innerHTML = `
+      <p><strong>${recentComplete.length}</strong> tasks completed in the last 30 days.</p>
+      <p><strong>${recentLogs.length}</strong> work logs captured.</p>
+      <p><strong>${workState.tasks.filter((t) => t.status === "waiting").length}</strong> tasks currently waiting.</p>
+    `;
+  }
+
+  function renderWorkSettings() {
+    elements.workDefaultCategory.value = workState.settings.defaultCategory || "";
+  }
+
+  function exportWorkBackup() {
+    downloadJsonFile(`work-command-backup-${workTodayKey()}.json`, {
+      type: "my-command-center-work",
+      exportedAt: new Date().toISOString(),
+      work: workState
+    });
+  }
+
+  function exportGlobalBackup() {
+    downloadJsonFile(`command-center-global-backup-${workTodayKey()}.json`, {
+      type: "my-command-center-global",
+      exportedAt: new Date().toISOString(),
+      personal: state,
+      work: workState,
+      activeMode: appMode
+    });
+    elements.systemConfirmDialog.close();
+  }
+
+  function downloadJsonFile(filename, payload) {
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function resetWorkData() {
+    if (!confirm("Delete all Work Command data? Personal Command Center data will NOT be touched.")) return;
+    if (!confirm("Final confirmation: delete Work tasks, Work Operations, Work Logs, and Work settings?")) return;
+    workState = createInitialWorkState();
+    saveWorkState();
+    renderWorkAll();
+  }
+
   const SECTION_IDENTITIES = {
     schedule: { title: "PROTOCOL", kicker: "14-DAY BATTLE RHYTHM // TRAINING PLAN" },
     history: { title: "ARCHIVE", kicker: "WRITTEN RECORD // LESSONS LEARNED" },
     activity: { title: "ACTIVITY", kicker: "PERFORMANCE LOG // TRACKING" },
     intel: { title: "INTEL", kicker: "PATTERNS // TREND ANALYSIS" },
     operations: { title: "OPERATIONS", kicker: "CAMPAIGN // MACRO PROGRESS" },
-    settings: { title: "SYSTEM", kicker: "CONTROL // SETTINGS" }
+    settings: { title: "SYSTEM", kicker: "CONTROL // SETTINGS" },
+    "work-dashboard": { title: "WORK COMMAND", kicker: "PROFESSIONAL OPERATING SYSTEM" },
+    "work-tasks": { title: "TASKS", kicker: "EXECUTION // TASK CONTROL" },
+    "work-operations": { title: "WORK OPS", kicker: "MISSION // PROFESSIONAL OPERATIONS" },
+    "work-archive": { title: "WORK ARCHIVE", kicker: "PROFESSIONAL RECORD // DAILY LOG" },
+    "work-intel": { title: "WORK INTEL", kicker: "PATTERNS // PROFESSIONAL TRENDS" },
+    "work-settings": { title: "WORK SYSTEM", kicker: "CONTROL // WORK SETTINGS" }
   };
 
   function renderHeaderForView(target) {
-    const dashboard = target === "today";
-    elements.dashboardDirectivePanel.hidden = !dashboard;
-    elements.sectionIdentityBanner.hidden = dashboard;
+    const personalDashboard = appMode === "personal" && target === "today";
+    elements.dashboardDirectivePanel.hidden = !personalDashboard;
+    elements.sectionIdentityBanner.hidden = personalDashboard;
 
-    if (!dashboard) {
+    if (!personalDashboard) {
       const identity = SECTION_IDENTITIES[target] || {
         title: String(target || "COMMAND CENTER").toUpperCase(),
-        kicker: "COMMAND CENTER"
+        kicker: appMode === "work" ? "WORK COMMAND" : "COMMAND CENTER"
       };
       elements.sectionIdentityTitle.textContent = identity.title;
       elements.sectionIdentityKicker.textContent = identity.kicker;
@@ -3623,6 +4162,12 @@
     if (target === "operations") renderOperations();
     if (target === "schedule") renderSchedule();
     if (target === "settings") renderSettings();
+    if (target === "work-dashboard") renderWorkDashboard();
+    if (target === "work-tasks") renderWorkTasks();
+    if (target === "work-operations") renderWorkOperations();
+    if (target === "work-archive") renderWorkArchive();
+    if (target === "work-intel") renderWorkIntel();
+    if (target === "work-settings") renderWorkSettings();
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
