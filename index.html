@@ -723,9 +723,15 @@
         </section>
 
         <section class="settings-card">
-          <h3>Work backup</h3>
-          <p class="helper-text">Export Work Command by itself without changing your personal backup.</p>
-          <button id="exportWorkDataButton" class="button secondary full-width" type="button">Export work data</button>
+          <h3>Work backup & restore</h3>
+          <p class="helper-text">Export or restore Work Command independently. Personal Command Center data remains untouched.</p>
+          <div class="button-stack">
+            <button id="exportWorkDataButton" class="button secondary full-width" type="button">Export Work backup</button>
+            <label class="button secondary full-width file-button" for="workRestoreInput">Restore Work backup</label>
+            <input id="workRestoreInput" class="sr-only" type="file" accept="application/json,.json">
+            <button id="workOpenGlobalRestoreButton" class="button secondary full-width" type="button">Restore Global backup</button>
+          </div>
+          <p id="workBackupStatus" class="save-status" aria-live="polite"></p>
         </section>
 
         <section class="settings-card danger-zone">
@@ -766,13 +772,16 @@
         </section>
 
         <section class="settings-card" data-collapsible-key="system-backup">
-          <h3>Backup and restore</h3>
-          <p class="helper-text">Export regularly. Local browser data can be erased if Safari website data is cleared.</p>
+          <h3>Backup & restore</h3>
+          <p class="helper-text">Create a portable backup before major updates or resets. Restore validates the file before changing anything.</p>
           <div class="button-stack">
-            <button id="exportDataButton" class="button secondary full-width" type="button">Export data</button>
-            <label class="button secondary full-width file-button" for="importDataInput">Import data</label>
+            <button id="exportDataButton" class="button secondary full-width" type="button">Export Personal backup</button>
+            <label class="button secondary full-width file-button" for="importDataInput">Restore Personal backup</label>
             <input id="importDataInput" class="sr-only" type="file" accept="application/json,.json">
+            <button id="openGlobalRestoreButton" class="button secondary full-width" type="button">Restore Global backup</button>
+            <input id="globalRestoreInput" class="sr-only" type="file" accept="application/json,.json">
           </div>
+          <p id="backupStatus" class="save-status" aria-live="polite"></p>
         </section>
 
         <section class="settings-card danger-zone">
@@ -1121,6 +1130,46 @@
         <button id="workLogCancel" class="button secondary" type="button">Cancel</button>
       </div>
     </form>
+  </dialog>
+
+
+  <dialog id="restorePreviewDialog" class="restore-preview-dialog">
+    <div class="restore-preview-shell">
+      <p class="category-kicker">BACKUP VALIDATION</p>
+      <h2 id="restorePreviewTitle">Backup validated</h2>
+      <p id="restorePreviewMeta" class="helper-text"></p>
+
+      <div id="restorePreviewStats" class="restore-preview-stats"></div>
+
+      <div class="restore-mode-section">
+        <span class="data-label">RESTORE MODE</span>
+
+        <label class="restore-mode-option">
+          <input type="radio" name="restoreMode" value="merge" checked>
+          <span>
+            <strong>Merge with current data</strong>
+            <small>Keep existing unique records and add missing records from the backup.</small>
+          </span>
+        </label>
+
+        <label class="restore-mode-option">
+          <input type="radio" name="restoreMode" value="replace">
+          <span>
+            <strong>Replace restored scope</strong>
+            <small>Use this backup as the authoritative copy for the selected scope.</small>
+          </span>
+        </label>
+      </div>
+
+      <div class="restore-warning">
+        A safety snapshot of your current data is created immediately before restore.
+      </div>
+
+      <div class="button-row restore-actions">
+        <button id="restoreConfirmButton" class="button primary" type="button">Restore backup</button>
+        <button id="restoreCancelButton" class="button secondary" type="button">Cancel</button>
+      </div>
+    </div>
   </dialog>
 
 </body>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-work-mode-v12-ui-fix";
+const CACHE_NAME = "command-center-backup-restore-v13";
 const APP_SHELL = [
   "./",
   "./index.html",

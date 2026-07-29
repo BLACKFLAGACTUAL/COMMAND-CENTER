@@ -125,6 +125,9 @@
   let appMode = localStorage.getItem(APP_MODE_KEY) === "work" ? "work" : "personal";
   let workTaskFilter = "open";
   let workState = loadWorkState();
+  const BACKUP_SCHEMA_VERSION = 13;
+  const SAFETY_SNAPSHOT_KEY = "myCommandCenter.preRestoreSnapshot.v13";
+  let pendingRestore = null;
 
   function createInitialWorkState() {
     return {
@@ -226,7 +229,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel"].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -498,6 +501,16 @@
 
     elements.exportDataButton.addEventListener("click", exportData);
     elements.importDataInput.addEventListener("change", importData);
+    elements.openGlobalRestoreButton.addEventListener("click", () => elements.globalRestoreInput.click());
+    elements.workOpenGlobalRestoreButton.addEventListener("click", () => elements.globalRestoreInput.click());
+    elements.globalRestoreInput.addEventListener("change", (event) => prepareRestoreFromFile(event, "global"));
+    elements.workRestoreInput.addEventListener("change", (event) => prepareRestoreFromFile(event, "work"));
+    elements.restoreConfirmButton.addEventListener("click", executePendingRestore);
+    elements.restoreCancelButton.addEventListener("click", closeRestorePreview);
+    elements.restorePreviewDialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      closeRestorePreview();
+    });
     elements.resetTodayButton.addEventListener("click", resetToday);
     elements.deleteAllDataButton.addEventListener("click", deleteAllData);
   }
@@ -3591,70 +3604,373 @@
   }
 
   function deleteAllData() {
-    const first = confirm("Delete every stored Command Center record and setting from this browser?");
-    if (!first) return;
-    const second = confirm("This is permanent unless you exported a backup. Delete all data now?");
-    if (!second) return;
+    if (!confirm("Delete all Personal Command Center data? Work Command data will remain separate.")) return;
 
-    localStorage.removeItem(BACKUP_STORAGE_KEY);
+    if (confirm("Create and download a safety backup before wiping Personal data?")) {
+      downloadSafetyBackupBeforeWipe("personal");
+    }
+
+    if (!confirm("Final confirmation: permanently reset Personal Command Center data in this browser?")) return;
+
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(BACKUP_STORAGE_KEY);
+    } catch (_) {}
     state = createInitialState();
     saveAndRender();
     switchView("today");
   }
 
-  function exportData() {
-    const payload = {
-      exportedAt: new Date().toISOString(),
-      app: "My Command Center",
-      data: state
+  function countPersonalBackupData(personal) {
+    const daily = Object.keys(personal?.daily || {});
+    const aars = daily.filter((date) => {
+      const aar = personal.daily?.[date]?.aar || {};
+      return ["wentWell","improve","lesson","priority"].some((field) => String(aar[field] || "").trim());
+    }).length;
+
+    const liftEntries = Object.values(personal?.exerciseLogs || {})
+      .reduce((sum, entries) => sum + (Array.isArray(entries) ? entries.length : 0), 0);
+
+    const activityEntries = Object.values(personal?.activityTrackers || {})
+      .reduce((sum, tracker) => sum + (Array.isArray(tracker?.entries) ? tracker.entries.length : 0), 0);
+
+    return {
+      days: daily.length,
+      aars,
+      lifts: liftEntries,
+      activities: activityEntries,
+      operations: personal?.operations?.items?.length || 0
     };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {
-      type: "application/json"
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `command-center-backup-${getTodayKey()}.json`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  function importData(event) {
-    const file = event.target.files?.[0];
+  function countWorkBackupData(work) {
+    return {
+      tasks: Array.isArray(work?.tasks) ? work.tasks.length : 0,
+      operations: Array.isArray(work?.operations) ? work.operations.length : 0,
+      logs: Array.isArray(work?.logs) ? work.logs.length : 0
+    };
+  }
+
+  function makeBackupEnvelope(scope) {
+    const exportedAt = new Date().toISOString();
+    const base = {
+      app: "My Command Center",
+      format: "command-center-backup",
+      schemaVersion: BACKUP_SCHEMA_VERSION,
+      exportedAt,
+      scope
+    };
+
+    if (scope === "personal") {
+      return { ...base, personal: structuredCloneSafe(state) };
+    }
+    if (scope === "work") {
+      return { ...base, work: structuredCloneSafe(workState) };
+    }
+    return {
+      ...base,
+      personal: structuredCloneSafe(state),
+      work: structuredCloneSafe(workState),
+      activeMode: appMode
+    };
+  }
+
+  function exportData() {
+    const payload = makeBackupEnvelope("personal");
+    downloadJsonFile(`command-center-personal-${getTodayKey()}.json`, payload);
+    if (elements.backupStatus) elements.backupStatus.textContent = "Personal backup exported.";
+  }
+
+  function exportWorkBackup() {
+    const payload = makeBackupEnvelope("work");
+    downloadJsonFile(`command-center-work-${workTodayKey()}.json`, payload);
+    if (elements.workBackupStatus) elements.workBackupStatus.textContent = "Work backup exported.";
+  }
+
+  function exportGlobalBackup() {
+    const payload = makeBackupEnvelope("global");
+    downloadJsonFile(`command-center-global-${workTodayKey()}.json`, payload);
+    elements.systemConfirmDialog.close();
+  }
+
+  function normalizeIncomingBackup(parsed, requestedScope = "personal") {
+    if (!parsed || typeof parsed !== "object") throw new Error("Backup file is empty or invalid.");
+
+    // v13+ envelope.
+    if (parsed.format === "command-center-backup") {
+      return {
+        schemaVersion: Number(parsed.schemaVersion) || 1,
+        exportedAt: parsed.exportedAt || null,
+        scope: parsed.scope || requestedScope,
+        personal: parsed.personal || null,
+        work: parsed.work || null,
+        activeMode: parsed.activeMode || null
+      };
+    }
+
+    // Earlier Global backup format from Work Mode v11/v12.
+    if (parsed.type === "my-command-center-global") {
+      return {
+        schemaVersion: Number(parsed.schemaVersion) || 11,
+        exportedAt: parsed.exportedAt || null,
+        scope: "global",
+        personal: parsed.personal || null,
+        work: parsed.work || null,
+        activeMode: parsed.activeMode || null
+      };
+    }
+
+    // Earlier Work-only backup.
+    if (parsed.type === "my-command-center-work") {
+      return {
+        schemaVersion: Number(parsed.schemaVersion) || 11,
+        exportedAt: parsed.exportedAt || null,
+        scope: "work",
+        personal: null,
+        work: parsed.work || null,
+        activeMode: null
+      };
+    }
+
+    // Legacy personal payload: { app, exportedAt, data } or raw personal state.
+    const legacyPersonal = parsed.data || parsed;
+    if (legacyPersonal?.settings && legacyPersonal?.daily) {
+      return {
+        schemaVersion: Number(parsed.schemaVersion) || Number(legacyPersonal.version) || 1,
+        exportedAt: parsed.exportedAt || null,
+        scope: "personal",
+        personal: legacyPersonal,
+        work: null,
+        activeMode: null
+      };
+    }
+
+    throw new Error("This is not a recognized My Command Center backup.");
+  }
+
+  function validateRestoreEnvelope(envelope, requestedScope) {
+    if (!envelope) throw new Error("Could not read backup.");
+
+    const effectiveScope = requestedScope === "global" ? "global" : requestedScope;
+
+    if (effectiveScope === "personal" && !envelope.personal) {
+      throw new Error("This backup does not contain Personal Command Center data.");
+    }
+    if (effectiveScope === "work" && !envelope.work) {
+      throw new Error("This backup does not contain Work Command data.");
+    }
+    if (effectiveScope === "global" && !envelope.personal && !envelope.work) {
+      throw new Error("This backup does not contain Personal or Work data.");
+    }
+
+    if (envelope.personal) {
+      if (typeof envelope.personal !== "object" || !envelope.personal.settings || !envelope.personal.daily) {
+        throw new Error("Personal backup data failed validation.");
+      }
+    }
+    if (envelope.work) {
+      if (typeof envelope.work !== "object" || !Array.isArray(envelope.work.tasks) || !Array.isArray(envelope.work.operations)) {
+        throw new Error("Work backup data failed validation.");
+      }
+    }
+    return true;
+  }
+
+  function prepareRestoreFromFile(event, requestedScope) {
+    const input = event.target;
+    const file = input.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = () => {
       try {
         const parsed = JSON.parse(String(reader.result));
-        const incoming = parsed.data || parsed;
-
-        if (!incoming || typeof incoming !== "object" || !incoming.settings || !incoming.daily) {
-          throw new Error("This file is not a valid Command Center backup.");
-        }
-
-        if (!confirm("Import this backup? It will replace the data currently stored in this browser.")) {
-          return;
-        }
-
-        state = incoming;
-        ensureStateShape();
-        saveAndRender();
-        switchView("today");
-        alert("Backup imported successfully.");
+        const envelope = normalizeIncomingBackup(parsed, requestedScope);
+        validateRestoreEnvelope(envelope, requestedScope);
+        pendingRestore = { envelope, requestedScope, fileName: file.name };
+        renderRestorePreview();
+        elements.restorePreviewDialog.showModal();
       } catch (error) {
-        alert(error.message || "The backup could not be imported.");
+        alert(error.message || "The backup could not be validated.");
+        pendingRestore = null;
       } finally {
-        elements.importDataInput.value = "";
+        input.value = "";
       }
     };
     reader.onerror = () => {
-      alert("The selected file could not be read.");
-      elements.importDataInput.value = "";
+      alert("The selected backup file could not be read.");
+      input.value = "";
     };
     reader.readAsText(file);
+  }
+
+  function importData(event) {
+    // Keep the existing Personal Restore file button wired to the new validated flow.
+    prepareRestoreFromFile(event, "personal");
+  }
+
+  function renderRestorePreview() {
+    if (!pendingRestore) return;
+    const { envelope, requestedScope, fileName } = pendingRestore;
+
+    const scopeLabel = requestedScope === "global"
+      ? "Global"
+      : requestedScope === "work" ? "Work" : "Personal";
+
+    elements.restorePreviewTitle.textContent = `${scopeLabel} backup validated`;
+    const exported = envelope.exportedAt ? new Date(envelope.exportedAt).toLocaleString() : "Unknown";
+    elements.restorePreviewMeta.textContent =
+      `${fileName} · Created ${exported} · Schema v${envelope.schemaVersion || 1}`;
+
+    const cards = [];
+    if ((requestedScope === "personal" || requestedScope === "global") && envelope.personal) {
+      const p = countPersonalBackupData(envelope.personal);
+      cards.push(["Personal days", p.days], ["AARs", p.aars], ["Lift entries", p.lifts], ["Activity entries", p.activities], ["Personal Ops", p.operations]);
+    }
+    if ((requestedScope === "work" || requestedScope === "global") && envelope.work) {
+      const w = countWorkBackupData(envelope.work);
+      cards.push(["Work tasks", w.tasks], ["Work Ops", w.operations], ["Work logs", w.logs]);
+    }
+
+    elements.restorePreviewStats.replaceChildren();
+    cards.forEach(([label, value]) => {
+      const card = document.createElement("div");
+      card.innerHTML = `<span>${escapeHtml(label)}</span><strong>${value}</strong>`;
+      elements.restorePreviewStats.appendChild(card);
+    });
+  }
+
+  function closeRestorePreview() {
+    pendingRestore = null;
+    if (elements.restorePreviewDialog?.open) elements.restorePreviewDialog.close();
+  }
+
+  function getRestoreMode() {
+    return document.querySelector('input[name="restoreMode"]:checked')?.value === "replace"
+      ? "replace"
+      : "merge";
+  }
+
+  function createSafetySnapshot(reason = "restore") {
+    const snapshot = {
+      app: "My Command Center",
+      format: "command-center-safety-snapshot",
+      schemaVersion: BACKUP_SCHEMA_VERSION,
+      createdAt: new Date().toISOString(),
+      reason,
+      personal: structuredCloneSafe(state),
+      work: structuredCloneSafe(workState),
+      activeMode: appMode
+    };
+    try {
+      localStorage.setItem(SAFETY_SNAPSHOT_KEY, JSON.stringify(snapshot));
+    } catch (error) {
+      console.warn("Could not save pre-restore safety snapshot:", error);
+    }
+    return snapshot;
+  }
+
+  function mergeWorkStates(current, incoming) {
+    const base = createInitialWorkState();
+    const a = current && typeof current === "object" ? current : base;
+    const b = incoming && typeof incoming === "object" ? incoming : base;
+
+    const taskMap = new Map();
+    [...(a.tasks || []), ...(b.tasks || [])].forEach((task) => {
+      if (!task) return;
+      const key = task.id || JSON.stringify([task.title || "", task.createdAt || "", task.due || ""]);
+      const existing = taskMap.get(key);
+      taskMap.set(key, existing ? { ...existing, ...structuredCloneSafe(task) } : structuredCloneSafe(task));
+    });
+
+    const opMap = new Map();
+    [...(a.operations || []), ...(b.operations || [])].forEach((op) => {
+      if (!op) return;
+      const key = op.id || JSON.stringify([op.name || "", op.createdAt || ""]);
+      const existing = opMap.get(key);
+      opMap.set(key, existing ? { ...existing, ...structuredCloneSafe(op) } : structuredCloneSafe(op));
+    });
+
+    const logMap = new Map();
+    [...(a.logs || []), ...(b.logs || [])].forEach((log) => {
+      if (!log) return;
+      const key = log.id || JSON.stringify([log.date || "", log.completed || "", log.createdAt || ""]);
+      const existing = logMap.get(key);
+      logMap.set(key, existing ? { ...existing, ...structuredCloneSafe(log) } : structuredCloneSafe(log));
+    });
+
+    return {
+      ...base,
+      ...a,
+      ...b,
+      settings: { ...base.settings, ...(a.settings || {}), ...(b.settings || {}) },
+      tasks: [...taskMap.values()],
+      operations: [...opMap.values()],
+      logs: [...logMap.values()],
+      activeOperationId: b.activeOperationId || a.activeOperationId || null
+    };
+  }
+
+  function executePendingRestore() {
+    if (!pendingRestore) return;
+    const { envelope, requestedScope } = pendingRestore;
+    const mode = getRestoreMode();
+
+    const scopeLabel = requestedScope === "global"
+      ? "Personal + Work"
+      : requestedScope === "work" ? "Work" : "Personal";
+
+    if (mode === "replace" && !confirm(`Replace current ${scopeLabel} data with this backup? A safety snapshot will be created first.`)) {
+      return;
+    }
+
+    createSafetySnapshot(`pre-${requestedScope}-${mode}-restore`);
+
+    try {
+      if ((requestedScope === "personal" || requestedScope === "global") && envelope.personal) {
+        state = mode === "merge"
+          ? mergeCommandCenterStates(state, envelope.personal)
+          : structuredCloneSafe(envelope.personal);
+        ensureStateShape();
+        saveState();
+      }
+
+      if ((requestedScope === "work" || requestedScope === "global") && envelope.work) {
+        workState = mode === "merge"
+          ? mergeWorkStates(workState, envelope.work)
+          : { ...createInitialWorkState(), ...structuredCloneSafe(envelope.work) };
+        saveWorkState();
+      }
+
+      if (requestedScope === "global" && envelope.activeMode) {
+        appMode = envelope.activeMode === "work" ? "work" : "personal";
+        try { localStorage.setItem(APP_MODE_KEY, appMode); } catch (_) {}
+      }
+
+      closeRestorePreview();
+      renderAll();
+      applyModeUI();
+      switchView(appMode === "work" ? "work-dashboard" : "today");
+
+      const message = `${scopeLabel} backup restored using ${mode === "merge" ? "Merge" : "Replace"} mode.`;
+      if (requestedScope === "work" && elements.workBackupStatus) elements.workBackupStatus.textContent = message;
+      else if (elements.backupStatus) elements.backupStatus.textContent = message;
+      alert(message);
+    } catch (error) {
+      console.error("Restore failed:", error);
+      alert(`Restore failed: ${error.message || "Unknown error"}. Your pre-restore safety snapshot was preserved.`);
+    }
+  }
+
+  function downloadSafetyBackupBeforeWipe(scope) {
+    const payload = scope === "work"
+      ? makeBackupEnvelope("work")
+      : scope === "personal"
+        ? makeBackupEnvelope("personal")
+        : makeBackupEnvelope("global");
+
+    const label = scope === "work" ? "work" : scope === "personal" ? "personal" : "global";
+    downloadJsonFile(`command-center-pre-wipe-${label}-${workTodayKey()}.json`, payload);
   }
 
 
@@ -4142,7 +4458,13 @@
 
   function resetWorkData() {
     if (!confirm("Delete all Work Command data? Personal Command Center data will NOT be touched.")) return;
+
+    if (confirm("Create and download a safety backup before wiping Work data?")) {
+      downloadSafetyBackupBeforeWipe("work");
+    }
+
     if (!confirm("Final confirmation: delete Work tasks, Work Operations, Work Logs, and Work settings?")) return;
+
     workState = createInitialWorkState();
     saveWorkState();
     renderWorkAll();
