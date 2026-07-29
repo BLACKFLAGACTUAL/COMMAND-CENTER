@@ -2632,3 +2632,81 @@ body[data-app-mode="work"] #brandTitle::after {
     animation: none;
   }
 }
+
+
+/* v15 — streamlined SITREP */
+.ai-sitrep-card {
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: .85rem;
+  padding: .9rem 1rem;
+}
+
+.ai-sitrep-card-copy p {
+  font-size: .82rem;
+  line-height: 1.4;
+}
+
+.ai-sitrep-start {
+  min-height: 52px;
+}
+
+.ai-sitrep-context {
+  padding: .5rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: rgba(239,75,80,.035);
+  color: var(--muted);
+  font-size: .66rem;
+  letter-spacing: .03em;
+}
+
+.ai-sitrep-shell {
+  grid-template-rows: auto auto auto minmax(180px,1fr) auto;
+}
+
+.ai-sitrep-conversation {
+  gap: .55rem;
+}
+
+.ai-message {
+  max-width: 84%;
+  padding: .62rem .72rem;
+}
+
+.ai-sitrep-input-area {
+  grid-template-columns: 72px minmax(0,1fr);
+  gap: .55rem;
+  padding: .7rem;
+}
+
+.ai-mic-button,
+.ai-sitrep-text-entry textarea {
+  min-height: 68px;
+}
+
+.ai-sitrep-review {
+  padding: .85rem;
+}
+
+@media (max-width: 520px) {
+  .ai-sitrep-card {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-sitrep-start {
+    width: 100%;
+  }
+
+  .ai-sitrep-dialog {
+    width: calc(100vw - 12px);
+    height: 88vh;
+  }
+
+  .ai-sitrep-input-area {
+    grid-template-columns: 62px minmax(0,1fr);
+    padding: .6rem;
+  }
+
+  .ai-mic-button {
+    font-size: .72rem;
+  }
+}

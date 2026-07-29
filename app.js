@@ -229,7 +229,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart"].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -299,58 +299,41 @@
 
   function createSitrepSession() {
     const day = getTodayRecord();
-    const cycleDay = calculateCycleDay(new Date());
-    const workout = state.settings.schedule[cycleDay - 1] || "Training";
-    const steps = [];
-
-    day.mindTasks.forEach((task) => {
-      steps.push({
-        type: "task",
-        category: "mind",
-        taskId: task.id,
-        label: task.text,
-        question: `Mind check: did you complete "${task.text}" today?`
-      });
-    });
-
-    steps.push({
-      type: "workout",
-      question: `Today's scheduled training is ${workout}. Did you train? Tell me what you did, or say no.`
-    });
-
-    steps.push({
-      type: "protein",
-      question: `About how many grams of protein did you get today? You can say a number, or say skip.`
-    });
-
-    steps.push({
-      type: "activity",
-      question: `Any other training or activity worth logging? For example: "ran 3 miles in 21 minutes, felt easy" or "incline bench 225 for 5." Say none if there's nothing else.`
-    });
-
-    day.spiritTasks.forEach((task) => {
-      steps.push({
-        type: "task",
-        category: "spirit",
-        taskId: task.id,
-        label: task.text,
-        question: `Spirit check: did you complete "${task.text}" today?`
-      });
-    });
-
-    steps.push({ type: "aar", field: "wentWell", question: "What went well today?" });
-    steps.push({ type: "aar", field: "improve", question: "What needs improvement?" });
-    steps.push({ type: "aar", field: "lesson", question: "What's the main lesson learned?" });
-    steps.push({ type: "aar", field: "priority", question: "What's tomorrow's main priority?" });
-    steps.push({ type: "rating", question: "Rate today's overall execution from 1 to 10." });
+    const completedMind = day.mindTasks.filter((task) => task.completed).length;
+    const completedSpirit = day.spiritTasks.filter((task) => task.completed).length;
+    const totalChecks = day.mindTasks.length + day.spiritTasks.length + 1;
+    const completedChecks = completedMind + completedSpirit + (day.workoutComplete ? 1 : 0);
 
     return {
       date: getTodayKey(),
       stepIndex: 0,
-      steps,
+      steps: [
+        {
+          type: "activity",
+          question: "Start with training. Tell me what activity or workout you did today. Include lifts, weight and reps, distance and time, or say none."
+        },
+        {
+          type: "aar",
+          field: "wentWell",
+          question: "What went well today?"
+        },
+        {
+          type: "reflection",
+          question: "What needs improvement, and what did you learn from today?"
+        },
+        {
+          type: "aar",
+          field: "priority",
+          question: "What's tomorrow's main priority?"
+        },
+        {
+          type: "rating",
+          question: "Optional: rate the day from 1 to 10, or say skip."
+        }
+      ],
       proposals: [],
       transcript: [],
-      workoutName: workout
+      checkboxContext: { completed: completedChecks, total: totalChecks }
     };
   }
 
@@ -360,6 +343,8 @@
     elements.aiSitrepReview.hidden = true;
     elements.aiSitrepInputArea.hidden = false;
     elements.aiSitrepTextInput.value = "";
+    elements.aiSitrepContext.textContent =
+      `Dashboard checkboxes stay manual · ${sitrepSession.checkboxContext.completed}/${sitrepSession.checkboxContext.total} currently complete`;
     renderSitrepQuestion();
     elements.aiSitrepDialog.showModal();
   }
@@ -370,6 +355,8 @@
     elements.aiSitrepConversation.replaceChildren();
     elements.aiSitrepReview.hidden = true;
     elements.aiSitrepInputArea.hidden = false;
+    elements.aiSitrepContext.textContent =
+      `Dashboard checkboxes stay manual · ${sitrepSession.checkboxContext.completed}/${sitrepSession.checkboxContext.total} currently complete`;
     renderSitrepQuestion();
   }
 
@@ -399,13 +386,35 @@
     setTimeout(() => elements.aiSitrepTextInput.focus(), 100);
   }
 
+  function getPreferredSitrepVoice() {
+    if (!("speechSynthesis" in window)) return null;
+    const voices = window.speechSynthesis.getVoices() || [];
+    const preferredNames = [
+      "Daniel", "Alex", "Tom", "Arthur", "Aaron",
+      "Google UK English Male", "Microsoft Guy", "Microsoft David",
+      "Microsoft Mark", "Microsoft Ryan"
+    ];
+
+    for (const name of preferredNames) {
+      const voice = voices.find((item) =>
+        String(item.name || "").toLowerCase().includes(name.toLowerCase())
+      );
+      if (voice) return voice;
+    }
+
+    return voices.find((voice) => /^en(-|_)/i.test(voice.lang || "")) || voices[0] || null;
+  }
+
   function speakSitrep(text) {
     if (!("speechSynthesis" in window)) return;
     try {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1.02;
-      utterance.pitch = 0.95;
+      const voice = getPreferredSitrepVoice();
+      if (voice) utterance.voice = voice;
+      utterance.rate = 1.03;
+      utterance.pitch = 0.82;
+      utterance.volume = 1;
       window.speechSynthesis.speak(utterance);
     } catch (_) {}
   }
@@ -493,45 +502,34 @@
   function addSitrepProposal(proposal) {
     sitrepSession.proposals.push({
       id: `sp-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      approved: true,
+      approved: proposal.kind === "activityNote" ? false : true,
       ...proposal
     });
   }
 
+  function splitReflectionAnswer(answer) {
+    const text = String(answer || "").trim();
+    if (!text) return { improve: "", lesson: "" };
+
+    const parts = text
+      .split(/(?<=[.!?])\s+/)
+      .map((part) => part.trim())
+      .filter(Boolean);
+
+    const improveParts = parts.filter((part) =>
+      /\b(need|improve|should|could|better|fix|work on|next time|stop|start|earlier|later)\b/i.test(part)
+    );
+    const lessonParts = parts.filter((part) =>
+      /\b(learned|lesson|realized|remember|showed me|takeaway|understand|important)\b/i.test(part)
+    );
+
+    return {
+      improve: (improveParts.length ? improveParts : [parts[0] || text]).join(" "),
+      lesson: (lessonParts.length ? lessonParts : [parts.at(-1) || text]).join(" ")
+    };
+  }
+
   function parseSitrepAnswer(step, answer) {
-    if (step.type === "task") {
-      addSitrepProposal({
-        kind: "task",
-        category: step.category,
-        taskId: step.taskId,
-        title: `${step.category === "mind" ? "Mind" : "Spirit"} · ${step.label}`,
-        summary: isAffirmativeAnswer(answer) ? "Complete" : "Not complete",
-        value: isAffirmativeAnswer(answer)
-      });
-      return;
-    }
-
-    if (step.type === "workout") {
-      const trained = !isNegativeOrSkip(answer);
-      addSitrepProposal({
-        kind: "workout",
-        title: "Today's training",
-        summary: trained ? `${sitrepSession.workoutName} · Complete` : `${sitrepSession.workoutName} · Not complete`,
-        value: trained
-      });
-      if (trained) parseSmartActivityText(answer);
-      return;
-    }
-
-    if (step.type === "protein") {
-      const match = String(answer).match(/\b(\d{2,3})\b/);
-      if (match) {
-        const grams = clamp(Number(match[1]), 0, normalizeProteinGoal(state.settings.proteinGoal));
-        addSitrepProposal({ kind: "protein", title: "Protein", summary: `${grams} g`, value: grams });
-      }
-      return;
-    }
-
     if (step.type === "activity") {
       if (!isNegativeOrSkip(answer)) parseSmartActivityText(answer);
       return;
@@ -541,8 +539,6 @@
       if (!isNegativeOrSkip(answer) && String(answer).trim()) {
         const labels = {
           wentWell: "AAR · Went well",
-          improve: "AAR · Improve",
-          lesson: "AAR · Lesson learned",
           priority: "AAR · Tomorrow priority"
         };
         addSitrepProposal({
@@ -556,26 +552,60 @@
       return;
     }
 
+    if (step.type === "reflection") {
+      if (!isNegativeOrSkip(answer) && String(answer).trim()) {
+        const reflection = splitReflectionAnswer(answer);
+        if (reflection.improve) {
+          addSitrepProposal({
+            kind: "aar",
+            field: "improve",
+            title: "AAR · Improve",
+            summary: reflection.improve,
+            value: reflection.improve
+          });
+        }
+        if (reflection.lesson) {
+          addSitrepProposal({
+            kind: "aar",
+            field: "lesson",
+            title: "AAR · Lesson learned",
+            summary: reflection.lesson,
+            value: reflection.lesson
+          });
+        }
+      }
+      return;
+    }
+
     if (step.type === "rating") {
+      if (isNegativeOrSkip(answer)) return;
       const match = String(answer).match(/\b(10|[1-9])\b/);
       if (match) {
         const rating = Number(match[1]);
-        addSitrepProposal({ kind: "rating", title: "AAR · Overall rating", summary: `${rating}/10`, value: rating });
+        addSitrepProposal({
+          kind: "rating",
+          title: "AAR · Overall rating",
+          summary: `${rating}/10`,
+          value: rating
+        });
       }
     }
   }
 
   function parseSmartActivityText(text) {
-    const raw = String(text).trim();
+    const raw = String(text || "").trim();
     const lower = raw.toLowerCase();
+    let found = false;
 
-    // Running / rucking parser.
+    // Running / rucking.
     const distanceMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:mile|miles|mi)\b/);
     const timeMatch = lower.match(/(?:in|time(?: was)?|for)\s*(\d{1,3})(?::(\d{2}))?\s*(?:minutes?|mins?|min)?\b/);
-    if (distanceMatch && (/\brun|ran|running|ruck|rucked|rucking\b/.test(lower))) {
+
+    if (distanceMatch && /\b(run|ran|running|ruck|rucked|rucking)\b/.test(lower)) {
       const domain = /\bruck/.test(lower) ? "Ruck" : "Running";
       const distance = Number(distanceMatch[1]);
       let minutes = null;
+
       if (timeMatch) {
         minutes = Number(timeMatch[1]) + (timeMatch[2] ? Number(timeMatch[2]) / 60 : 0);
       }
@@ -587,14 +617,16 @@
         [4, /\b(hard|tough|threshold)\b/],
         [5, /\b(very hard|max|maximum|all out)\b/]
       ];
-      const effort = effortMap.find(([,rx]) => rx.test(lower))?.[0] || null;
+      const effort = effortMap.find(([, rx]) => rx.test(lower))?.[0] || null;
 
       const metrics = [{ metric: "Distance", value: distance, unit: "mi" }];
       if (minutes) {
         metrics.push({ metric: "Time", value: minutes, unit: "min" });
         metrics.push({ metric: "Pace", value: minutes / distance, unit: "min/mi" });
       }
-      if (effort && domain === "Running") metrics.push({ metric: "Effort zone", value: effort, unit: "zone" });
+      if (effort && domain === "Running") {
+        metrics.push({ metric: "Effort zone", value: effort, unit: "zone" });
+      }
 
       addSitrepProposal({
         kind: "activity",
@@ -604,33 +636,107 @@
         metrics,
         note: raw
       });
+      found = true;
     }
 
-    // Strength parser: "<exercise> 225 for 5" or "225 x 5 incline bench".
-    const liftMatch = raw.match(/(?:hit\s+)?([a-zA-Z][a-zA-Z\s'-]{2,35}?)\s+(\d{2,4})\s*(?:lb|lbs|pounds?)?\s*(?:for|x|×)\s*(\d{1,2})(?:\s*reps?)?/i)
-      || raw.match(/(\d{2,4})\s*(?:lb|lbs|pounds?)?\s*(?:for|x|×)\s*(\d{1,2})\s+(?:on\s+)?([a-zA-Z][a-zA-Z\s'-]{2,35})/i);
+    // Surfing.
+    if (/\b(surf|surfed|surfing)\b/.test(lower)) {
+      const minutesMatch = lower.match(/(\d{1,3})\s*(?:minutes?|mins?|min)\b/);
+      const hourMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|hr)\b/);
+      const wavesMatch = lower.match(/(?:caught|got)\s+(\d{1,2})\s+waves?\b/);
+      const metrics = [];
 
-    if (liftMatch) {
-      let exercise, weight, reps;
-      if (/^\d/.test(liftMatch[1])) {
-        weight = Number(liftMatch[1]); reps = Number(liftMatch[2]); exercise = liftMatch[3].trim();
-      } else {
-        exercise = liftMatch[1].replace(/^(i\s+)?(hit|did)\s+/i, "").trim();
-        weight = Number(liftMatch[2]); reps = Number(liftMatch[3]);
-      }
-      exercise = exercise.replace(/\b(today|this morning|after work)\b/gi, "").trim();
-      if (exercise && weight && reps) {
+      if (minutesMatch) metrics.push({ metric: "Session time", value: Number(minutesMatch[1]), unit: "min" });
+      else if (hourMatch) metrics.push({ metric: "Session time", value: Number(hourMatch[1]) * 60, unit: "min" });
+      if (wavesMatch) metrics.push({ metric: "Waves caught", value: Number(wavesMatch[1]), unit: "waves" });
+
+      if (metrics.length) {
         addSitrepProposal({
-          kind: "lift",
-          title: `Lift · ${exercise}`,
-          summary: `${weight} lb × ${reps}`,
-          exercise,
-          weight,
-          reps,
-          sets: 1,
-          note: "Logged from AI SITREP"
+          kind: "activity",
+          title: "Surfing",
+          summary: metrics.map((item) => `${item.value} ${item.unit}`).join(" · "),
+          domain: "Surfing",
+          metrics,
+          note: raw
         });
+        found = true;
       }
+    }
+
+    // Timed combat / conditioning activities.
+    const timedActivities = [
+      ["BJJ", /\b(bjj|jiu jitsu|jiu-jitsu)\b/],
+      ["MMA", /\bmma\b/],
+      ["Boxing", /\b(boxing|boxed)\b/],
+      ["Swimming", /\b(swim|swam|swimming)\b/]
+    ];
+
+    timedActivities.forEach(([domain, rx]) => {
+      if (!rx.test(lower)) return;
+      const mins = lower.match(/(\d{1,3})\s*(?:minutes?|mins?|min)\b/);
+      const hrs = lower.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|hr)\b/);
+      const duration = mins ? Number(mins[1]) : hrs ? Number(hrs[1]) * 60 : null;
+      if (!duration) return;
+
+      addSitrepProposal({
+        kind: "activity",
+        title: domain,
+        summary: `${duration} min`,
+        domain,
+        metrics: [{ metric: "Training time", value: duration, unit: "min" }],
+        note: raw
+      });
+      found = true;
+    });
+
+    // Multiple lift entries from one answer.
+    const candidates = raw.split(/[,;]|\band then\b|\bthen\b/i).map((part) => part.trim()).filter(Boolean);
+    const seen = new Set();
+
+    candidates.forEach((part) => {
+      let match = part.match(/(?:i\s+)?(?:hit|did)?\s*([a-zA-Z][a-zA-Z\s'-]{2,35}?)\s+(\d{2,4})\s*(?:lb|lbs|pounds?)?\s*(?:for|x|×)\s*(\d{1,2})(?:\s*reps?)?/i);
+      let exercise, weight, reps;
+
+      if (match) {
+        exercise = match[1].trim();
+        weight = Number(match[2]);
+        reps = Number(match[3]);
+      } else {
+        match = part.match(/(\d{2,4})\s*(?:lb|lbs|pounds?)?\s*(?:for|x|×)\s*(\d{1,2})\s+(?:on\s+)?([a-zA-Z][a-zA-Z\s'-]{2,35})/i);
+        if (match) {
+          weight = Number(match[1]);
+          reps = Number(match[2]);
+          exercise = match[3].trim();
+        }
+      }
+
+      if (!exercise || !weight || !reps) return;
+      exercise = exercise.replace(/\b(today|this morning|after work)\b/gi, "").replace(/\s+/g, " ").trim();
+      const key = `${exercise.toLowerCase()}|${weight}|${reps}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+
+      addSitrepProposal({
+        kind: "lift",
+        title: `Lift · ${exercise}`,
+        summary: `${weight} lb × ${reps}`,
+        exercise,
+        weight,
+        reps,
+        sets: 1,
+        note: "Logged from AI SITREP"
+      });
+      found = true;
+    });
+
+    // If the parser cannot structure it, surface the note for review but never save it automatically.
+    if (!found) {
+      addSitrepProposal({
+        kind: "activityNote",
+        title: "Unstructured activity note",
+        summary: raw,
+        value: raw
+      });
     }
   }
 
@@ -691,6 +797,8 @@
     const day = getTodayRecord();
 
     approved.forEach((proposal) => {
+      if (proposal.kind === "activityNote") return;
+
       if (proposal.kind === "task") {
         const list = proposal.category === "mind" ? day.mindTasks : day.spiritTasks;
         const task = list.find((item) => item.id === proposal.taskId);
