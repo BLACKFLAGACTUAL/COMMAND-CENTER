@@ -2144,3 +2144,144 @@ select {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* v12 — Command Menu cleanup + mode-switch feedback */
+.command-menu-dialog {
+  width: min(420px, calc(100vw - 28px));
+  max-height: min(82vh, 720px);
+  padding: 0;
+  border: 1px solid rgba(239,75,80,.65);
+  background: #0b0b10;
+  color: var(--text);
+  overflow: hidden;
+}
+
+.command-menu-dialog::backdrop {
+  background: rgba(0,0,0,.78);
+  backdrop-filter: blur(5px);
+}
+
+.command-menu-shell {
+  padding: 1.1rem;
+}
+
+.command-menu-head {
+  padding-bottom: .9rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: .95rem;
+}
+
+.command-menu-head h2 {
+  margin: .2rem 0 .45rem;
+  font-size: clamp(1.8rem, 8vw, 2.6rem);
+  line-height: 1;
+}
+
+.command-menu-head .helper-text {
+  margin: 0;
+  max-width: 34ch;
+}
+
+.command-menu-section {
+  display: grid;
+  gap: .55rem;
+  margin-bottom: 1rem;
+}
+
+.command-menu-section > .data-label {
+  margin-bottom: .1rem;
+}
+
+.command-menu-option {
+  width: 100%;
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  gap: .8rem;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: .8rem .9rem;
+  font: inherit;
+}
+
+.command-menu-copy {
+  min-width: 0;
+  display: grid;
+  gap: .2rem;
+}
+
+.command-menu-copy strong {
+  font-family: var(--display);
+  font-size: 1rem;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.command-menu-copy small {
+  color: var(--muted);
+  font-size: .72rem;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.command-menu-indicator {
+  color: #454550;
+  font-size: .8rem;
+}
+
+.command-menu-option.selected,
+.command-menu-option[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: rgba(239,75,80,.09);
+}
+
+.command-menu-option.selected .command-menu-indicator,
+.command-menu-option[aria-pressed="true"] .command-menu-indicator {
+  color: var(--accent);
+}
+
+.command-menu-arrow {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.command-menu-option:active {
+  transform: scale(.985);
+}
+
+.command-menu-cancel {
+  margin-top: .25rem;
+}
+
+/* Work-mode visual cue */
+body[data-app-mode="work"] .command-header .eyebrow {
+  color: var(--accent);
+}
+
+body[data-app-mode="work"] #brandTitle::after {
+  content: " // WORK";
+  color: var(--accent);
+  font-size: .28em;
+  vertical-align: middle;
+  letter-spacing: .08em;
+}
+
+@media (max-width: 430px) {
+  .command-menu-dialog {
+    width: calc(100vw - 24px);
+  }
+
+  .command-menu-shell {
+    padding: .95rem;
+  }
+
+  .command-menu-option {
+    min-height: 64px;
+    padding: .72rem .8rem;
+  }
+}

@@ -1008,30 +1008,53 @@
 
   <dialog id="systemConfirmDialog" class="command-menu-dialog">
     <div class="command-menu-shell">
-      <p class="category-kicker">COMMAND MENU</p>
-      <h2>Mode & System</h2>
-
-      <div class="command-menu-section">
-        <span class="data-label">MODE</span>
-        <button id="commandPersonalMode" class="command-menu-option" type="button">
-          <strong>PERSONAL MODE</strong><small>Operation Arete</small>
-        </button>
-        <button id="commandWorkMode" class="command-menu-option" type="button">
-          <strong>WORK MODE</strong><small>Professional operating system</small>
-        </button>
+      <div class="command-menu-head">
+        <p class="category-kicker">COMMAND MENU</p>
+        <h2>Mode & System</h2>
+        <p class="helper-text">Switch operating environments or open settings for the active mode.</p>
       </div>
 
-      <div class="command-menu-section">
-        <span class="data-label">SYSTEM</span>
+      <section class="command-menu-section" aria-labelledby="commandModeHeading">
+        <span id="commandModeHeading" class="data-label">MODE</span>
+
+        <button id="commandPersonalMode" class="command-menu-option" type="button" aria-pressed="true">
+          <span class="command-menu-copy">
+            <strong>Personal</strong>
+            <small>Operation Arete</small>
+          </span>
+          <span class="command-menu-indicator" aria-hidden="true">●</span>
+        </button>
+
+        <button id="commandWorkMode" class="command-menu-option" type="button" aria-pressed="false">
+          <span class="command-menu-copy">
+            <strong>Work</strong>
+            <small>Professional operating system</small>
+          </span>
+          <span class="command-menu-indicator" aria-hidden="true">●</span>
+        </button>
+      </section>
+
+      <section class="command-menu-section" aria-labelledby="commandSystemHeading">
+        <span id="commandSystemHeading" class="data-label">SYSTEM</span>
+
         <button id="systemConfirmYes" class="command-menu-option" type="button">
-          <strong>MODE SYSTEM</strong><small id="commandModeSystemLabel">Personal settings</small>
+          <span class="command-menu-copy">
+            <strong>Mode System</strong>
+            <small id="commandModeSystemLabel">Personal settings</small>
+          </span>
+          <span class="command-menu-arrow" aria-hidden="true">→</span>
         </button>
-        <button id="commandGlobalBackup" class="command-menu-option" type="button">
-          <strong>GLOBAL BACKUP</strong><small>Export Personal + Work together</small>
-        </button>
-      </div>
 
-      <button id="systemConfirmCancel" class="button secondary full-width" type="button">Cancel</button>
+        <button id="commandGlobalBackup" class="command-menu-option" type="button">
+          <span class="command-menu-copy">
+            <strong>Global Backup</strong>
+            <small>Export Personal + Work together</small>
+          </span>
+          <span class="command-menu-arrow" aria-hidden="true">→</span>
+        </button>
+      </section>
+
+      <button id="systemConfirmCancel" class="button secondary full-width command-menu-cancel" type="button">Cancel</button>
     </div>
   </dialog>
 

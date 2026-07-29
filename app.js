@@ -295,8 +295,14 @@
       button.addEventListener("click", () => switchView(button.dataset.target));
     });
     elements.systemMenuButton.addEventListener("click", openCommandMenu);
-    elements.commandPersonalMode.addEventListener("click", () => setAppMode("personal"));
-    elements.commandWorkMode.addEventListener("click", () => setAppMode("work"));
+    elements.commandPersonalMode.addEventListener("click", (event) => {
+      event.preventDefault();
+      setAppMode("personal");
+    });
+    elements.commandWorkMode.addEventListener("click", (event) => {
+      event.preventDefault();
+      setAppMode("work");
+    });
     elements.systemConfirmYes.addEventListener("click", () => {
       elements.systemConfirmDialog.close();
       switchView(appMode === "work" ? "work-settings" : "settings");
@@ -3653,30 +3659,66 @@
 
 
   function openCommandMenu() {
-    elements.commandPersonalMode.classList.toggle("selected", appMode === "personal");
-    elements.commandWorkMode.classList.toggle("selected", appMode === "work");
+    const personalActive = appMode === "personal";
+    elements.commandPersonalMode.classList.toggle("selected", personalActive);
+    elements.commandWorkMode.classList.toggle("selected", !personalActive);
+
+    elements.commandPersonalMode.setAttribute("aria-pressed", String(personalActive));
+    elements.commandWorkMode.setAttribute("aria-pressed", String(!personalActive));
+
     elements.commandModeSystemLabel.textContent = appMode === "work" ? "Work settings" : "Personal settings";
     elements.systemConfirmDialog.showModal();
   }
 
   function setAppMode(mode) {
-    appMode = mode === "work" ? "work" : "personal";
-    localStorage.setItem(APP_MODE_KEY, appMode);
-    elements.systemConfirmDialog.close();
+    const nextMode = mode === "work" ? "work" : "personal";
+    appMode = nextMode;
+
+    try {
+      localStorage.setItem(APP_MODE_KEY, appMode);
+    } catch (error) {
+      console.warn("Could not persist active mode:", error);
+    }
+
+    if (elements.systemConfirmDialog?.open) elements.systemConfirmDialog.close();
     applyModeUI();
-    switchView(appMode === "work" ? "work-dashboard" : "today");
+
+    const target = appMode === "work" ? "work-dashboard" : "today";
+    switchView(target);
   }
 
   function applyModeUI() {
     const work = appMode === "work";
-    elements.personalNav.hidden = work;
-    elements.workNav.hidden = !work;
-    elements.brandEyebrow.textContent = work
-      ? "WORK COMMAND // PROFESSIONAL OPERATING SYSTEM"
-      : "OPERATION ARETE // PERSONAL OPERATING SYSTEM";
-    elements.brandTitle.textContent = work ? "WORK COMMAND" : "MY COMMAND CENTER";
+
+    if (elements.personalNav) elements.personalNav.hidden = work;
+    if (elements.workNav) elements.workNav.hidden = !work;
+
+    if (elements.brandEyebrow) {
+      elements.brandEyebrow.textContent = work
+        ? "WORK COMMAND // PROFESSIONAL OPERATING SYSTEM"
+        : "OPERATION ARETE // PERSONAL OPERATING SYSTEM";
+    }
+    if (elements.brandTitle) {
+      elements.brandTitle.textContent = work ? "WORK COMMAND" : "MY COMMAND CENTER";
+    }
+
+    document.body.dataset.appMode = appMode;
+
+    // Make sure only the selected mode's views can become visible.
+    document.querySelectorAll(".work-view").forEach((view) => {
+      if (!work) {
+        view.hidden = true;
+        view.classList.remove("active");
+      }
+    });
 
     if (work) {
+      document.querySelectorAll(".view:not(.work-view)").forEach((view) => {
+        if (view.dataset.view !== "settings") {
+          view.hidden = true;
+          view.classList.remove("active");
+        }
+      });
       renderWorkAll();
     }
   }
@@ -4137,6 +4179,12 @@
   }
 
   function switchView(target) {
+    const isWorkTarget = String(target).startsWith("work-");
+    if (isWorkTarget && appMode !== "work") appMode = "work";
+    if (!isWorkTarget && target !== "settings" && appMode === "work") {
+      appMode = "personal";
+    }
+    applyModeUI();
     renderHeaderForView(target);
     activeView = target;
 
