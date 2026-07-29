@@ -46,6 +46,17 @@
         </div>
       </div>
 
+      <section id="aiSitrepCard" class="ai-sitrep-card" aria-labelledby="aiSitrepCardHeading">
+        <div class="ai-sitrep-card-copy">
+          <span class="data-label">AI SITREP</span>
+          <h2 id="aiSitrepCardHeading">Daily Debrief</h2>
+          <p>Talk through the day. SITREP organizes your answers into Dashboard, Activity, and AAR records for approval.</p>
+        </div>
+        <button id="startAiSitrepButton" class="button primary ai-sitrep-start" type="button">
+          <span aria-hidden="true">◉</span> START SITREP
+        </button>
+      </section>
+
       <section id="dashboardDirectivePanel" class="quote-panel" aria-labelledby="quoteHeading">
         <div class="section-heading compact">
           <div>
@@ -1168,6 +1179,55 @@
       <div class="button-row restore-actions">
         <button id="restoreConfirmButton" class="button primary" type="button">Restore backup</button>
         <button id="restoreCancelButton" class="button secondary" type="button">Cancel</button>
+      </div>
+    </div>
+  </dialog>
+
+
+  <dialog id="aiSitrepDialog" class="ai-sitrep-dialog">
+    <div class="ai-sitrep-shell">
+      <div class="ai-sitrep-head">
+        <div>
+          <p class="category-kicker">AI SITREP // DAILY CLOSEOUT</p>
+          <h2>Command Debrief</h2>
+        </div>
+        <button id="aiSitrepClose" class="icon-button" type="button" aria-label="Close SITREP">×</button>
+      </div>
+
+      <div class="ai-sitrep-statusbar">
+        <span id="aiSitrepProgress">Step 1</span>
+        <span id="aiSitrepVoiceStatus">Voice ready</span>
+      </div>
+
+      <div id="aiSitrepConversation" class="ai-sitrep-conversation" aria-live="polite"></div>
+
+      <div id="aiSitrepInputArea" class="ai-sitrep-input-area">
+        <button id="aiSitrepMicButton" class="ai-mic-button" type="button" aria-label="Speak answer">
+          <span aria-hidden="true">●</span>
+          <span id="aiSitrepMicLabel">TALK</span>
+        </button>
+
+        <div class="ai-sitrep-text-entry">
+          <label class="sr-only" for="aiSitrepTextInput">Your answer</label>
+          <textarea id="aiSitrepTextInput" rows="2" maxlength="1500" placeholder="Type your answer here…"></textarea>
+          <button id="aiSitrepSendButton" class="button primary" type="button">Send</button>
+        </div>
+      </div>
+
+      <div id="aiSitrepReview" class="ai-sitrep-review" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="category-kicker">PROPOSED SITREP</p>
+            <h3>Review before save</h3>
+          </div>
+          <span id="aiSitrepChangeCount" class="percent-badge">0</span>
+        </div>
+        <p class="helper-text">Nothing is written to your Command Center until you approve it below.</p>
+        <div id="aiSitrepProposalList" class="ai-sitrep-proposals"></div>
+        <div class="button-row">
+          <button id="aiSitrepSaveAll" class="button primary" type="button">Save approved SITREP</button>
+          <button id="aiSitrepRestart" class="button secondary" type="button">Restart</button>
+        </div>
       </div>
     </div>
   </dialog>

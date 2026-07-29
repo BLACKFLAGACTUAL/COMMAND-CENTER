@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-backup-restore-v13";
+const CACHE_NAME = "command-center-ai-sitrep-v14";
 const APP_SHELL = [
   "./",
   "./index.html",
