@@ -21,6 +21,20 @@
     Your browser blocked local storage. Changes may not persist.
   </div>
 
+  <section id="onboardingScreen" class="onboarding-screen" hidden>
+    <div class="onboarding-shell">
+      <header class="onboarding-brand"><p class="eyebrow">PERSONAL OPERATING SYSTEM</p><h1>MY COMMAND CENTER</h1><p>Build a system for your Mind, Body, Spirit, and Mission.</p></header>
+      <div class="onboarding-progress"><span id="onboardingStepLabel">Step 1 of 6</span><div><i id="onboardingProgressBar"></i></div></div>
+      <section class="onboarding-step" data-onboarding-step="0"><div class="onboarding-panel hero"><p class="category-kicker">WELCOME</p><h2>Build your command center</h2><p>Personalize the full app without losing Protocol, workout building, AARs, Activity, Intel, Operations, Work Mode, or AI SITREP.</p><div class="button-stack"><button id="onboardingBeginButton" class="button primary full-width" type="button">Create my Command Center</button><button id="onboardingTemplateButton" class="button secondary full-width" type="button">Use Operation Arete template</button><label class="button secondary full-width file-button" for="onboardingRestoreInput">Restore existing backup</label><input id="onboardingRestoreInput" class="sr-only" type="file" accept="application/json,.json"></div></div></section>
+      <section class="onboarding-step" data-onboarding-step="1" hidden><div class="onboarding-panel"><p class="category-kicker">MISSION</p><h2>Name your system</h2><label for="onboardingSystemName">Command Center name</label><input id="onboardingSystemName" type="text" maxlength="80" placeholder="My Command Center"><label for="onboardingMission">Personal mission</label><textarea id="onboardingMission" rows="4" maxlength="800"></textarea><label for="onboardingPrimaryGoal">Primary goal</label><input id="onboardingPrimaryGoal" type="text" maxlength="160"></div></section>
+      <section class="onboarding-step" data-onboarding-step="2" hidden><div class="onboarding-panel"><p class="category-kicker">DAILY PROTOCOL</p><h2>Mind, Body, Spirit</h2><p class="helper-text">These become editable Dashboard templates.</p><div class="onboarding-domains"><div><h3>Mind</h3><div id="onboardingMindTasks"></div><button class="text-button onboarding-add-task" data-onboarding-domain="mind" type="button">+ Add Mind task</button></div><div><h3>Body</h3><div id="onboardingBodyTasks"></div><button class="text-button onboarding-add-task" data-onboarding-domain="body" type="button">+ Add Body task</button></div><div><h3>Spirit</h3><div id="onboardingSpiritTasks"></div><button class="text-button onboarding-add-task" data-onboarding-domain="spirit" type="button">+ Add Spirit task</button></div></div></div></section>
+      <section class="onboarding-step" data-onboarding-step="3" hidden><div class="onboarding-panel"><p class="category-kicker">ACTIVITY TRACKER</p><h2>Choose what you track</h2><div id="onboardingActivityChoices" class="onboarding-choice-grid"></div><div class="onboarding-custom-row"><input id="onboardingCustomActivity" type="text" maxlength="60" placeholder="Custom activity"><button id="onboardingAddCustomActivity" class="button secondary" type="button">Add</button></div></div></section>
+      <section class="onboarding-step" data-onboarding-step="4" hidden><div class="onboarding-panel"><p class="category-kicker">TRAINING STRUCTURE</p><h2>Choose your starting plan</h2><label class="onboarding-choice-card"><input type="radio" name="onboardingTrainingMode" value="template" checked><span><strong>Starter 14-day cycle</strong><small>Use the existing Strength A/B and conditioning template.</small></span></label><label class="onboarding-choice-card"><input type="radio" name="onboardingTrainingMode" value="build"><span><strong>Build my own program</strong><small>Open the full workout builder after setup.</small></span></label><label class="onboarding-choice-card"><input type="radio" name="onboardingTrainingMode" value="none"><span><strong>No schedule yet</strong><small>Add a workout program later.</small></span></label><label for="onboardingProteinGoal">Protein goal</label><input id="onboardingProteinGoal" type="number" min="50" max="400" step="5" value="170"></div></section>
+      <section class="onboarding-step" data-onboarding-step="5" hidden><div class="onboarding-panel"><p class="category-kicker">FINAL REVIEW</p><h2>Your Command Center</h2><p class="helper-text">Nothing is written until you press Create.</p><div id="onboardingReview" class="onboarding-review"></div><button id="onboardingCreateButton" class="button primary full-width" type="button">Create my Command Center</button></div></section>
+      <div id="onboardingNavigation" class="onboarding-navigation" hidden><button id="onboardingBackButton" class="button secondary" type="button">Back</button><button id="onboardingNextButton" class="button primary" type="button">Next</button></div>
+    </div>
+  </section>
+
   <div class="app-shell">
     <header class="command-header">
       <div class="brand-lockup">
@@ -781,6 +795,8 @@
           <div id="spiritTemplateEditor" class="template-editor"></div>
           <button class="text-button template-add" type="button" data-category="spirit">+ Add spirit template</button>
         </section>
+
+        <section class="settings-card" data-collapsible-key="system-profile"><h3>Personal setup</h3><p class="helper-text">Edit your profile without deleting historical AAR, Activity, Intel, or Operation data.</p><div id="profileSummary" class="profile-summary"></div><button id="editPersonalSetupButton" class="button secondary full-width" type="button">Edit personal setup</button></section>
 
         <section class="settings-card" data-collapsible-key="system-backup">
           <h3>Backup & restore</h3>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-ai-sitrep-v15-streamlined";
+const CACHE_NAME = "command-center-onboarding-v16";
 const APP_SHELL = [
   "./",
   "./index.html",

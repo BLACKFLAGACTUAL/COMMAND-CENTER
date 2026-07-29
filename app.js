@@ -175,10 +175,13 @@
   function init() {
     cacheElements();
     ensureStateShape();
+    ensureProfileShape();
     bindEvents();
     initializeCollapsibleSections();
     renderAll();
     applyModeUI();
+    renderProfileSummary();
+    if (shouldShowOnboarding()) showOnboarding(false, false);
     registerServiceWorker();
   }
 
@@ -229,7 +232,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext"].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -296,6 +299,9 @@
 
   let sitrepSession = null;
   let sitrepRecognition = null;
+  const ONBOARDING_VERSION = 1;
+  let onboardingDraft = null;
+  let onboardingStep = 0;
 
   function createSitrepSession() {
     const day = getTodayRecord();
@@ -867,7 +873,80 @@
     sitrepSession = null;
   }
 
+
+  const ONBOARDING_ACTIVITIES = ["Weightlifting","Running","Ruck","MMA","BJJ","Boxing","Swimming","Surfing","Chess","Reading","Body Weight"];
+
+  function hasMeaningfulExistingData(candidate = state) {
+    const daily = Object.values(candidate?.daily || {});
+    const meaningfulDay = daily.some((day) => (day?.protein||0)>0 || day?.workoutComplete || [...(day?.mindTasks||[]),...(day?.spiritTasks||[])].some((t)=>t.completed) || ["wentWell","improve","lesson","priority"].some((f)=>String(day?.aar?.[f]||"").trim()));
+    const lifts = Object.values(candidate?.exerciseLogs||{}).some((x)=>Array.isArray(x)&&x.length);
+    const acts = Object.values(candidate?.activityTrackers||{}).some((x)=>Array.isArray(x?.entries)&&x.entries.length);
+    const ops = Boolean(candidate?.operations?.items?.length);
+    return meaningfulDay || lifts || acts || ops;
+  }
+
+  function ensureProfileShape() {
+    if (!state.profile || typeof state.profile !== "object") state.profile = {};
+    if (hasMeaningfulExistingData(state) && !state.profile.onboardingComplete) {
+      state.profile = { ...state.profile, onboardingComplete:true, onboardingVersion:ONBOARDING_VERSION, createdAt:state.profile.createdAt||new Date().toISOString(), template:state.profile.template||"existing-installation", systemName:state.profile.systemName||"My Command Center" };
+      saveState();
+    }
+  }
+
+  function shouldShowOnboarding(){ ensureProfileShape(); return !state.profile?.onboardingComplete && !hasMeaningfulExistingData(state); }
+
+  function makeOnboardingDraft(template=false){
+    return { editing:false, systemName:"My Command Center", mission:template?"Become stronger, sharper, more disciplined, and more capable.":"", primaryGoal:template?"Execute consistently across Mind, Body, and Spirit.":"", mindTasks:template?[...DEFAULT_MIND_TASKS]:["Read","Study"], bodyTasks:template?["Complete scheduled training","Reach protein goal"]:["Train"], spiritTasks:template?[...DEFAULT_SPIRIT_TASKS]:["Reflect"], activities:template?["Weightlifting","Running","Ruck","MMA","Surfing"]:["Weightlifting","Running"], trainingMode:"template", proteinGoal:Number(state.settings?.proteinGoal)||170 };
+  }
+
+  function showOnboarding(template=false, editing=false){
+    onboardingDraft=makeOnboardingDraft(template); onboardingDraft.editing=editing;
+    if(editing && state.profile?.onboardingComplete){ onboardingDraft.systemName=state.profile.systemName||"My Command Center"; onboardingDraft.mission=state.profile.mission||""; onboardingDraft.primaryGoal=state.profile.primaryGoal||""; onboardingDraft.mindTasks=(state.settings.mindTemplates||[]).map((x)=>typeof x==="string"?x:x.text); onboardingDraft.spiritTasks=(state.settings.spiritTemplates||[]).map((x)=>typeof x==="string"?x:x.text); onboardingDraft.bodyTasks=[...(state.profile.bodyTasks||["Complete scheduled training","Reach protein goal"])]; onboardingDraft.activities=Object.keys(state.activityTrackers||{}); onboardingDraft.trainingMode=state.profile.trainingMode||"template"; }
+    onboardingStep=editing?1:0; elements.onboardingScreen.hidden=false; document.body.classList.add("onboarding-active"); renderOnboarding();
+  }
+  function hideOnboarding(){ elements.onboardingScreen.hidden=true; document.body.classList.remove("onboarding-active"); }
+
+  function renderOnboarding(){
+    document.querySelectorAll(".onboarding-step").forEach((s)=>{ const active=Number(s.dataset.onboardingStep)===onboardingStep; s.hidden=!active; });
+    elements.onboardingStepLabel.textContent=`Step ${onboardingStep+1} of 6`; elements.onboardingProgressBar.style.width=`${(onboardingStep+1)/6*100}%`; elements.onboardingNavigation.hidden=onboardingStep===0||onboardingStep===5; elements.onboardingBackButton.disabled=onboardingStep<=1; elements.onboardingNextButton.textContent=onboardingStep===4?"Review":"Next";
+    elements.onboardingSystemName.value=onboardingDraft.systemName; elements.onboardingMission.value=onboardingDraft.mission; elements.onboardingPrimaryGoal.value=onboardingDraft.primaryGoal; elements.onboardingProteinGoal.value=String(onboardingDraft.proteinGoal);
+    renderOnboardingTasks(); renderOnboardingActivities(); const radio=document.querySelector(`input[name="onboardingTrainingMode"][value="${onboardingDraft.trainingMode}"]`); if(radio) radio.checked=true; if(onboardingStep===5) renderOnboardingReview();
+  }
+
+  function renderOnboardingTasks(){
+    [["mindTasks",elements.onboardingMindTasks],["bodyTasks",elements.onboardingBodyTasks],["spiritTasks",elements.onboardingSpiritTasks]].forEach(([field,box])=>{ box.replaceChildren(); onboardingDraft[field].forEach((text,i)=>{ const row=document.createElement("div"); row.className="onboarding-task-row"; const input=document.createElement("input"); input.value=text; input.maxLength=120; input.addEventListener("input",()=>onboardingDraft[field][i]=input.value); const del=document.createElement("button"); del.type="button"; del.className="text-button danger-text"; del.textContent="Remove"; del.addEventListener("click",()=>{onboardingDraft[field].splice(i,1);renderOnboardingTasks();}); row.append(input,del); box.appendChild(row); }); });
+  }
+
+  function renderOnboardingActivities(){ elements.onboardingActivityChoices.replaceChildren(); [...new Set([...ONBOARDING_ACTIVITIES,...onboardingDraft.activities])].forEach((name)=>{ const label=document.createElement("label"); label.className="onboarding-activity-choice"; const input=document.createElement("input"); input.type="checkbox"; input.checked=onboardingDraft.activities.includes(name); input.addEventListener("change",()=>{ onboardingDraft.activities=input.checked?[...new Set([...onboardingDraft.activities,name])]:onboardingDraft.activities.filter((x)=>x!==name); }); const span=document.createElement("span"); span.innerHTML=`<strong>${escapeHtml(name)}</strong><small>Smart metrics included</small>`; label.append(input,span); elements.onboardingActivityChoices.appendChild(label); }); }
+
+  function syncOnboarding(){ onboardingDraft.systemName=elements.onboardingSystemName.value.trim()||"My Command Center"; onboardingDraft.mission=elements.onboardingMission.value.trim(); onboardingDraft.primaryGoal=elements.onboardingPrimaryGoal.value.trim(); onboardingDraft.proteinGoal=normalizeProteinGoal(elements.onboardingProteinGoal.value); onboardingDraft.trainingMode=document.querySelector('input[name="onboardingTrainingMode"]:checked')?.value||"template"; ["mindTasks","bodyTasks","spiritTasks"].forEach((f)=>onboardingDraft[f]=onboardingDraft[f].map((x)=>x.trim()).filter(Boolean)); }
+  function moveOnboarding(dir){ syncOnboarding(); onboardingStep=clamp(onboardingStep+dir,1,5); renderOnboarding(); }
+
+  function renderOnboardingReview(){ syncOnboarding(); elements.onboardingReview.innerHTML=`<section><span class="data-label">SYSTEM</span><strong>${escapeHtml(onboardingDraft.systemName)}</strong><p>${escapeHtml(onboardingDraft.mission||onboardingDraft.primaryGoal||"Personal operating system")}</p></section><section><span class="data-label">MIND</span>${onboardingDraft.mindTasks.map((x)=>`<p>✓ ${escapeHtml(x)}</p>`).join("")||"<p>None</p>"}</section><section><span class="data-label">BODY</span>${onboardingDraft.bodyTasks.map((x)=>`<p>✓ ${escapeHtml(x)}</p>`).join("")||"<p>None</p>"}</section><section><span class="data-label">SPIRIT</span>${onboardingDraft.spiritTasks.map((x)=>`<p>✓ ${escapeHtml(x)}</p>`).join("")||"<p>None</p>"}</section><section><span class="data-label">ACTIVITIES</span><p>${onboardingDraft.activities.map(escapeHtml).join(" · ")||"None"}</p></section><section><span class="data-label">FULL FEATURES</span><p>Workout builder · AAR · Activity · Intel · Operations · Work Mode · AI SITREP</p></section>`; }
+
+  function applyOnboardingDraft(){
+    syncOnboarding(); if(!onboardingDraft.editing && hasMeaningfulExistingData(state)){ alert("Existing data was detected. Setup was cancelled to protect your Command Center."); hideOnboarding(); return; }
+    try{ if(typeof createSafetySnapshot==="function") createSafetySnapshot("pre-onboarding-apply"); }catch(_){}
+    state.profile={...(state.profile||{}),onboardingComplete:true,onboardingVersion:ONBOARDING_VERSION,createdAt:state.profile?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString(),template:onboardingDraft.trainingMode==="template"?"operation-arete":"custom",systemName:onboardingDraft.systemName,mission:onboardingDraft.mission,primaryGoal:onboardingDraft.primaryGoal,bodyTasks:[...onboardingDraft.bodyTasks],trainingMode:onboardingDraft.trainingMode};
+    state.settings.mindTemplates=onboardingDraft.mindTasks.map((text)=>({id:`mind-${Date.now()}-${Math.random().toString(16).slice(2)}`,text})); state.settings.spiritTemplates=onboardingDraft.spiritTasks.map((text)=>({id:`spirit-${Date.now()}-${Math.random().toString(16).slice(2)}`,text})); state.settings.proteinGoal=onboardingDraft.proteinGoal;
+    onboardingDraft.activities.forEach((name)=>{ if(!state.activityTrackers[name]) state.activityTrackers[name]={name,entries:[],metrics:inferActivityMetrics(name)}; });
+    if(!onboardingDraft.editing){ const today=getTodayRecord(); today.mindTasks=onboardingDraft.mindTasks.map(createTask); today.spiritTasks=onboardingDraft.spiritTasks.map(createTask); }
+    if(onboardingDraft.trainingMode==="none" && !onboardingDraft.editing) state.settings.schedule=Array(14).fill("Rest");
+    saveState(); hideOnboarding(); renderAll(); switchView(onboardingDraft.trainingMode==="build"?"schedule":"today"); if(onboardingDraft.trainingMode==="build") setTimeout(()=>alert("Use the workout builder in Protocol to create your program."),150);
+  }
+
+  function renderProfileSummary(){ if(!elements.profileSummary)return; const p=state.profile||{}; elements.profileSummary.innerHTML=`<p><span class="data-label">SYSTEM</span><strong>${escapeHtml(p.systemName||"My Command Center")}</strong></p><p><span class="data-label">MISSION</span>${escapeHtml(p.mission||p.primaryGoal||"Not set")}</p><p><span class="data-label">ACTIVITIES</span>${Object.keys(state.activityTrackers||{}).map(escapeHtml).join(" · ")||"None"}</p>`; }
+
   function bindEvents() {
+
+    elements.onboardingBeginButton.addEventListener("click",()=>{onboardingDraft=makeOnboardingDraft(false);onboardingStep=1;renderOnboarding();});
+    elements.onboardingTemplateButton.addEventListener("click",()=>{onboardingDraft=makeOnboardingDraft(true);onboardingStep=1;renderOnboarding();});
+    elements.onboardingRestoreInput.addEventListener("change",(event)=>{hideOnboarding(); if(typeof prepareRestoreFromFile==="function")prepareRestoreFromFile(event,"global");else importData(event);});
+    elements.onboardingBackButton.addEventListener("click",()=>moveOnboarding(-1)); elements.onboardingNextButton.addEventListener("click",()=>moveOnboarding(1)); elements.onboardingCreateButton.addEventListener("click",applyOnboardingDraft);
+    elements.onboardingAddCustomActivity.addEventListener("click",()=>{const name=elements.onboardingCustomActivity.value.trim();if(!name)return;if(!onboardingDraft.activities.includes(name))onboardingDraft.activities.push(name);elements.onboardingCustomActivity.value="";renderOnboardingActivities();});
+    document.querySelectorAll(".onboarding-add-task").forEach((b)=>b.addEventListener("click",()=>{onboardingDraft[`${b.dataset.onboardingDomain}Tasks`].push("");renderOnboardingTasks();}));
+    document.querySelectorAll('input[name="onboardingTrainingMode"]').forEach((i)=>i.addEventListener("change",()=>onboardingDraft.trainingMode=i.value));
+    elements.editPersonalSetupButton.addEventListener("click",()=>showOnboarding(false,true));
 
     elements.startAiSitrepButton.addEventListener("click", openAiSitrep);
     elements.aiSitrepClose.addEventListener("click", () => {
@@ -3970,6 +4049,7 @@
   }
 
   function renderSettings() {
+    renderProfileSummary();
     elements.proteinGoalInput.value = String(normalizeProteinGoal(state.settings.proteinGoal));
     renderTemplateEditor("mind", state.settings.mindTemplates, elements.mindTemplateEditor);
     renderTemplateEditor("spirit", state.settings.spiritTemplates, elements.spiritTemplateEditor);
