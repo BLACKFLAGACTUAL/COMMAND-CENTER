@@ -2733,3 +2733,9 @@ body[data-app-mode="work"] #brandTitle::after {
   .onboarding-task-row .danger-text { justify-self: start; padding: .25rem 0 .45rem; }
   .onboarding-navigation { padding-bottom: max(.7rem, env(safe-area-inset-bottom)); }
 }
+
+.build-version-badge{
+  display:inline-block;margin:.35rem 0 .8rem;padding:.35rem .55rem;
+  border:1px solid var(--line);color:var(--muted);font-size:.62rem;
+  letter-spacing:.08em;text-transform:uppercase;
+}

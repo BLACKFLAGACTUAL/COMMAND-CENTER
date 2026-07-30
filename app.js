@@ -170,17 +170,46 @@
   }
 
 
+  window.addEventListener("error", (event) => {
+    const box = document.getElementById("storageAlert");
+    if (box) {
+      box.hidden = false;
+      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v19`;
+    }
+  });
+
   document.addEventListener("DOMContentLoaded", init);
 
   function init() {
     cacheElements();
-    ensureStateShape();
-    ensureProfileShape();
-    bindEvents();
-    initializeCollapsibleSections();
-    renderAll();
-    applyModeUI();
-    renderProfileSummary();
+
+    const runStage = (name, fn) => {
+      try { fn(); return true; }
+      catch (error) {
+        console.error(`Command Center ${name} failed:`, error);
+        if (elements.storageAlert) {
+          elements.storageAlert.hidden = false;
+          elements.storageAlert.textContent =
+            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v19`;
+        }
+        return false;
+      }
+    };
+
+    runStage("state initialization", () => {
+      ensureStateShape();
+      ensureProfileShape();
+    });
+    runStage("control binding", bindEvents);
+    runStage("collapsible UI setup", initializeCollapsibleSections);
+    runStage("data render", renderAll);
+    runStage("mode render", applyModeUI);
+    runStage("profile render", renderProfileSummary);
+
+    if (elements.buildVersionBadge) {
+      elements.buildVersionBadge.textContent = "BUILD v19 · CONTROLS ACTIVE";
+    }
+
     if (shouldShowOnboarding()) showOnboarding(false, false);
     registerServiceWorker();
   }
@@ -232,7 +261,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter"].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -1015,6 +1044,266 @@
     const p=state.profile||{};
     const selected=Array.isArray(p.selectedActivities)&&p.selectedActivities.length?p.selectedActivities:Object.keys(state.activityTrackers||{});
     elements.profileSummary.innerHTML=`<p><span class="data-label">SYSTEM</span><strong>${escapeHtml(p.systemName||"My Command Center")}</strong></p><p><span class="data-label">MISSION</span>${escapeHtml(p.mission||p.primaryGoal||"Not set")}</p><p><span class="data-label">PROTOCOL</span>${state.settings.mindTemplates.length} Mind · ${(p.bodyTasks||[]).length} Body · ${state.settings.spiritTemplates.length} Spirit</p><p><span class="data-label">ACTIVITIES</span>${selected.map(escapeHtml).join(" · ")||"None"}</p>`;
+  }
+
+  function bindEvents() {
+
+    elements.onboardingBeginButton.addEventListener("click",()=>{onboardingDraft=makeOnboardingDraft(false);onboardingStep=1;renderOnboarding();});
+    elements.onboardingTemplateButton.addEventListener("click",()=>{onboardingDraft=makeOnboardingDraft(true);onboardingStep=1;renderOnboarding();});
+    elements.onboardingRestoreInput.addEventListener("change",(event)=>{hideOnboarding(); if(typeof prepareRestoreFromFile==="function")prepareRestoreFromFile(event,"global");else importData(event);});
+    elements.onboardingBackButton.addEventListener("click",()=>moveOnboarding(-1)); elements.onboardingNextButton.addEventListener("click",()=>moveOnboarding(1)); elements.onboardingCreateButton.addEventListener("click",applyOnboardingDraft);
+    elements.onboardingAddCustomActivity.addEventListener("click",()=>{const name=elements.onboardingCustomActivity.value.trim();if(!name)return;if(!onboardingDraft.activities.includes(name))onboardingDraft.activities.push(name);elements.onboardingCustomActivity.value="";renderOnboardingActivities();});
+    document.querySelectorAll(".onboarding-add-task").forEach((b)=>b.addEventListener("click",()=>{onboardingDraft[`${b.dataset.onboardingDomain}Tasks`].push("");renderOnboardingTasks();}));
+    document.querySelectorAll('input[name="onboardingTrainingMode"]').forEach((i)=>i.addEventListener("change",()=>onboardingDraft.trainingMode=i.value));
+    elements.editPersonalSetupButton.addEventListener("click",()=>showOnboarding(false,true));
+
+    elements.startAiSitrepButton.addEventListener("click", openAiSitrep);
+    elements.aiSitrepClose.addEventListener("click", () => {
+      stopSitrepRecognition();
+      if (confirm("Close SITREP? Unsaved proposed updates will be discarded.")) {
+        sitrepSession = null;
+        elements.aiSitrepDialog.close();
+      }
+    });
+    elements.aiSitrepMicButton.addEventListener("click", startSitrepRecognition);
+    elements.aiSitrepSendButton.addEventListener("click", submitSitrepAnswer);
+    elements.aiSitrepTextInput.addEventListener("keydown", (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") submitSitrepAnswer();
+    });
+    elements.aiSitrepSaveAll.addEventListener("click", saveAiSitrep);
+    elements.aiSitrepRestart.addEventListener("click", restartAiSitrep);
+    elements.aiSitrepDialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      stopSitrepRecognition();
+      if (confirm("Close SITREP? Unsaved proposed updates will be discarded.")) {
+        sitrepSession = null;
+        elements.aiSitrepDialog.close();
+      }
+    });
+    document.querySelectorAll(".nav-button").forEach((button) => {
+      button.addEventListener("click", () => switchView(button.dataset.target));
+    });
+    elements.systemMenuButton.addEventListener("click", openCommandMenu);
+    elements.commandNewCenter.addEventListener("click", (event) => {
+      event.preventDefault();
+      elements.systemConfirmDialog.close();
+      showOnboarding(false, true);
+    });
+    elements.commandPersonalMode.addEventListener("click", (event) => {
+      event.preventDefault();
+      setAppMode("personal");
+    });
+    elements.commandWorkMode.addEventListener("click", (event) => {
+      event.preventDefault();
+      setAppMode("work");
+    });
+    elements.systemConfirmYes.addEventListener("click", () => {
+      elements.systemConfirmDialog.close();
+      switchView(appMode === "work" ? "work-settings" : "settings");
+    });
+    elements.commandGlobalBackup.addEventListener("click", exportGlobalBackup);
+    elements.systemConfirmCancel.addEventListener("click", () => elements.systemConfirmDialog.close());
+    elements.systemConfirmDialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      elements.systemConfirmDialog.close();
+    });
+
+    elements.workQuickAddTask.addEventListener("click", () => openWorkTaskDialog());
+    elements.workAddTaskButton.addEventListener("click", () => openWorkTaskDialog());
+    elements.workTaskCancel.addEventListener("click", () => elements.workTaskDialog.close());
+    elements.workTaskForm.addEventListener("submit", saveWorkTaskFromDialog);
+
+    elements.workAddOperationButton.addEventListener("click", () => openWorkOperationDialog());
+    elements.workOperationCancel.addEventListener("click", () => elements.workOperationDialog.close());
+    elements.workOperationForm.addEventListener("submit", saveWorkOperationFromDialog);
+
+    elements.workAddLogButton.addEventListener("click", openWorkLogDialog);
+    elements.workLogCancel.addEventListener("click", () => elements.workLogDialog.close());
+    elements.workLogForm.addEventListener("submit", saveWorkLogFromDialog);
+
+    document.querySelectorAll(".work-filter").forEach((button) => {
+      button.addEventListener("click", () => {
+        workTaskFilter = button.dataset.workFilter || "open";
+        document.querySelectorAll(".work-filter").forEach((item) => item.classList.toggle("active", item === button));
+        renderWorkTasks();
+      });
+    });
+
+    elements.saveWorkSettings.addEventListener("click", () => {
+      workState.settings.defaultCategory = elements.workDefaultCategory.value.trim();
+      saveWorkState();
+      elements.workSettingsStatus.textContent = "Work settings saved.";
+      setTimeout(() => { elements.workSettingsStatus.textContent = ""; }, 1500);
+    });
+    elements.exportWorkDataButton.addEventListener("click", exportWorkBackup);
+    elements.resetWorkDataButton.addEventListener("click", resetWorkData);
+
+
+    elements.archiveCalendarPrev.addEventListener("click", () => {
+      archiveCalendarCursor = new Date(
+        archiveCalendarCursor.getFullYear(),
+        archiveCalendarCursor.getMonth() - 1,
+        1,
+        12
+      );
+      renderArchiveCalendar();
+    });
+    elements.archiveCalendarNext.addEventListener("click", () => {
+      archiveCalendarCursor = new Date(
+        archiveCalendarCursor.getFullYear(),
+        archiveCalendarCursor.getMonth() + 1,
+        1,
+        12
+      );
+      renderArchiveCalendar();
+    });
+    elements.archiveCalendarToday.addEventListener("click", () => {
+      const today = new Date();
+      archiveCalendarCursor = new Date(today.getFullYear(), today.getMonth(), 1, 12);
+      renderArchiveCalendar();
+    });
+
+    elements.editQuoteButton.addEventListener("click", openQuoteEditor);
+    elements.saveQuoteButton.addEventListener("click", saveQuote);
+    elements.cancelQuoteButton.addEventListener("click", closeQuoteEditor);
+
+    elements.workoutComplete.addEventListener("change", () => {
+      const day = getTodayRecord();
+      day.workoutComplete = elements.workoutComplete.checked;
+      saveAndRender();
+    });
+
+    elements.toggleWorkoutDetails.addEventListener("click", toggleWorkoutDetails);
+
+    elements.proteinSlider.addEventListener("input", () => {
+      setProtein(Number(elements.proteinSlider.value), false);
+    });
+    elements.proteinSlider.addEventListener("change", () => saveAndRender());
+
+    document.querySelectorAll(".protein-adjust").forEach((button) => {
+      button.addEventListener("click", () => {
+        const day = getTodayRecord();
+        setProtein(day.protein + Number(button.dataset.change), true);
+      });
+    });
+
+    elements.resetProteinButton.addEventListener("click", () => {
+      if (confirm("Reset today’s protein log to 0 grams?")) {
+        setProtein(0, true);
+      }
+    });
+
+    document.querySelectorAll(".add-task-button").forEach((button) => {
+      button.addEventListener("click", () => openTaskDialog(button.dataset.category));
+    });
+
+    elements.taskDialogForm.addEventListener("submit", handleTaskDialogSubmit);
+    elements.scheduleDialogForm.addEventListener("submit", handleScheduleDialogSubmit);
+    elements.addWorkoutButton.addEventListener("click", () => openWorkoutDialog());
+    elements.addExerciseRowButton.addEventListener("click", () => addExerciseEditorRow(""));
+    elements.workoutDialogForm.addEventListener("submit", handleWorkoutDialogSubmit);
+    elements.quickAddExerciseButton.addEventListener("click", () => addQuickExerciseRow(""));
+    elements.quickWorkoutForm.addEventListener("submit", handleQuickWorkoutSubmit);
+
+    elements.toggleScheduleButton.addEventListener("click", toggleScheduleVisibility);
+    elements.taskDialogCancel.addEventListener("click", () => elements.taskDialog.close());
+    elements.scheduleDialogCancel.addEventListener("click", () => elements.scheduleDialog.close());
+    elements.workoutDialogCancel.addEventListener("click", () => elements.workoutDialog.close());
+    elements.exerciseLogCancel.addEventListener("click", () => elements.exerciseLogDialog.close());
+    elements.exerciseLogForm.addEventListener("submit", saveExerciseLog);
+    elements.progressExerciseSelect.addEventListener("change", () => {
+      state.settings.progressExercise = elements.progressExerciseSelect.value;
+      saveState();
+      renderProgressChart();
+    });
+    elements.addPastLiftButton.addEventListener("click", openPastExerciseLogDialog);
+    elements.manualStrengthEntryButton.addEventListener("click", openPastExerciseLogDialog);
+    elements.addActivityTrackerButton.addEventListener("click", openActivityTrackerDialog);
+    elements.activityTrackerCancel.addEventListener("click", () => elements.activityTrackerDialog.close());
+    elements.activityTrackerForm.addEventListener("submit", saveActivityTracker);
+    elements.activityTrackerName.addEventListener("input", () => {
+      const metrics = inferActivityMetrics(elements.activityTrackerName.value);
+      if (metrics.length) {
+        elements.activityTrackerMetrics.value = metrics.map((metric) => `${metric.name} | ${metric.unit}`).join("\n");
+      }
+    });
+    elements.intelRange.addEventListener("change", () => {
+      state.settings.intelRange = elements.intelRange.value;
+      saveState();
+      renderIntel();
+    });
+    elements.operationsYearSelect.addEventListener("change", renderOperationsYearTimeline);
+    elements.addActivityEntryButton.addEventListener("click", openActivityEntryDialog);
+    elements.activityEntryCancel.addEventListener("click", () => elements.activityEntryDialog.close());
+    elements.activityEntryForm.addEventListener("submit", saveActivityEntry);
+    elements.activityMetricSelect.addEventListener("change", () => {
+      const domain = state.settings.archiveDomain;
+      const metrics = getTrackerMetrics(domain);
+      const selectedName = elements.activityMetricSelect.value;
+      const index = metrics.findIndex((metric) => metric.name === selectedName);
+      const current = Number(state.settings.activitySlideByDomain?.[domain] || 0);
+      if (index >= 0) {
+        setActivityMetricSlide(index, index > current ? 1 : index < current ? -1 : 0);
+      }
+    });
+
+    elements.activitySwipePrev.addEventListener("click", () => moveActivityMetricSlide(-1));
+    elements.activitySwipeNext.addEventListener("click", () => moveActivityMetricSlide(1));
+    elements.activityTrendWindow.addEventListener("change", renderActivityProgress);
+    elements.editAarCancel.addEventListener("click", () => elements.editAarDialog.close());
+    elements.editAarForm.addEventListener("submit", saveArchivedAar);
+    elements.newOperationButton.addEventListener("click", () => openOperationDialog());
+    elements.operationDialogCancel.addEventListener("click", () => elements.operationDialog.close());
+    elements.operationForm.addEventListener("submit", saveOperation);
+    [elements.taskDialog, elements.scheduleDialog, elements.workoutDialog, elements.exerciseLogDialog, elements.activityTrackerDialog, elements.activityEntryDialog, elements.editAarDialog, elements.operationDialog].forEach((dialog) => {
+      dialog.addEventListener("cancel", (event) => { event.preventDefault(); dialog.close(); });
+      dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+    });
+
+    elements.aarRating.addEventListener("input", () => {
+      elements.aarRatingOutput.value = elements.aarRating.value;
+      saveAarDraft();
+    });
+    [
+      elements.aarWentWell,
+      elements.aarImprove,
+      elements.aarLesson,
+      elements.aarPriority
+    ].forEach((field) => field.addEventListener("input", saveAarDraft));
+    elements.aarForm.addEventListener("submit", saveAar);
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) refreshForNewDate();
+    });
+    window.addEventListener("focus", refreshForNewDate);
+    window.setInterval(refreshForNewDate, 60_000);
+
+    elements.cycleStartDate.addEventListener("change", () => {
+      if (!elements.cycleStartDate.value) return;
+      state.settings.cycleStartDate = elements.cycleStartDate.value;
+      saveAndRender();
+    });
+
+    elements.saveSettingsButton.addEventListener("click", saveSettings);
+
+    document.querySelectorAll(".template-add").forEach((button) => {
+      button.addEventListener("click", () => addTemplate(button.dataset.category));
+    });
+
+    elements.exportDataButton.addEventListener("click", exportData);
+    elements.importDataInput.addEventListener("change", importData);
+    elements.openGlobalRestoreButton.addEventListener("click", () => elements.globalRestoreInput.click());
+    elements.workOpenGlobalRestoreButton.addEventListener("click", () => elements.globalRestoreInput.click());
+    elements.globalRestoreInput.addEventListener("change", (event) => prepareRestoreFromFile(event, "global"));
+    elements.workRestoreInput.addEventListener("change", (event) => prepareRestoreFromFile(event, "work"));
+    elements.restoreConfirmButton.addEventListener("click", executePendingRestore);
+    elements.restoreCancelButton.addEventListener("click", closeRestorePreview);
+    elements.restorePreviewDialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      closeRestorePreview();
+    });
+    elements.resetTodayButton.addEventListener("click", resetToday);
+    elements.deleteAllDataButton.addEventListener("click", deleteAllData);
   }
 
   function ensureStateShape() {
