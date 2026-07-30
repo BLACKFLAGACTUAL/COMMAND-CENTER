@@ -2877,3 +2877,168 @@ body[data-app-mode="work"] #brandTitle::after {
   border-left: 3px solid var(--accent);
   background: rgba(239,75,80,.06);
 }
+
+
+/* v24 — compact folders + faster schedule builder */
+.hot-swap-box {
+  gap: .65rem;
+  padding: .72rem;
+}
+
+.template-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .35rem;
+}
+
+.template-chip {
+  min-height: 36px;
+  padding: .4rem .45rem;
+  font-size: .68rem;
+}
+
+.hot-swap-days-fieldset {
+  border: 1px solid var(--line);
+  padding: .55rem;
+  margin: .15rem 0;
+}
+
+.hot-swap-days-fieldset legend {
+  color: var(--accent);
+  padding: 0 .35rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 800;
+  font-size: .7rem;
+}
+
+.hot-swap-day-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .35rem;
+}
+
+.hot-swap-day {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  align-items: center;
+  gap: .35rem;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  padding: .4rem;
+  background: var(--panel);
+}
+
+.hot-swap-day:has(input:checked) {
+  border-color: var(--accent);
+  background: rgba(239,75,80,.10);
+}
+
+.hot-swap-day span {
+  min-width: 0;
+  display: grid;
+  gap: .08rem;
+}
+
+.hot-swap-day strong {
+  font-size: .72rem;
+}
+
+.hot-swap-day small {
+  color: var(--muted);
+  font-size: .56rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.builder-divider {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin: 1rem 0 .75rem;
+  color: var(--muted);
+  font-size: .68rem;
+  letter-spacing: .08em;
+}
+
+.builder-divider::before,
+.builder-divider::after {
+  content: "";
+  height: 1px;
+  background: var(--line);
+  flex: 1;
+}
+
+.builder-assign-secondary {
+  opacity: .8;
+}
+
+.workout-library {
+  display: grid;
+  gap: .35rem;
+}
+
+.library-heading {
+  margin: .7rem 0 .2rem;
+}
+
+.compact-workout-folder {
+  padding: .5rem .6rem !important;
+  min-height: 0 !important;
+}
+
+.compact-workout-top {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  gap: .55rem;
+}
+
+.compact-workout-copy {
+  display: grid;
+  gap: .08rem;
+  min-width: 0;
+}
+
+.compact-workout-copy strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compact-workout-copy small {
+  color: var(--muted);
+  font-size: .62rem;
+}
+
+.compact-workout-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: .25rem;
+}
+
+.compact-workout-actions .text-button {
+  padding: .28rem .4rem;
+  font-size: .62rem;
+}
+
+.schedule-item {
+  cursor: pointer;
+}
+
+@media (max-width: 560px) {
+  .template-chip-grid,
+  .hot-swap-day-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .compact-workout-top {
+    grid-template-columns: 1fr;
+  }
+
+  .compact-workout-actions {
+    justify-content: flex-start;
+  }
+}

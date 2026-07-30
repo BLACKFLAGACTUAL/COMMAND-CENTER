@@ -9,7 +9,7 @@
   <title>My Command Center</title>
 
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./styles.css?v=23">
+  <link rel="stylesheet" href="./styles.css?v=24">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 </head>
 <body>
@@ -313,13 +313,13 @@
               <div class="builder-label-row hot-swap-heading-row">
                 <div>
                   <p class="category-kicker">HOT SWAP</p>
-                  <h4 id="hotSwapHeading">Templates</h4>
+                  <h4 id="hotSwapHeading">Build the schedule</h4>
                 </div>
                 <button id="clearHotSwapSelection" class="text-button" type="button">Clear</button>
               </div>
+
               <p class="helper-text">
-                Pick a protocol, select the schedule day(s) below, then assign it instantly.
-                Saved workouts appear here automatically.
+                Pick a template, tap the day(s) you want, then assign. No typing required.
               </p>
 
               <div class="hot-swap-section">
@@ -328,7 +328,7 @@
               </div>
 
               <div class="hot-swap-section">
-                <span class="data-label">SAVED TEMPLATES</span>
+                <span class="data-label">SAVED PROGRAMS</span>
                 <div id="savedTemplateChips" class="template-chip-grid"></div>
               </div>
 
@@ -338,11 +338,20 @@
                 <small id="hotSwapSelectedDetail"></small>
               </div>
 
-              <button id="hotSwapAssignButton" class="button secondary full-width" type="button" disabled>
+              <fieldset class="hot-swap-days-fieldset">
+                <legend>Assign to days</legend>
+                <div id="hotSwapDayGrid" class="hot-swap-day-grid"></div>
+              </fieldset>
+
+              <button id="hotSwapAssignButton" class="button primary full-width" type="button" disabled>
                 Assign selected template
               </button>
               <p id="hotSwapStatus" class="save-status" aria-live="polite"></p>
             </section>
+
+            <div class="builder-divider">
+              <span>CREATE / EDIT WORKOUT</span>
+            </div>
 
             <label for="quickWorkoutName">Workout name</label>
             <input id="quickWorkoutName" type="text" maxlength="80" placeholder="Example: Upper Body Power" required>
@@ -353,10 +362,9 @@
             </div>
             <div id="quickExerciseEditor" class="exercise-editor"></div>
 
-            <fieldset class="assign-days-fieldset">
-              <legend>Assign to schedule days</legend>
+            <fieldset class="assign-days-fieldset builder-assign-secondary">
+              <legend>Optional: assign new workout now</legend>
               <div id="quickAssignDays" class="assign-days-grid"></div>
-              <p class="helper-text">Optional. You can also assign it later by tapping Edit on any schedule day.</p>
             </fieldset>
 
             <p id="quickWorkoutStatus" class="save-status" aria-live="polite"></p>
@@ -372,7 +380,7 @@
             </div>
             <button id="addWorkoutButton" class="button secondary compact-action" type="button">Open editor</button>
           </div>
-          <p class="helper-text">Original templates stay protected. Duplicate one to customize it, or use the builder above.</p>
+          <p class="helper-text">Tap a workout to manage it. Protected templates can be duplicated; custom workouts can be edited or deleted.</p>
           <div id="workoutLibrary" class="workout-library"></div>
         </section>
 
@@ -1134,13 +1142,13 @@
     </form>
   </dialog>
 
-  <script src="./app.js?v=23" defer></script>
+  <script src="./app.js?v=24" defer></script>
 
   <dialog id="systemConfirmDialog" class="command-menu-dialog">
     <div class="command-menu-shell">
       <div class="command-menu-head">
         <p class="category-kicker">COMMAND MENU</p>
-        <h2>Mode & System</h2><div id="buildVersionBadge" class="build-version-badge">BUILD v23</div>
+        <h2>Mode & System</h2><div id="buildVersionBadge" class="build-version-badge">BUILD v24</div>
         <p class="helper-text">Switch operating environments or open settings for the active mode.</p>
       </div>
 

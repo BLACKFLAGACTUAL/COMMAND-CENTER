@@ -1,5 +1,5 @@
-const CACHE_NAME = "command-center-v23-dashboard-log-routing";
-const APP_SHELL = ["./","./index.html","./styles.css?v=23","./app.js?v=23","./manifest.json","./apple-touch-icon.png","./icon-192.png","./icon-512.png"];
+const CACHE_NAME = "command-center-v24-schedule-ux";
+const APP_SHELL = ["./","./index.html","./styles.css?v=24","./app.js?v=24","./manifest.json","./apple-touch-icon.png","./icon-192.png","./icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));

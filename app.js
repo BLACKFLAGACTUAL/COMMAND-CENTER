@@ -175,7 +175,7 @@
     const box = document.getElementById("storageAlert");
     if (box) {
       box.hidden = false;
-      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v23`;
+      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v24`;
     }
   });
 
@@ -191,7 +191,7 @@
         if (elements.storageAlert) {
           elements.storageAlert.hidden = false;
           elements.storageAlert.textContent =
-            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v23`;
+            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v24`;
         }
         return false;
       }
@@ -208,7 +208,7 @@
     runStage("profile render", renderProfileSummary);
 
     if (elements.buildVersionBadge) {
-      elements.buildVersionBadge.textContent = "BUILD v23 · CONTROLS ACTIVE";
+      elements.buildVersionBadge.textContent = "BUILD v24 · CONTROLS ACTIVE";
     }
 
     if (shouldShowOnboarding()) showOnboarding(false, false);
@@ -262,7 +262,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge", "onboardingCustomScheduleLengthRow", "onboardingCustomScheduleLength", "scheduleCycleEyebrow", "scheduleCycleHelp", "quickBuilderHelp", "workoutBuilderCard", "genericTemplateChips", "savedTemplateChips", "clearHotSwapSelection", "hotSwapSelection", "hotSwapSelectedName", "hotSwapSelectedDetail", "hotSwapAssignButton", "hotSwapStatus"].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge", "onboardingCustomScheduleLengthRow", "onboardingCustomScheduleLength", "scheduleCycleEyebrow", "scheduleCycleHelp", "quickBuilderHelp", "workoutBuilderCard", "genericTemplateChips", "savedTemplateChips", "clearHotSwapSelection", "hotSwapSelection", "hotSwapSelectedName", "hotSwapSelectedDetail", "hotSwapAssignButton", "hotSwapStatus", "hotSwapDayGrid"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -1854,7 +1854,11 @@
       edit.className = "schedule-edit";
       edit.type = "button";
       edit.textContent = "Edit";
-      edit.addEventListener("click", () => openScheduleDialog(index));
+      edit.addEventListener("click", (event) => {
+        event.stopPropagation();
+        openScheduleDialog(index);
+      });
+      item.addEventListener("click", () => openScheduleDialog(index));
 
       dayBlock.append(number, label);
       top.append(dayBlock, edit);
@@ -1907,13 +1911,17 @@
   }
 
   function renderHotSwapTemplates() {
-    if (!elements.genericTemplateChips || !elements.savedTemplateChips) return;
+    if (!elements.genericTemplateChips || !elements.savedTemplateChips || !elements.hotSwapDayGrid) return;
 
     elements.genericTemplateChips.replaceChildren();
     elements.savedTemplateChips.replaceChildren();
 
     Object.keys(GENERIC_HOT_SWAP_TEMPLATES).forEach((name) => {
-      elements.genericTemplateChips.appendChild(createHotSwapChip(name, "generic"));
+      // Avoid duplicates when a generic type also exists in saved/protected templates.
+      const duplicateSaved = DEFAULT_WORKOUTS[name] || state.customWorkouts?.[name];
+      if (!duplicateSaved) {
+        elements.genericTemplateChips.appendChild(createHotSwapChip(name, "generic"));
+      }
     });
 
     const savedNames = [
@@ -1927,6 +1935,7 @@
       );
     });
 
+    renderHotSwapDayGrid();
     renderHotSwapSelection();
   }
 
@@ -1951,17 +1960,6 @@
     const library = getHotSwapLibrary();
     if (!library[name]) return;
 
-    hotSwapTemplateName = name;
-    elements.quickWorkoutName.value = name;
-
-    const exercises = Array.isArray(library[name]) ? library[name] : [];
-    elements.quickExerciseEditor.replaceChildren();
-    if (exercises.length) {
-      exercises.forEach((exercise) => addQuickExerciseRow(exercise));
-    } else {
-      addQuickExerciseRow("");
-    }
-
     elements.hotSwapStatus.textContent = "";
     renderHotSwapTemplates();
   }
@@ -1969,7 +1967,30 @@
   function clearHotSwapTemplate() {
     hotSwapTemplateName = "";
     elements.hotSwapStatus.textContent = "";
+    elements.hotSwapDayGrid?.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+      input.checked = false;
+    });
     renderHotSwapTemplates();
+  }
+
+  function renderHotSwapDayGrid() {
+    elements.hotSwapDayGrid.replaceChildren();
+
+    state.settings.schedule.forEach((assignment, index) => {
+      const label = document.createElement("label");
+      label.className = "hot-swap-day";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = String(index);
+      checkbox.dataset.hotSwapDay = "true";
+
+      const copy = document.createElement("span");
+      copy.innerHTML = `<strong>DAY ${index + 1}</strong><small>${escapeHtml(assignment)}</small>`;
+
+      label.append(checkbox, copy);
+      elements.hotSwapDayGrid.appendChild(label);
+    });
   }
 
   function renderHotSwapSelection() {
@@ -2003,24 +2024,16 @@
       return;
     }
 
-    const selectedDays = [...elements.quickAssignDays.querySelectorAll('input[type="checkbox"]:checked')];
+    const selectedDays = [...elements.hotSwapDayGrid.querySelectorAll('input[type="checkbox"]:checked')];
     if (!selectedDays.length) {
-      elements.hotSwapStatus.textContent = "Select at least one schedule day below.";
+      elements.hotSwapStatus.textContent = "Tap at least one day to assign.";
       return;
     }
 
     const selectedName = hotSwapTemplateName;
 
-    // Generic quick types are saved as lightweight reusable custom protocols
-    // the first time they are assigned so Schedule/Edit can use them normally.
-    if (
-      GENERIC_HOT_SWAP_TEMPLATES[selectedName] &&
-      !DEFAULT_WORKOUTS[selectedName] &&
-      !state.customWorkouts[selectedName]
-    ) {
-      state.customWorkouts[selectedName] = [...GENERIC_HOT_SWAP_TEMPLATES[selectedName]];
-    }
-
+    // Generic quick types stay lightweight schedule labels.
+    // Do not create duplicate custom workouts just because they were assigned.
     selectedDays.forEach((checkbox) => {
       const index = Number(checkbox.value);
       if (Number.isInteger(index) && state.settings.schedule[index] !== undefined) {
@@ -2028,14 +2041,20 @@
       }
     });
 
-    elements.hotSwapStatus.textContent =
-      `${selectedName} assigned to ${selectedDays.length} day${selectedDays.length === 1 ? "" : "s"}.`;
+    const count = selectedDays.length;
+    saveState();
 
-    saveAndRender();
-
-    // Re-select after render so the user can immediately hot-swap another day.
+    // Refresh the schedule and assignment grid, then clear selected days for fast repeat use.
+    renderSchedule();
     hotSwapTemplateName = selectedName;
     renderHotSwapTemplates();
+
+    elements.hotSwapDayGrid.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+      input.checked = false;
+    });
+
+    elements.hotSwapStatus.textContent =
+      `${selectedName} assigned to ${count} day${count === 1 ? "" : "s"}.`;
   }
 
   function renderQuickWorkoutBuilder() {
@@ -2165,42 +2184,61 @@
 
   function createWorkoutLibraryItem(name, exercises, isOriginal) {
     const item = document.createElement("article");
-    item.className = "workout-library-item";
+    item.className = "workout-library-item compact-workout-folder";
 
-    const info = document.createElement("div");
+    const top = document.createElement("div");
+    top.className = "compact-workout-top";
+
+    const copy = document.createElement("div");
+    copy.className = "compact-workout-copy";
+
     const title = document.createElement("strong");
     title.textContent = name;
-    const count = document.createElement("span");
-    count.className = "helper-text";
-    count.textContent = `${exercises.length} exercise${exercises.length === 1 ? "" : "s"}`;
-    info.append(title, count);
+
+    const count = document.createElement("small");
+    count.textContent = `${exercises.length} item${exercises.length === 1 ? "" : "s"}`;
+
+    copy.append(title, count);
 
     const actions = document.createElement("div");
-    actions.className = "library-actions";
+    actions.className = "compact-workout-actions";
+
+    const assign = document.createElement("button");
+    assign.type = "button";
+    assign.className = "text-button";
+    assign.textContent = "Assign";
+    assign.addEventListener("click", () => {
+      hotSwapTemplateName = name;
+      renderHotSwapTemplates();
+      elements.hotSwapSelection.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    actions.appendChild(assign);
 
     const duplicate = document.createElement("button");
-    duplicate.className = "schedule-edit";
     duplicate.type = "button";
+    duplicate.className = "text-button";
     duplicate.textContent = "Duplicate";
     duplicate.addEventListener("click", () => duplicateWorkout(name));
     actions.appendChild(duplicate);
 
     if (!isOriginal) {
       const edit = document.createElement("button");
-      edit.className = "schedule-edit";
       edit.type = "button";
+      edit.className = "text-button";
       edit.textContent = "Edit";
       edit.addEventListener("click", () => openWorkoutDialog(name));
 
       const remove = document.createElement("button");
-      remove.className = "schedule-edit danger-edit";
       remove.type = "button";
+      remove.className = "text-button danger-text";
       remove.textContent = "Delete";
       remove.addEventListener("click", () => deleteCustomWorkout(name));
+
       actions.append(edit, remove);
     }
 
-    item.append(info, actions);
+    top.append(copy, actions);
+    item.appendChild(top);
     return item;
   }
 
