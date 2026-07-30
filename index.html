@@ -796,7 +796,7 @@
           <button class="text-button template-add" type="button" data-category="spirit">+ Add spirit template</button>
         </section>
 
-        <section class="settings-card" data-collapsible-key="system-profile"><h3>Personal setup</h3><p class="helper-text">Edit your profile without deleting historical AAR, Activity, Intel, or Operation data.</p><div id="profileSummary" class="profile-summary"></div><button id="editPersonalSetupButton" class="button secondary full-width" type="button">Edit personal setup</button></section>
+        <section class="settings-card" data-collapsible-key="system-profile"><h3>Command Center profile</h3><p class="helper-text">Edit your profile without deleting historical AAR, Activity, Intel, or Operation data.</p><div id="profileSummary" class="profile-summary"></div><button id="editPersonalSetupButton" class="button secondary full-width" type="button">Edit Command Center</button></section>
 
         <section class="settings-card" data-collapsible-key="system-backup">
           <h3>Backup & restore</h3>
@@ -1049,6 +1049,17 @@
         <h2>Mode & System</h2>
         <p class="helper-text">Switch operating environments or open settings for the active mode.</p>
       </div>
+
+      <section class="command-menu-section command-center-launch" aria-labelledby="commandCenterHeading">
+        <span id="commandCenterHeading" class="data-label">COMMAND CENTER</span>
+        <button id="commandNewCenter" class="command-menu-option command-new-center" type="button">
+          <span class="command-menu-copy">
+            <strong>New Command Center</strong>
+            <small>Build or edit your personal Mind, Body, Spirit, activities, and training setup</small>
+          </span>
+          <span class="command-menu-arrow" aria-hidden="true">→</span>
+        </button>
+      </section>
 
       <section class="command-menu-section" aria-labelledby="commandModeHeading">
         <span id="commandModeHeading" class="data-label">MODE</span>

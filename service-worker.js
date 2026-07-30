@@ -1,4 +1,4 @@
-const CACHE_NAME = "command-center-onboarding-v16";
+const CACHE_NAME = "command-center-onboarding-v17-fixed";
 const APP_SHELL = [
   "./",
   "./index.html",
