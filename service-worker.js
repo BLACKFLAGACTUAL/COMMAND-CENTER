@@ -1,5 +1,5 @@
-const CACHE_NAME = "command-center-v21-hot-swap";
-const APP_SHELL = ["./","./index.html","./styles.css?v=21","./app.js?v=21","./manifest.json","./apple-touch-icon.png","./icon-192.png","./icon-512.png"];
+const CACHE_NAME = "command-center-v22-lift-log-fix";
+const APP_SHELL = ["./","./index.html","./styles.css?v=22","./app.js?v=22","./manifest.json","./apple-touch-icon.png","./icon-192.png","./icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));

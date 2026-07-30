@@ -2853,3 +2853,13 @@ body[data-app-mode="work"] #brandTitle::after {
     text-align: center;
   }
 }
+
+
+/* v22 — lift logging confirmation */
+#exerciseLogStatus:not(:empty) {
+  display: block;
+  margin-top: .6rem;
+  padding: .55rem .65rem;
+  border-left: 3px solid var(--accent);
+  background: rgba(239,75,80,.06);
+}

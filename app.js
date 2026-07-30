@@ -113,6 +113,7 @@
   let scheduleDialogIndex = null;
   let editingWorkoutName = null;
   let loggingExerciseName = null;
+  let loggingWorkoutName = null;
   let loggingPastEntry = false;
   let lastRenderedDateKey = getTodayKey();
   let editingAarDateKey = null;
@@ -174,7 +175,7 @@
     const box = document.getElementById("storageAlert");
     if (box) {
       box.hidden = false;
-      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v21`;
+      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v22`;
     }
   });
 
@@ -190,7 +191,7 @@
         if (elements.storageAlert) {
           elements.storageAlert.hidden = false;
           elements.storageAlert.textContent =
-            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v21`;
+            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v22`;
         }
         return false;
       }
@@ -207,7 +208,7 @@
     runStage("profile render", renderProfileSummary);
 
     if (elements.buildVersionBadge) {
-      elements.buildVersionBadge.textContent = "BUILD v21 · CONTROLS ACTIVE";
+      elements.buildVersionBadge.textContent = "BUILD v22 · CONTROLS ACTIVE";
     }
 
     if (shouldShowOnboarding()) showOnboarding(false, false);
@@ -1309,8 +1310,18 @@
     elements.taskDialogCancel.addEventListener("click", () => elements.taskDialog.close());
     elements.scheduleDialogCancel.addEventListener("click", () => elements.scheduleDialog.close());
     elements.workoutDialogCancel.addEventListener("click", () => elements.workoutDialog.close());
-    elements.exerciseLogCancel.addEventListener("click", () => elements.exerciseLogDialog.close());
+    elements.exerciseLogCancel.addEventListener("click", () => {
+      loggingPastEntry = false;
+      loggingExerciseName = null;
+      loggingWorkoutName = null;
+      elements.exerciseLogDialog.close();
+    });
     elements.exerciseLogForm.addEventListener("submit", saveExerciseLog);
+    elements.exerciseLogDialog.addEventListener("cancel", () => {
+      loggingPastEntry = false;
+      loggingExerciseName = null;
+      loggingWorkoutName = null;
+    });
     elements.progressExerciseSelect.addEventListener("change", () => {
       state.settings.progressExercise = elements.progressExerciseSelect.value;
       saveState();
@@ -2179,6 +2190,8 @@
   function openExerciseLogDialog(exerciseName) {
     loggingPastEntry = false;
     loggingExerciseName = exerciseName;
+    const currentCycleDay = calculateCycleDay(new Date());
+    loggingWorkoutName = state.settings.schedule[currentCycleDay - 1] || "Unassigned";
     const latest = getLatestExerciseLog(exerciseName);
     elements.exerciseLogName.textContent = exerciseName;
     elements.exerciseSelectField.hidden = true;
@@ -2195,6 +2208,7 @@
   function openPastExerciseLogDialog() {
     loggingPastEntry = true;
     loggingExerciseName = null;
+    loggingWorkoutName = null;
     elements.exerciseLogName.textContent = "Historical strength entry";
     elements.exerciseSelectField.hidden = false;
     populateExerciseNameSelect();
@@ -2226,33 +2240,107 @@
 
   function saveExerciseLog(event) {
     event.preventDefault();
-    const exerciseName = loggingPastEntry ? elements.exerciseNameInput.value.trim() : loggingExerciseName;
+
+    const exerciseName = loggingPastEntry
+      ? elements.exerciseNameInput.value.trim()
+      : String(loggingExerciseName || "").trim();
     const dateKey = elements.exerciseDateInput.value;
     const weight = Number(elements.exerciseWeightInput.value);
     const reps = Number(elements.exerciseRepsInput.value);
     const sets = Number(elements.exerciseSetsInput.value);
-    if (!exerciseName || !dateKey || !Number.isFinite(weight) || weight < 0 || !Number.isInteger(reps) || reps < 1 || !Number.isInteger(sets) || sets < 1) {
-      elements.exerciseLogStatus.textContent = "Choose an exercise and date, then enter valid weight, reps, and sets.";
+
+    if (
+      !exerciseName ||
+      !dateKey ||
+      !Number.isFinite(weight) ||
+      weight < 0 ||
+      !Number.isInteger(reps) ||
+      reps < 1 ||
+      !Number.isInteger(sets) ||
+      sets < 1
+    ) {
+      elements.exerciseLogStatus.textContent =
+        "Choose an exercise and date, then enter valid weight, reps, and sets.";
       return;
     }
+
     const selectedDate = new Date(`${dateKey}T12:00:00`);
     if (Number.isNaN(selectedDate.getTime())) {
       elements.exerciseLogStatus.textContent = "Choose a valid workout date.";
       return;
     }
-    const log = { id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, date: selectedDate.toISOString(), weight, reps, sets, note: elements.exerciseLogNote.value.trim(), workout: state.settings.schedule[calculateCycleDay(selectedDate) - 1] };
-    if (!Array.isArray(state.exerciseLogs[exerciseName])) state.exerciseLogs[exerciseName] = [];
+
+    const scheduleIndex = calculateCycleDay(selectedDate) - 1;
+    const workoutName = loggingWorkoutName ||
+      state.settings.schedule[scheduleIndex] ||
+      "Unassigned";
+
+    const log = {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      date: selectedDate.toISOString(),
+      weight,
+      reps,
+      sets,
+      note: elements.exerciseLogNote.value.trim(),
+      workout: workoutName,
+      scheduleDay: scheduleIndex + 1
+    };
+
+    if (!Array.isArray(state.exerciseLogs[exerciseName])) {
+      state.exerciseLogs[exerciseName] = [];
+    }
+
     state.exerciseLogs[exerciseName].push(log);
-    saveState();
-    elements.exerciseLogDialog.close();
+
+    // Make the newly logged exercise the active progress selection.
+    // This matters for a first-ever log because the select option does not
+    // exist until Activity is rendered again.
+    state.settings.progressExercise = exerciseName;
+
+    // Attach a lightweight reference to the daily record so same-day
+    // workout swaps still retain the exact lift session that was performed.
+    const dayKey = dateKey;
+    if (!state.daily[dayKey]) {
+      state.daily[dayKey] = createDailyRecord(dayKey);
+    }
+    if (!Array.isArray(state.daily[dayKey].liftLogIds)) {
+      state.daily[dayKey].liftLogIds = [];
+    }
+    state.daily[dayKey].liftLogIds.push(log.id);
+    state.daily[dayKey].updatedAt = new Date().toISOString();
+
+    const saved = saveState();
+    if (saved === false) {
+      // Roll back the in-memory insert if persistence reports failure.
+      state.exerciseLogs[exerciseName] =
+        state.exerciseLogs[exerciseName].filter((entry) => entry.id !== log.id);
+      state.daily[dayKey].liftLogIds =
+        state.daily[dayKey].liftLogIds.filter((id) => id !== log.id);
+      elements.exerciseLogStatus.textContent =
+        "The lift could not be saved. Your previous data is unchanged.";
+      return;
+    }
+
+    elements.exerciseLogStatus.textContent =
+      `${formatWeight(weight)} × ${reps} saved to ${workoutName}.`;
+
     loggingPastEntry = false;
     loggingExerciseName = null;
-    renderWorkoutDetails(state.settings.schedule[calculateCycleDay(new Date()) - 1]);
+    loggingWorkoutName = null;
+
+    // Re-render the Activity tracker so a brand-new exercise immediately
+    // appears in the progress selector/chart. Previously the code tried to
+    // select an option that did not exist yet, making a successful first log
+    // look like it never registered.
+    renderToday();
+    renderActivityTracker();
     renderHistory();
-    if (exerciseName) {
-      elements.progressExerciseSelect.value = exerciseName;
-      renderProgressChart();
-    }
+
+    setTimeout(() => {
+      if (elements.exerciseLogDialog.open) {
+        elements.exerciseLogDialog.close();
+      }
+    }, 180);
   }
 
   function getLatestExerciseLog(exerciseName) {
