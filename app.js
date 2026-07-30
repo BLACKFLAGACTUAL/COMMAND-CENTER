@@ -172,10 +172,12 @@
 
 
   window.addEventListener("error", (event) => {
+    const message = String(event.message || "");
+    if (!message || message === "Script error.") return;
     const box = document.getElementById("storageAlert");
     if (box) {
       box.hidden = false;
-      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v27`;
+      box.textContent = `Interface error: ${message} · BUILD v28`;
     }
   });
 
@@ -191,7 +193,7 @@
         if (elements.storageAlert) {
           elements.storageAlert.hidden = false;
           elements.storageAlert.textContent =
-            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v27`;
+            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v28`;
         }
         return false;
       }
@@ -208,7 +210,7 @@
     runStage("profile render", renderProfileSummary);
 
     if (elements.buildVersionBadge) {
-      elements.buildVersionBadge.textContent = "BUILD v27 · CONTROLS ACTIVE";
+      elements.buildVersionBadge.textContent = "BUILD v28 · CONTROLS ACTIVE";
     }
 
     if (shouldShowOnboarding()) showOnboarding(false, false);
@@ -262,7 +264,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge", "onboardingCustomScheduleLengthRow", "onboardingCustomScheduleLength", "scheduleCycleEyebrow", "scheduleCycleHelp", "quickBuilderHelp", "workoutBuilderCard", "genericTemplateChips", "savedTemplateChips", "clearHotSwapSelection", "hotSwapSelection", "hotSwapSelectedName", "hotSwapSelectedDetail", "hotSwapAssignButton", "hotSwapStatus", "hotSwapDayGrid", "exerciseLogSaveButton", "activityEntrySaveButton", "liftSetRows", "addLiftSetButton"].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge", "onboardingCustomScheduleLengthRow", "onboardingCustomScheduleLength", "scheduleCycleEyebrow", "scheduleCycleHelp", "quickBuilderHelp", "workoutBuilderCard", "genericTemplateChips", "savedTemplateChips", "clearHotSwapSelection", "hotSwapSelection", "hotSwapSelectedName", "hotSwapSelectedDetail", "hotSwapAssignButton", "hotSwapStatus", "hotSwapDayGrid", "exerciseLogSaveButton", "activityEntrySaveButton", "liftSetRows", "addLiftSetButton", "aiSitrepInputHint"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -335,41 +337,30 @@
 
   function createSitrepSession() {
     const day = getTodayRecord();
-    const completedMind = day.mindTasks.filter((task) => task.completed).length;
-    const completedSpirit = day.spiritTasks.filter((task) => task.completed).length;
-    const totalChecks = day.mindTasks.length + day.spiritTasks.length + 1;
-    const completedChecks = completedMind + completedSpirit + (day.workoutComplete ? 1 : 0);
+    const cycleDay = calculateCycleDay(new Date());
+    const scheduledWorkout = state.settings.schedule[cycleDay - 1] || "Training";
 
     return {
       date: getTodayKey(),
       stepIndex: 0,
+      scheduledWorkout,
+      extraActivityCount: 0,
       steps: [
         {
-          type: "activity",
-          question: "Start with training. Tell me what activity or workout you did today. Include lifts, weight and reps, distance and time, or say none."
+          type: "training",
+          question: `Today's schedule is ${scheduledWorkout}. Tell me what training you actually did. For lifting, say the exercise and each set. Example: "Zercher squat, 185 for 8, 225 for 4, then 185 for 10 drop set."`
         },
         {
-          type: "aar",
-          field: "wentWell",
-          question: "What went well today?"
+          type: "extraActivity",
+          question: "Did you do anything else worth tracking today—running, BJJ, MMA, boxing, rucking, surfing, swimming, mobility, or another lift? Tell me the activity and stats, or say none."
         },
-        {
-          type: "reflection",
-          question: "What needs improvement, and what did you learn from today?"
-        },
-        {
-          type: "aar",
-          field: "priority",
-          question: "What's tomorrow's main priority?"
-        },
-        {
-          type: "rating",
-          question: "Optional: rate the day from 1 to 10, or say skip."
-        }
+        { type: "aar", field: "wentWell", question: "What went well today?" },
+        { type: "reflection", question: "What needs improvement, and what did you learn?" },
+        { type: "aar", field: "priority", question: "What is tomorrow's main priority?" },
+        { type: "rating", question: "Optional: rate today's execution from 1 to 10, or say skip." }
       ],
       proposals: [],
-      transcript: [],
-      checkboxContext: { completed: completedChecks, total: totalChecks }
+      transcript: []
     };
   }
 
@@ -380,7 +371,7 @@
     elements.aiSitrepInputArea.hidden = false;
     elements.aiSitrepTextInput.value = "";
     elements.aiSitrepContext.textContent =
-      `Dashboard checkboxes stay manual · ${sitrepSession.checkboxContext.completed}/${sitrepSession.checkboxContext.total} currently complete`;
+      `Scheduled today: ${sitrepSession.scheduledWorkout} · Dashboard checkboxes stay manual`;
     renderSitrepQuestion();
     elements.aiSitrepDialog.showModal();
   }
@@ -392,7 +383,7 @@
     elements.aiSitrepReview.hidden = true;
     elements.aiSitrepInputArea.hidden = false;
     elements.aiSitrepContext.textContent =
-      `Dashboard checkboxes stay manual · ${sitrepSession.checkboxContext.completed}/${sitrepSession.checkboxContext.total} currently complete`;
+      `Scheduled today: ${sitrepSession.scheduledWorkout} · Dashboard checkboxes stay manual`;
     renderSitrepQuestion();
   }
 
@@ -468,17 +459,31 @@
     sitrepRecognition.lang = "en-US";
     sitrepRecognition.interimResults = true;
     sitrepRecognition.continuous = false;
+    sitrepRecognition.maxAlternatives = 3;
 
     elements.aiSitrepMicButton.classList.add("listening");
     elements.aiSitrepMicLabel.textContent = "LISTENING";
     elements.aiSitrepVoiceStatus.textContent = "Listening…";
 
+    let bestTranscript = "";
     sitrepRecognition.onresult = (event) => {
       let transcript = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
+        const result = event.results[i];
+        let chosen = result[0]?.transcript || "";
+        // Prefer alternatives that contain numbers / training vocabulary.
+        for (let j = 1; j < result.length; j++) {
+          const candidate = result[j]?.transcript || "";
+          const score = (candidate.match(/\d/g) || []).length +
+            (/\b(set|reps?|squat|bench|pull|run|mile|minutes?|bjj|mma|ruck|surf)\b/i.test(candidate) ? 3 : 0);
+          const chosenScore = (chosen.match(/\d/g) || []).length +
+            (/\b(set|reps?|squat|bench|pull|run|mile|minutes?|bjj|mma|ruck|surf)\b/i.test(chosen) ? 3 : 0);
+          if (score > chosenScore) chosen = candidate;
+        }
+        transcript += chosen;
       }
-      elements.aiSitrepTextInput.value = transcript.trim();
+      bestTranscript = transcript.trim();
+      elements.aiSitrepTextInput.value = bestTranscript;
     };
 
     sitrepRecognition.onerror = () => {
@@ -489,8 +494,17 @@
     sitrepRecognition.onend = () => {
       elements.aiSitrepMicButton.classList.remove("listening");
       elements.aiSitrepMicLabel.textContent = "TALK";
-      elements.aiSitrepVoiceStatus.textContent = "Voice ready";
-      if (elements.aiSitrepTextInput.value.trim()) submitSitrepAnswer();
+      elements.aiSitrepVoiceStatus.textContent = bestTranscript
+        ? "Transcript ready — review, then Send"
+        : "Voice ready";
+      sitrepRecognition = null;
+      if (bestTranscript) {
+        elements.aiSitrepTextInput.focus();
+        elements.aiSitrepTextInput.setSelectionRange(
+          elements.aiSitrepTextInput.value.length,
+          elements.aiSitrepTextInput.value.length
+        );
+      }
     };
 
     sitrepRecognition.start();
@@ -565,9 +579,165 @@
     };
   }
 
+
+  const SITREP_EXERCISE_ALIASES = {
+    "zercher squat": ["zercher squat","zurcher squat","zerker squat","searcher squat","jerker squat","zercher squats"],
+    "incline bench": ["incline bench","incline press","incline bench press"],
+    "weighted pull-ups": ["weighted pull ups","weighted pull-ups","weighted pullups","weighted pull up","weighted chin ups"],
+    "bench press": ["bench press","flat bench","bench"],
+    "back squat": ["back squat","barbell squat"],
+    "front squat": ["front squat"],
+    "deadlift": ["deadlift","dead lift"],
+    "overhead press": ["overhead press","ohp","shoulder press"],
+    "barbell row": ["barbell row","bent over row","bent-over row"]
+  };
+
+  function numberWordsToDigits(text) {
+    let value = String(text || "").toLowerCase();
+    // Common weight phrases voice transcription often emits without numerals.
+    const phrases = {
+      "one thirty five":"135","one hundred thirty five":"135",
+      "one fifty five":"155","one hundred fifty five":"155",
+      "one sixty five":"165","one hundred sixty five":"165",
+      "one eighty five":"185","one hundred eighty five":"185",
+      "two oh five":"205","two hundred five":"205",
+      "two fifteen":"215","two hundred fifteen":"215",
+      "two twenty five":"225","two hundred twenty five":"225",
+      "two thirty five":"235","two hundred thirty five":"235",
+      "two forty five":"245","two hundred forty five":"245",
+      "two fifty five":"255","two hundred fifty five":"255",
+      "two seventy five":"275","two hundred seventy five":"275",
+      "three fifteen":"315","three hundred fifteen":"315",
+      "three sixty five":"365","three hundred sixty five":"365",
+      "four oh five":"405","four hundred five":"405"
+    };
+    Object.entries(phrases).forEach(([phrase, digits]) => {
+      value = value.replace(new RegExp(`\\b${phrase}\\b`, "g"), digits);
+    });
+
+    const simple = {
+      "one":"1","two":"2","three":"3","four":"4","five":"5","six":"6",
+      "seven":"7","eight":"8","nine":"9","ten":"10","eleven":"11","twelve":"12",
+      "thirteen":"13","fourteen":"14","fifteen":"15","twenty":"20"
+    };
+    Object.entries(simple).forEach(([word, digit]) => {
+      value = value.replace(new RegExp(`\\b${word}\\b`, "g"), digit);
+    });
+    return value;
+  }
+
+  function normalizeSitrepTrainingText(text) {
+    let normalized = numberWordsToDigits(text)
+      .replace(/\bby\b/gi, " x ")
+      .replace(/\btimes\b/gi, " x ")
+      .replace(/\bfor\s+(\d+)\s+reps?\b/gi, " for $1")
+      .replace(/\bpounds?\b/gi, " lb")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    Object.entries(SITREP_EXERCISE_ALIASES).forEach(([canonical, aliases]) => {
+      aliases.forEach((alias) => {
+        normalized = normalized.replace(new RegExp(`\\b${alias.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi"), canonical);
+      });
+    });
+    return normalized;
+  }
+
+  function knownExerciseNames() {
+    const names = new Set();
+    Object.keys(SITREP_EXERCISE_ALIASES).forEach((name) => names.add(name));
+    Object.values(DEFAULT_WORKOUTS || {}).flat().forEach((name) => names.add(String(name).toLowerCase()));
+    Object.values(state.customWorkouts || {}).flat().forEach((name) => names.add(String(name).toLowerCase()));
+    Object.keys(state.exerciseLogs || {}).forEach((name) => names.add(String(name).toLowerCase()));
+    return [...names].filter(Boolean);
+  }
+
+  function detectExerciseName(segment) {
+    const lower = String(segment || "").toLowerCase();
+    const names = knownExerciseNames().sort((a,b) => b.length - a.length);
+    const exact = names.find((name) => lower.includes(name));
+    if (exact) {
+      // Preserve known library capitalization where possible.
+      const libraryName = [
+        ...Object.values(DEFAULT_WORKOUTS || {}).flat(),
+        ...Object.values(state.customWorkouts || {}).flat(),
+        ...Object.keys(state.exerciseLogs || {})
+      ].find((item) => String(item).toLowerCase() === exact);
+      return libraryName || exact.replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+    return null;
+  }
+
+  function parseSetType(text) {
+    const value = String(text || "").toLowerCase();
+    if (/\b(drop|dropset|drop set)\b/.test(value)) return "drop";
+    if (/\b(warmup|warm up|warm-up)\b/.test(value)) return "warmup";
+    if (/\b(backoff|back off|back-off)\b/.test(value)) return "backoff";
+    if (/\b(amrap|max reps)\b/.test(value)) return "amrap";
+    if (/\b(failure|to failure)\b/.test(value)) return "failure";
+    if (/\b(technique|form)\b/.test(value)) return "technique";
+    return "working";
+  }
+
+  function parseLiftSets(text) {
+    const normalized = normalizeSitrepTrainingText(text);
+    const sets = [];
+
+    // Supports: 185x8, 185 for 8, "at 185 for 8", "225 4 reps".
+    const rx = /(?:at\s+)?(\d{2,4}(?:\.\d+)?)\s*(?:lb)?\s*(?:x|for)\s*(\d{1,3})(?:\s*reps?)?([^,;.]*?)(?=,\s*\d|;\s*\d|\.|\band\s+\d|\bthen\s+\d|$)/gi;
+    let match;
+    while ((match = rx.exec(normalized)) !== null) {
+      sets.push({
+        weight: Number(match[1]),
+        reps: Number(match[2]),
+        type: parseSetType(match[3] || "")
+      });
+    }
+
+    // Alternate "225, 4 reps" / "225 4 reps"
+    if (!sets.length) {
+      const alt = /(?:at\s+)?(\d{2,4}(?:\.\d+)?)\s*(?:lb)?[, ]+\s*(\d{1,3})\s*reps?\b([^,;.]*)/gi;
+      while ((match = alt.exec(normalized)) !== null) {
+        sets.push({
+          weight: Number(match[1]),
+          reps: Number(match[2]),
+          type: parseSetType(match[3] || "")
+        });
+      }
+    }
+    return sets;
+  }
+
+  function addLiftProposalFromText(text, fallbackExercise = null) {
+    const normalized = normalizeSitrepTrainingText(text);
+    const exercise = detectExerciseName(normalized) || fallbackExercise;
+    const setDetails = parseLiftSets(normalized);
+    if (!exercise || !setDetails.length) return false;
+
+    const working = setDetails.filter((set) => set.type === "working");
+    const source = working.length ? working : setDetails;
+    const top = [...source].sort((a,b) => b.weight - a.weight)[0];
+
+    addSitrepProposal({
+      kind: "lift",
+      title: `Lift · ${exercise}`,
+      summary: `${setDetails.length} set${setDetails.length === 1 ? "" : "s"} · top ${top.weight} lb × ${top.reps}`,
+      exercise,
+      weight: top.weight,
+      reps: top.reps,
+      sets: setDetails.length,
+      setDetails,
+      volume: setDetails.reduce((sum, set) => sum + set.weight * set.reps, 0),
+      note: "Logged from AI SITREP"
+    });
+    return true;
+  }
+
   function parseSitrepAnswer(step, answer) {
-    if (step.type === "activity") {
-      if (!isNegativeOrSkip(answer)) parseSmartActivityText(answer);
+    if (step.type === "training" || step.type === "extraActivity") {
+      if (!isNegativeOrSkip(answer)) {
+        parseSmartActivityText(answer);
+      }
       return;
     }
 
@@ -591,24 +761,14 @@
     if (step.type === "reflection") {
       if (!isNegativeOrSkip(answer) && String(answer).trim()) {
         const reflection = splitReflectionAnswer(answer);
-        if (reflection.improve) {
-          addSitrepProposal({
-            kind: "aar",
-            field: "improve",
-            title: "AAR · Improve",
-            summary: reflection.improve,
-            value: reflection.improve
-          });
-        }
-        if (reflection.lesson) {
-          addSitrepProposal({
-            kind: "aar",
-            field: "lesson",
-            title: "AAR · Lesson learned",
-            summary: reflection.lesson,
-            value: reflection.lesson
-          });
-        }
+        if (reflection.improve) addSitrepProposal({
+          kind: "aar", field: "improve", title: "AAR · Improve",
+          summary: reflection.improve, value: reflection.improve
+        });
+        if (reflection.lesson) addSitrepProposal({
+          kind: "aar", field: "lesson", title: "AAR · Lesson learned",
+          summary: reflection.lesson, value: reflection.lesson
+        });
       }
       return;
     }
@@ -616,35 +776,35 @@
     if (step.type === "rating") {
       if (isNegativeOrSkip(answer)) return;
       const match = String(answer).match(/\b(10|[1-9])\b/);
-      if (match) {
-        const rating = Number(match[1]);
-        addSitrepProposal({
-          kind: "rating",
-          title: "AAR · Overall rating",
-          summary: `${rating}/10`,
-          value: rating
-        });
-      }
+      if (match) addSitrepProposal({
+        kind: "rating",
+        title: "AAR · Overall rating",
+        summary: `${Number(match[1])}/10`,
+        value: Number(match[1])
+      });
     }
   }
 
   function parseSmartActivityText(text) {
     const raw = String(text || "").trim();
-    const lower = raw.toLowerCase();
+    const normalized = normalizeSitrepTrainingText(raw);
+    const lower = normalized.toLowerCase();
     let found = false;
+
+    // Lifting: split on exercise names / sentence separators, but preserve set sequences.
+    const exercise = detectExerciseName(normalized);
+    if (exercise && addLiftProposalFromText(normalized, exercise)) {
+      found = true;
+    }
 
     // Running / rucking.
     const distanceMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:mile|miles|mi)\b/);
     const timeMatch = lower.match(/(?:in|time(?: was)?|for)\s*(\d{1,3})(?::(\d{2}))?\s*(?:minutes?|mins?|min)?\b/);
-
     if (distanceMatch && /\b(run|ran|running|ruck|rucked|rucking)\b/.test(lower)) {
       const domain = /\bruck/.test(lower) ? "Ruck" : "Running";
       const distance = Number(distanceMatch[1]);
       let minutes = null;
-
-      if (timeMatch) {
-        minutes = Number(timeMatch[1]) + (timeMatch[2] ? Number(timeMatch[2]) / 60 : 0);
-      }
+      if (timeMatch) minutes = Number(timeMatch[1]) + (timeMatch[2] ? Number(timeMatch[2]) / 60 : 0);
 
       const effortMap = [
         [1, /\b(very easy|recovery|super easy)\b/],
@@ -653,125 +813,76 @@
         [4, /\b(hard|tough|threshold)\b/],
         [5, /\b(very hard|max|maximum|all out)\b/]
       ];
-      const effort = effortMap.find(([, rx]) => rx.test(lower))?.[0] || null;
-
-      const metrics = [{ metric: "Distance", value: distance, unit: "mi" }];
+      const effort = effortMap.find(([,rx]) => rx.test(lower))?.[0] || null;
+      const metrics = [{ metric:"Distance", value:distance, unit:"mi" }];
       if (minutes) {
-        metrics.push({ metric: "Time", value: minutes, unit: "min" });
-        metrics.push({ metric: "Pace", value: minutes / distance, unit: "min/mi" });
+        metrics.push({ metric:"Time", value:minutes, unit:"min" });
+        metrics.push({ metric:"Pace", value:minutes/distance, unit:"min/mi" });
       }
-      if (effort && domain === "Running") {
-        metrics.push({ metric: "Effort zone", value: effort, unit: "zone" });
-      }
+      if (effort) metrics.push({ metric:"Effort zone", value:effort, unit:"zone" });
 
       addSitrepProposal({
-        kind: "activity",
-        title: domain,
-        summary: `${distance} mi${minutes ? ` · ${formatPaceMinutes(minutes / distance)}/mi` : ""}${effort ? ` · Zone ${effort}` : ""}`,
-        domain,
-        metrics,
-        note: raw
+        kind:"activity", title:domain,
+        summary:`${distance} mi${minutes ? ` · ${formatPaceMinutes(minutes/distance)}/mi` : ""}${effort ? ` · Zone ${effort}` : ""}`,
+        domain, metrics, note:raw
       });
       found = true;
     }
 
-    // Surfing.
-    if (/\b(surf|surfed|surfing)\b/.test(lower)) {
-      const minutesMatch = lower.match(/(\d{1,3})\s*(?:minutes?|mins?|min)\b/);
-      const hourMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|hr)\b/);
-      const wavesMatch = lower.match(/(?:caught|got)\s+(\d{1,2})\s+waves?\b/);
-      const metrics = [];
-
-      if (minutesMatch) metrics.push({ metric: "Session time", value: Number(minutesMatch[1]), unit: "min" });
-      else if (hourMatch) metrics.push({ metric: "Session time", value: Number(hourMatch[1]) * 60, unit: "min" });
-      if (wavesMatch) metrics.push({ metric: "Waves caught", value: Number(wavesMatch[1]), unit: "waves" });
-
-      if (metrics.length) {
-        addSitrepProposal({
-          kind: "activity",
-          title: "Surfing",
-          summary: metrics.map((item) => `${item.value} ${item.unit}`).join(" · "),
-          domain: "Surfing",
-          metrics,
-          note: raw
-        });
-        found = true;
-      }
-    }
-
-    // Timed combat / conditioning activities.
-    const timedActivities = [
+    // Timed combat / conditioning sessions.
+    const activities = [
       ["BJJ", /\b(bjj|jiu jitsu|jiu-jitsu)\b/],
       ["MMA", /\bmma\b/],
       ["Boxing", /\b(boxing|boxed)\b/],
-      ["Swimming", /\b(swim|swam|swimming)\b/]
+      ["Swimming", /\b(swim|swam|swimming)\b/],
+      ["Surfing", /\b(surf|surfed|surfing)\b/],
+      ["Mobility", /\b(mobility|stretching|recovery session)\b/]
     ];
 
-    timedActivities.forEach(([domain, rx]) => {
+    activities.forEach(([domain, rx]) => {
       if (!rx.test(lower)) return;
-      const mins = lower.match(/(\d{1,3})\s*(?:minutes?|mins?|min)\b/);
-      const hrs = lower.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|hr)\b/);
-      const duration = mins ? Number(mins[1]) : hrs ? Number(hrs[1]) * 60 : null;
-      if (!duration) return;
+      const minMatch = lower.match(/(\d{1,3})\s*(?:minutes?|mins?|min)\b/);
+      const hrMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|hr)\b/);
+      const duration = minMatch ? Number(minMatch[1]) : hrMatch ? Number(hrMatch[1]) * 60 : null;
+      const roundsMatch = lower.match(/(\d{1,2})\s*(?:rounds?|rolls?)\b/);
+      const metrics = [];
+      if (duration) metrics.push({ metric:"Training time", value:duration, unit:"min" });
+      if (roundsMatch) metrics.push({ metric:"Rounds", value:Number(roundsMatch[1]), unit:"rounds" });
 
-      addSitrepProposal({
-        kind: "activity",
-        title: domain,
-        summary: `${duration} min`,
-        domain,
-        metrics: [{ metric: "Training time", value: duration, unit: "min" }],
-        note: raw
-      });
-      found = true;
-    });
-
-    // Multiple lift entries from one answer.
-    const candidates = raw.split(/[,;]|\band then\b|\bthen\b/i).map((part) => part.trim()).filter(Boolean);
-    const seen = new Set();
-
-    candidates.forEach((part) => {
-      let match = part.match(/(?:i\s+)?(?:hit|did)?\s*([a-zA-Z][a-zA-Z\s'-]{2,35}?)\s+(\d{2,4})\s*(?:lb|lbs|pounds?)?\s*(?:for|x|×)\s*(\d{1,2})(?:\s*reps?)?/i);
-      let exercise, weight, reps;
-
-      if (match) {
-        exercise = match[1].trim();
-        weight = Number(match[2]);
-        reps = Number(match[3]);
-      } else {
-        match = part.match(/(\d{2,4})\s*(?:lb|lbs|pounds?)?\s*(?:for|x|×)\s*(\d{1,2})\s+(?:on\s+)?([a-zA-Z][a-zA-Z\s'-]{2,35})/i);
-        if (match) {
-          weight = Number(match[1]);
-          reps = Number(match[2]);
-          exercise = match[3].trim();
-        }
+      if (domain === "Surfing") {
+        const waves = lower.match(/(?:caught|got)\s+(\d{1,2})\s+waves?\b/);
+        if (waves) metrics.push({ metric:"Waves caught", value:Number(waves[1]), unit:"waves" });
       }
 
-      if (!exercise || !weight || !reps) return;
-      exercise = exercise.replace(/\b(today|this morning|after work)\b/gi, "").replace(/\s+/g, " ").trim();
-      const key = `${exercise.toLowerCase()}|${weight}|${reps}`;
-      if (seen.has(key)) return;
-      seen.add(key);
-
-      addSitrepProposal({
-        kind: "lift",
-        title: `Lift · ${exercise}`,
-        summary: `${weight} lb × ${reps}`,
-        exercise,
-        weight,
-        reps,
-        sets: 1,
-        note: "Logged from AI SITREP"
-      });
-      found = true;
+      if (metrics.length) {
+        addSitrepProposal({
+          kind:"activity", title:domain,
+          summary:metrics.map((m)=>`${m.value} ${m.unit}`).join(" · "),
+          domain, metrics, note:raw
+        });
+        found = true;
+      }
     });
 
-    // If the parser cannot structure it, surface the note for review but never save it automatically.
+    // Bodyweight / simple rep-only activity.
+    const bodyweight = lower.match(/\b(\d{1,3})\s*(pull[- ]?ups?|push[- ]?ups?|burpees?)\b/);
+    if (bodyweight) {
+      addSitrepProposal({
+        kind:"activity", title:"Body Weight",
+        summary:`${bodyweight[1]} ${bodyweight[2]}`,
+        domain:"Body Weight",
+        metrics:[{ metric:"Reps", value:Number(bodyweight[1]), unit:"reps" }],
+        note:raw
+      });
+      found = true;
+    }
+
     if (!found) {
       addSitrepProposal({
-        kind: "activityNote",
-        title: "Unstructured activity note",
-        summary: raw,
-        value: raw
+        kind:"activityNote",
+        title:"Needs review",
+        summary:raw,
+        value:raw
       });
     }
   }
@@ -812,6 +923,15 @@
 
       const copy = document.createElement("span");
       copy.innerHTML = `<strong>${escapeHtml(proposal.title)}</strong><small>${escapeHtml(proposal.summary)}</small>`;
+      if (proposal.kind === "lift" && Array.isArray(proposal.setDetails)) {
+        const breakdown = document.createElement("small");
+        breakdown.className = "ai-proposal-breakdown";
+        breakdown.textContent = proposal.setDetails.map((set, index) => {
+          const type = set.type && set.type !== "working" ? ` · ${set.type}` : "";
+          return `S${index + 1}: ${set.weight}×${set.reps}${type}`;
+        }).join(" | ");
+        copy.appendChild(breakdown);
+      }
       label.append(checkbox, copy);
       elements.aiSitrepProposalList.appendChild(label);
     });
@@ -861,14 +981,27 @@
 
       if (proposal.kind === "lift") {
         if (!Array.isArray(state.exerciseLogs[proposal.exercise])) state.exerciseLogs[proposal.exercise] = [];
+        const setDetails = Array.isArray(proposal.setDetails) && proposal.setDetails.length
+          ? proposal.setDetails
+          : [{ weight:proposal.weight, reps:proposal.reps, type:"working" }];
+        const scheduleIndex = calculateCycleDay(new Date(`${sitrepSession.date}T12:00:00`)) - 1;
+        const liftId = `sitrep-lift-${Date.now()}-${Math.random().toString(16).slice(2)}`;
         state.exerciseLogs[proposal.exercise].push({
-          id: `sitrep-lift-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          id: liftId,
           date: new Date(`${sitrepSession.date}T12:00:00`).toISOString(),
           weight: proposal.weight,
           reps: proposal.reps,
-          sets: proposal.sets || 1,
-          note: proposal.note || "AI SITREP"
+          sets: setDetails.length,
+          setDetails,
+          volume: proposal.volume || setDetails.reduce((sum,set)=>sum+(Number(set.weight)||0)*(Number(set.reps)||0),0),
+          workout: state.settings.schedule[scheduleIndex] || sitrepSession.scheduledWorkout || "AI SITREP",
+          scheduleDay: scheduleIndex + 1,
+          note: proposal.note || "AI SITREP",
+          createdAt: new Date().toISOString()
         });
+        if (!Array.isArray(day.liftLogIds)) day.liftLogIds = [];
+        day.liftLogIds.push(liftId);
+        state.settings.progressExercise = proposal.exercise;
       }
 
       if (proposal.kind === "activity") {
@@ -876,21 +1009,32 @@
           state.activityTrackers[proposal.domain] = {
             name: proposal.domain,
             entries: [],
+            sessions: [],
             metrics: inferActivityMetrics(proposal.domain)
           };
         }
         const tracker = state.activityTrackers[proposal.domain];
+        if (!Array.isArray(tracker.sessions)) tracker.sessions = [];
         const sessionId = `sitrep-session-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        const sessionDate = new Date(`${sitrepSession.date}T12:00:00`).toISOString();
         proposal.metrics.forEach((metric) => {
+          ensureTrackerMetric(tracker, { name:metric.metric, unit:metric.unit || "", type:"number" });
           tracker.entries.push({
             id: `${sessionId}-${slugifyMetric(metric.metric)}`,
             sessionId,
-            date: new Date(`${sitrepSession.date}T12:00:00`).toISOString(),
+            date: sessionDate,
             metric: metric.metric,
             value: metric.value,
             unit: metric.unit,
             note: proposal.note || "AI SITREP"
           });
+        });
+        tracker.sessions.push({
+          id:sessionId,
+          date:sessionDate,
+          note:proposal.note || "AI SITREP",
+          workout:proposal.domain,
+          metrics:Object.fromEntries(proposal.metrics.map((m)=>[m.metric,m.value]))
         });
       }
     });

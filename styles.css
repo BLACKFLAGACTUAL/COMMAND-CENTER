@@ -3128,3 +3128,29 @@ body[data-app-mode="work"] #brandTitle::after {
     align-items: center;
   }
 }
+
+
+/* v28 — smarter AI SITREP */
+.ai-sitrep-input-hint {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: .64rem;
+  line-height: 1.4;
+  margin-top: -.25rem;
+}
+
+.ai-proposal-breakdown {
+  display: block;
+  margin-top: .25rem;
+  color: var(--text) !important;
+  font-size: .66rem;
+  line-height: 1.45;
+}
+
+.ai-sitrep-conversation {
+  min-height: 220px;
+}
+
+.ai-sitrep-text-entry textarea {
+  min-height: 82px;
+}

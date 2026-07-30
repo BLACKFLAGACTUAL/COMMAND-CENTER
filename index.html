@@ -9,7 +9,7 @@
   <title>My Command Center</title>
 
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./styles.css?v=27">
+  <link rel="stylesheet" href="./styles.css?v=28">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 </head>
 <body>
@@ -123,7 +123,7 @@
         <div class="ai-sitrep-card-copy">
           <span class="data-label">AI SITREP</span>
           <h2 id="aiSitrepCardHeading">Daily Debrief</h2>
-          <p>Talk through training and your daily AAR. Dashboard checkboxes stay manual so the debrief stays fast.</p>
+          <p>Log training by voice, capture additional activities, then finish your AAR. Review everything before it saves.</p>
         </div>
         <button id="startAiSitrepButton" class="button primary ai-sitrep-start" type="button">
           <span aria-hidden="true">◉</span> START SITREP
@@ -1152,13 +1152,13 @@
     </form>
   </dialog>
 
-  <script src="./app.js?v=27" defer></script>
+  <script src="./app.js?v=28" defer></script>
 
   <dialog id="systemConfirmDialog" class="command-menu-dialog">
     <div class="command-menu-shell">
       <div class="command-menu-head">
         <p class="category-kicker">COMMAND MENU</p>
-        <h2>Mode & System</h2><div id="buildVersionBadge" class="build-version-badge">BUILD v27</div>
+        <h2>Mode & System</h2><div id="buildVersionBadge" class="build-version-badge">BUILD v28</div>
         <p class="helper-text">Switch operating environments or open settings for the active mode.</p>
       </div>
 
@@ -1350,6 +1350,7 @@
         <div class="ai-sitrep-text-entry">
           <label class="sr-only" for="aiSitrepTextInput">Your answer</label>
           <textarea id="aiSitrepTextInput" rows="2" maxlength="1500" placeholder="Type your answer here…"></textarea>
+          <small id="aiSitrepInputHint" class="ai-sitrep-input-hint">Tip: for lifting say “Zercher squat: 185 for 8, 225 for 4, then 185 for 10 drop set.”</small>
           <button id="aiSitrepSendButton" class="button primary" type="button">Send</button>
         </div>
       </div>
