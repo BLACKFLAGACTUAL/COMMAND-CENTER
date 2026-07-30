@@ -9,7 +9,7 @@
   <title>My Command Center</title>
 
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./styles.css?v=20">
+  <link rel="stylesheet" href="./styles.css?v=21">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 </head>
 <body>
@@ -309,6 +309,41 @@
           <p id="quickBuilderHelp" class="helper-text">Create your own workout, add exercises, and assign it directly to your schedule.</p>
 
           <form id="quickWorkoutForm" class="quick-workout-form">
+            <section class="hot-swap-box" aria-labelledby="hotSwapHeading">
+              <div class="builder-label-row hot-swap-heading-row">
+                <div>
+                  <p class="category-kicker">HOT SWAP</p>
+                  <h4 id="hotSwapHeading">Templates</h4>
+                </div>
+                <button id="clearHotSwapSelection" class="text-button" type="button">Clear</button>
+              </div>
+              <p class="helper-text">
+                Pick a protocol, select the schedule day(s) below, then assign it instantly.
+                Saved workouts appear here automatically.
+              </p>
+
+              <div class="hot-swap-section">
+                <span class="data-label">QUICK TYPES</span>
+                <div id="genericTemplateChips" class="template-chip-grid"></div>
+              </div>
+
+              <div class="hot-swap-section">
+                <span class="data-label">SAVED TEMPLATES</span>
+                <div id="savedTemplateChips" class="template-chip-grid"></div>
+              </div>
+
+              <div id="hotSwapSelection" class="hot-swap-selection" hidden>
+                <span class="data-label">SELECTED</span>
+                <strong id="hotSwapSelectedName">—</strong>
+                <small id="hotSwapSelectedDetail"></small>
+              </div>
+
+              <button id="hotSwapAssignButton" class="button secondary full-width" type="button" disabled>
+                Assign selected template
+              </button>
+              <p id="hotSwapStatus" class="save-status" aria-live="polite"></p>
+            </section>
+
             <label for="quickWorkoutName">Workout name</label>
             <input id="quickWorkoutName" type="text" maxlength="80" placeholder="Example: Upper Body Power" required>
 
@@ -1099,13 +1134,13 @@
     </form>
   </dialog>
 
-  <script src="./app.js?v=20" defer></script>
+  <script src="./app.js?v=21" defer></script>
 
   <dialog id="systemConfirmDialog" class="command-menu-dialog">
     <div class="command-menu-shell">
       <div class="command-menu-head">
         <p class="category-kicker">COMMAND MENU</p>
-        <h2>Mode & System</h2><div id="buildVersionBadge" class="build-version-badge">BUILD v20</div>
+        <h2>Mode & System</h2><div id="buildVersionBadge" class="build-version-badge">BUILD v21</div>
         <p class="helper-text">Switch operating environments or open settings for the active mode.</p>
       </div>
 

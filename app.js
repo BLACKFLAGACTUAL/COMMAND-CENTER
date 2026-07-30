@@ -174,7 +174,7 @@
     const box = document.getElementById("storageAlert");
     if (box) {
       box.hidden = false;
-      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v20`;
+      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v21`;
     }
   });
 
@@ -190,7 +190,7 @@
         if (elements.storageAlert) {
           elements.storageAlert.hidden = false;
           elements.storageAlert.textContent =
-            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v20`;
+            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v21`;
         }
         return false;
       }
@@ -207,7 +207,7 @@
     runStage("profile render", renderProfileSummary);
 
     if (elements.buildVersionBadge) {
-      elements.buildVersionBadge.textContent = "BUILD v20 · CONTROLS ACTIVE";
+      elements.buildVersionBadge.textContent = "BUILD v21 · CONTROLS ACTIVE";
     }
 
     if (shouldShowOnboarding()) showOnboarding(false, false);
@@ -261,7 +261,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge", "onboardingCustomScheduleLengthRow", "onboardingCustomScheduleLength", "scheduleCycleEyebrow", "scheduleCycleHelp", "quickBuilderHelp", "workoutBuilderCard"].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge", "onboardingCustomScheduleLengthRow", "onboardingCustomScheduleLength", "scheduleCycleEyebrow", "scheduleCycleHelp", "quickBuilderHelp", "workoutBuilderCard", "genericTemplateChips", "savedTemplateChips", "clearHotSwapSelection", "hotSwapSelection", "hotSwapSelectedName", "hotSwapSelectedDetail", "hotSwapAssignButton", "hotSwapStatus"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -1295,7 +1295,15 @@
     elements.addExerciseRowButton.addEventListener("click", () => addExerciseEditorRow(""));
     elements.workoutDialogForm.addEventListener("submit", handleWorkoutDialogSubmit);
     elements.quickAddExerciseButton.addEventListener("click", () => addQuickExerciseRow(""));
+    elements.quickWorkoutName.addEventListener("input", () => {
+      if (hotSwapTemplateName && elements.quickWorkoutName.value.trim() !== hotSwapTemplateName) {
+        hotSwapTemplateName = "";
+        renderHotSwapTemplates();
+      }
+    });
     elements.quickWorkoutForm.addEventListener("submit", handleQuickWorkoutSubmit);
+    elements.hotSwapAssignButton.addEventListener("click", assignHotSwapTemplate);
+    elements.clearHotSwapSelection.addEventListener("click", clearHotSwapTemplate);
 
     elements.toggleScheduleButton.addEventListener("click", toggleScheduleVisibility);
     elements.taskDialogCancel.addEventListener("click", () => elements.taskDialog.close());
@@ -1757,7 +1765,165 @@
   }
 
 
+
+  const GENERIC_HOT_SWAP_TEMPLATES = {
+    "Lift": ["Complete planned strength session."],
+    "Cardio": ["Complete planned conditioning session."],
+    "MMA": ["Complete planned MMA session."],
+    "BJJ": ["Complete planned BJJ session."],
+    "Boxing": ["Complete planned boxing session."],
+    "Run": ["Complete planned running session."],
+    "Ruck": ["Complete planned ruck session."],
+    "Mobility": ["Complete planned mobility / recovery session."],
+    "Recovery": ["Recovery, mobility, or low-intensity movement."],
+    "Rest": ["Rest day."]
+  };
+
+  let hotSwapTemplateName = "";
+
+  function getHotSwapLibrary() {
+    return {
+      ...GENERIC_HOT_SWAP_TEMPLATES,
+      ...DEFAULT_WORKOUTS,
+      ...(state.customWorkouts || {})
+    };
+  }
+
+  function renderHotSwapTemplates() {
+    if (!elements.genericTemplateChips || !elements.savedTemplateChips) return;
+
+    elements.genericTemplateChips.replaceChildren();
+    elements.savedTemplateChips.replaceChildren();
+
+    Object.keys(GENERIC_HOT_SWAP_TEMPLATES).forEach((name) => {
+      elements.genericTemplateChips.appendChild(createHotSwapChip(name, "generic"));
+    });
+
+    const savedNames = [
+      ...Object.keys(DEFAULT_WORKOUTS),
+      ...Object.keys(state.customWorkouts || {})
+    ];
+
+    [...new Set(savedNames)].forEach((name) => {
+      elements.savedTemplateChips.appendChild(
+        createHotSwapChip(name, state.customWorkouts?.[name] ? "custom" : "protected")
+      );
+    });
+
+    renderHotSwapSelection();
+  }
+
+  function createHotSwapChip(name, source) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "template-chip";
+    button.dataset.templateName = name;
+    button.dataset.templateSource = source;
+    button.textContent = name;
+    button.setAttribute("aria-pressed", String(hotSwapTemplateName === name));
+    if (hotSwapTemplateName === name) button.classList.add("selected");
+
+    button.addEventListener("click", () => {
+      selectHotSwapTemplate(name);
+    });
+
+    return button;
+  }
+
+  function selectHotSwapTemplate(name) {
+    const library = getHotSwapLibrary();
+    if (!library[name]) return;
+
+    hotSwapTemplateName = name;
+    elements.quickWorkoutName.value = name;
+
+    const exercises = Array.isArray(library[name]) ? library[name] : [];
+    elements.quickExerciseEditor.replaceChildren();
+    if (exercises.length) {
+      exercises.forEach((exercise) => addQuickExerciseRow(exercise));
+    } else {
+      addQuickExerciseRow("");
+    }
+
+    elements.hotSwapStatus.textContent = "";
+    renderHotSwapTemplates();
+  }
+
+  function clearHotSwapTemplate() {
+    hotSwapTemplateName = "";
+    elements.hotSwapStatus.textContent = "";
+    renderHotSwapTemplates();
+  }
+
+  function renderHotSwapSelection() {
+    const library = getHotSwapLibrary();
+    const selected = hotSwapTemplateName && library[hotSwapTemplateName];
+
+    elements.hotSwapSelection.hidden = !selected;
+    elements.hotSwapAssignButton.disabled = !selected;
+
+    if (!selected) {
+      elements.hotSwapSelectedName.textContent = "—";
+      elements.hotSwapSelectedDetail.textContent = "";
+      return;
+    }
+
+    elements.hotSwapSelectedName.textContent = hotSwapTemplateName;
+    const count = Array.isArray(selected) ? selected.length : 0;
+    const source = state.customWorkouts?.[hotSwapTemplateName]
+      ? "Custom workout"
+      : DEFAULT_WORKOUTS[hotSwapTemplateName]
+        ? "Protected template"
+        : "Quick type";
+    elements.hotSwapSelectedDetail.textContent =
+      `${source}${count ? ` · ${count} item${count === 1 ? "" : "s"}` : ""}`;
+  }
+
+  function assignHotSwapTemplate() {
+    const library = getHotSwapLibrary();
+    if (!hotSwapTemplateName || !library[hotSwapTemplateName]) {
+      elements.hotSwapStatus.textContent = "Select a template first.";
+      return;
+    }
+
+    const selectedDays = [...elements.quickAssignDays.querySelectorAll('input[type="checkbox"]:checked')];
+    if (!selectedDays.length) {
+      elements.hotSwapStatus.textContent = "Select at least one schedule day below.";
+      return;
+    }
+
+    const selectedName = hotSwapTemplateName;
+
+    // Generic quick types are saved as lightweight reusable custom protocols
+    // the first time they are assigned so Schedule/Edit can use them normally.
+    if (
+      GENERIC_HOT_SWAP_TEMPLATES[selectedName] &&
+      !DEFAULT_WORKOUTS[selectedName] &&
+      !state.customWorkouts[selectedName]
+    ) {
+      state.customWorkouts[selectedName] = [...GENERIC_HOT_SWAP_TEMPLATES[selectedName]];
+    }
+
+    selectedDays.forEach((checkbox) => {
+      const index = Number(checkbox.value);
+      if (Number.isInteger(index) && state.settings.schedule[index] !== undefined) {
+        state.settings.schedule[index] = selectedName;
+      }
+    });
+
+    elements.hotSwapStatus.textContent =
+      `${selectedName} assigned to ${selectedDays.length} day${selectedDays.length === 1 ? "" : "s"}.`;
+
+    saveAndRender();
+
+    // Re-select after render so the user can immediately hot-swap another day.
+    hotSwapTemplateName = selectedName;
+    renderHotSwapTemplates();
+  }
+
   function renderQuickWorkoutBuilder() {
+    renderHotSwapTemplates();
+
     if (!elements.quickExerciseEditor.children.length) {
       addQuickExerciseRow("");
       addQuickExerciseRow("");
@@ -1824,6 +1990,7 @@
     }
 
     state.customWorkouts[name] = exercises;
+    hotSwapTemplateName = name;
     [...elements.quickAssignDays.querySelectorAll('input[type="checkbox"]:checked')]
       .forEach((checkbox) => {
         state.settings.schedule[Number(checkbox.value)] = name;

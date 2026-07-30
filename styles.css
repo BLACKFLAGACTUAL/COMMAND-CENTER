@@ -2767,3 +2767,89 @@ body[data-app-mode="work"] #brandTitle::after {
 #workoutBuilderCard {
   scroll-margin-top: 1rem;
 }
+
+
+/* v21 — workout template hot swap */
+.hot-swap-box {
+  display: grid;
+  gap: .8rem;
+  margin-bottom: 1rem;
+  padding: .85rem;
+  border: 1px solid var(--accent);
+  background:
+    linear-gradient(110deg, rgba(239,75,80,.08), transparent 55%),
+    var(--panel-2);
+}
+
+.hot-swap-heading-row {
+  align-items: end;
+}
+
+.hot-swap-heading-row h4 {
+  margin: .15rem 0 0;
+  font-family: var(--display);
+  font-size: 1.6rem;
+  text-transform: uppercase;
+}
+
+.hot-swap-section {
+  display: grid;
+  gap: .45rem;
+}
+
+.template-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+
+.template-chip {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  padding: .55rem .7rem;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.template-chip:hover,
+.template-chip:focus-visible {
+  border-color: var(--accent);
+}
+
+.template-chip.selected {
+  border-color: var(--accent);
+  background: rgba(239,75,80,.16);
+  color: var(--accent);
+}
+
+.hot-swap-selection {
+  display: grid;
+  gap: .18rem;
+  padding: .65rem .75rem;
+  border-left: 3px solid var(--accent);
+  background: rgba(239,75,80,.055);
+}
+
+.hot-swap-selection[hidden] {
+  display: none !important;
+}
+
+.hot-swap-selection strong {
+  font-size: 1rem;
+}
+
+.hot-swap-selection small {
+  color: var(--muted);
+}
+
+@media (max-width: 520px) {
+  .template-chip {
+    flex: 1 1 calc(50% - .45rem);
+    text-align: center;
+  }
+}
