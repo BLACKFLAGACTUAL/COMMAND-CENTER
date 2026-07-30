@@ -3052,3 +3052,6 @@ body[data-app-mode="work"] #brandTitle::after {
 #exerciseLogStatus:not(:empty) {
   display: block;
 }
+
+#exerciseLogSaveButton:disabled,
+#activityEntrySaveButton:disabled { opacity:.55; pointer-events:none; }

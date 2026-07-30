@@ -175,7 +175,7 @@
     const box = document.getElementById("storageAlert");
     if (box) {
       box.hidden = false;
-      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v25`;
+      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v26`;
     }
   });
 
@@ -191,7 +191,7 @@
         if (elements.storageAlert) {
           elements.storageAlert.hidden = false;
           elements.storageAlert.textContent =
-            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v25`;
+            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v26`;
         }
         return false;
       }
@@ -208,7 +208,7 @@
     runStage("profile render", renderProfileSummary);
 
     if (elements.buildVersionBadge) {
-      elements.buildVersionBadge.textContent = "BUILD v25 · CONTROLS ACTIVE";
+      elements.buildVersionBadge.textContent = "BUILD v26 · CONTROLS ACTIVE";
     }
 
     if (shouldShowOnboarding()) showOnboarding(false, false);
@@ -262,7 +262,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge", "onboardingCustomScheduleLengthRow", "onboardingCustomScheduleLength", "scheduleCycleEyebrow", "scheduleCycleHelp", "quickBuilderHelp", "workoutBuilderCard", "genericTemplateChips", "savedTemplateChips", "clearHotSwapSelection", "hotSwapSelection", "hotSwapSelectedName", "hotSwapSelectedDetail", "hotSwapAssignButton", "hotSwapStatus", "hotSwapDayGrid", "exerciseLogSaveButton"].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge", "onboardingCustomScheduleLengthRow", "onboardingCustomScheduleLength", "scheduleCycleEyebrow", "scheduleCycleHelp", "quickBuilderHelp", "workoutBuilderCard", "genericTemplateChips", "savedTemplateChips", "clearHotSwapSelection", "hotSwapSelection", "hotSwapSelectedName", "hotSwapSelectedDetail", "hotSwapAssignButton", "hotSwapStatus", "hotSwapDayGrid", "exerciseLogSaveButton", "activityEntrySaveButton"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -1319,14 +1319,7 @@
       elements.exerciseLogDialog.close();
     });
     elements.exerciseLogForm.addEventListener("submit", saveExerciseLog);
-    elements.exerciseLogSaveButton.addEventListener("click", (event) => {
-      // iOS Safari occasionally fails to dispatch a form submit after dynamic
-      // schedule/view changes. Force the same validated submit path.
-      if (event.detail === 0) return;
-      if (!elements.exerciseLogForm.checkValidity()) return;
-      // Normal click will submit automatically; this listener exists as a
-      // stable bound control and intentionally does not mutate data directly.
-    });
+    elements.exerciseLogSaveButton.addEventListener("click", commitExerciseLog);
     elements.exerciseLogDialog.addEventListener("cancel", () => {
       loggingPastEntry = false;
       loggingExerciseName = null;
@@ -1359,6 +1352,7 @@
     elements.addActivityEntryButton.addEventListener("click", openActivityEntryDialog);
     elements.activityEntryCancel.addEventListener("click", () => elements.activityEntryDialog.close());
     elements.activityEntryForm.addEventListener("submit", saveActivityEntry);
+    elements.activityEntrySaveButton.addEventListener("click", commitActivityEntry);
     elements.activityMetricSelect.addEventListener("change", () => {
       const domain = state.settings.archiveDomain;
       const metrics = getTrackerMetrics(domain);
@@ -2046,12 +2040,22 @@
 
     // Generic quick types stay lightweight schedule labels.
     // Do not create duplicate custom workouts just because they were assigned.
+    const todayIndex = calculateCycleDay(new Date()) - 1;
+    let changedToday = false;
+
     selectedDays.forEach((checkbox) => {
       const index = Number(checkbox.value);
       if (Number.isInteger(index) && state.settings.schedule[index] !== undefined) {
+        if (index === todayIndex && state.settings.schedule[index] !== selectedName) changedToday = true;
         state.settings.schedule[index] = selectedName;
       }
     });
+
+    if (changedToday) {
+      const today = getTodayRecord();
+      today.workoutComplete = false;
+      today.updatedAt = new Date().toISOString();
+    }
 
     const count = selectedDays.length;
 
@@ -2403,114 +2407,102 @@
     elements.exerciseNameInput.value = selected || "";
   }
 
-  function saveExerciseLog(event) {
-    event.preventDefault();
+  let exerciseLogSaveInProgress = false;
 
-    const exerciseName = loggingPastEntry
-      ? elements.exerciseNameInput.value.trim()
-      : String(
-          elements.exerciseLogForm.dataset.exerciseName ||
-          loggingExerciseName ||
-          ""
-        ).trim();
-    const dateKey = elements.exerciseDateInput.value;
-    const weight = Number(elements.exerciseWeightInput.value);
-    const reps = Number(elements.exerciseRepsInput.value);
-    const sets = Number(elements.exerciseSetsInput.value);
+  function commitExerciseLog() {
+    if (exerciseLogSaveInProgress) return;
+    exerciseLogSaveInProgress = true;
+    elements.exerciseLogSaveButton.disabled = true;
+    elements.exerciseLogStatus.textContent = "Saving…";
 
-    if (
-      !exerciseName ||
-      !dateKey ||
-      !Number.isFinite(weight) ||
-      weight < 0 ||
-      !Number.isInteger(reps) ||
-      reps < 1 ||
-      !Number.isInteger(sets) ||
-      sets < 1
-    ) {
-      elements.exerciseLogStatus.textContent =
-        "Choose an exercise and date, then enter valid weight, reps, and sets.";
-      return;
-    }
+    try {
+      const exerciseName = loggingPastEntry
+        ? elements.exerciseNameInput.value.trim()
+        : String(
+            elements.exerciseLogForm.dataset.exerciseName ||
+            loggingExerciseName ||
+            elements.exerciseLogName.textContent ||
+            ""
+          ).trim();
 
-    const selectedDate = new Date(`${dateKey}T12:00:00`);
-    if (Number.isNaN(selectedDate.getTime())) {
-      elements.exerciseLogStatus.textContent = "Choose a valid workout date.";
-      return;
-    }
+      const dateKey = elements.exerciseDateInput.value || getTodayKey();
+      const weight = Number(elements.exerciseWeightInput.value);
+      const reps = Number(elements.exerciseRepsInput.value);
+      const sets = Number(elements.exerciseSetsInput.value);
 
-    const scheduleIndex = calculateCycleDay(selectedDate) - 1;
-    const workoutName =
-      elements.exerciseLogForm.dataset.workoutName ||
-      loggingWorkoutName ||
-      state.settings.schedule[scheduleIndex] ||
-      "Unassigned";
-
-    const log = {
-      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      date: selectedDate.toISOString(),
-      weight,
-      reps,
-      sets,
-      note: elements.exerciseLogNote.value.trim(),
-      workout: workoutName,
-      scheduleDay: scheduleIndex + 1
-    };
-
-    if (!Array.isArray(state.exerciseLogs[exerciseName])) {
-      state.exerciseLogs[exerciseName] = [];
-    }
-
-    state.exerciseLogs[exerciseName].push(log);
-
-    // Make the newly logged exercise the active progress selection.
-    // This matters for a first-ever log because the select option does not
-    // exist until Activity is rendered again.
-    state.settings.progressExercise = exerciseName;
-
-    // Attach a lightweight reference to the daily record so same-day
-    // workout swaps still retain the exact lift session that was performed.
-    const dayKey = dateKey;
-    if (!state.daily[dayKey]) {
-      state.daily[dayKey] = createDailyRecord(dayKey);
-    }
-    if (!Array.isArray(state.daily[dayKey].liftLogIds)) {
-      state.daily[dayKey].liftLogIds = [];
-    }
-    state.daily[dayKey].liftLogIds.push(log.id);
-    state.daily[dayKey].updatedAt = new Date().toISOString();
-
-    const saved = saveState();
-    if (saved === false) {
-      // Roll back the in-memory insert if persistence reports failure.
-      state.exerciseLogs[exerciseName] =
-        state.exerciseLogs[exerciseName].filter((entry) => entry.id !== log.id);
-      state.daily[dayKey].liftLogIds =
-        state.daily[dayKey].liftLogIds.filter((id) => id !== log.id);
-      elements.exerciseLogStatus.textContent =
-        "The lift could not be saved. Your previous data is unchanged.";
-      return;
-    }
-
-    elements.exerciseLogStatus.textContent =
-      `${formatWeight(weight)} × ${reps} saved to ${workoutName}.`;
-
-    loggingPastEntry = false;
-    loggingExerciseName = null;
-    loggingWorkoutName = null;
-    elements.exerciseLogForm.dataset.exerciseName = "";
-    elements.exerciseLogForm.dataset.workoutName = "";
-
-    // Rebuild all dependent views after a successful save.
-    // This guarantees the Dashboard "Last:" line, Activity progress,
-    // Archive, and Intel all see the same newly written log.
-    renderAll();
-
-    setTimeout(() => {
-      if (elements.exerciseLogDialog.open) {
-        elements.exerciseLogDialog.close();
+      if (!exerciseName || !dateKey || !Number.isFinite(weight) || weight < 0 ||
+          !Number.isInteger(reps) || reps < 1 || !Number.isInteger(sets) || sets < 1) {
+        elements.exerciseLogStatus.textContent = "Enter a valid weight, reps, and sets.";
+        return;
       }
-    }, 180);
+
+      const selectedDate = new Date(`${dateKey}T12:00:00`);
+      if (Number.isNaN(selectedDate.getTime())) {
+        elements.exerciseLogStatus.textContent = "Choose a valid workout date.";
+        return;
+      }
+
+      const scheduleIndex = calculateCycleDay(selectedDate) - 1;
+      const currentAssignedWorkout =
+        state.settings.schedule[scheduleIndex] ||
+        elements.exerciseLogForm.dataset.workoutName ||
+        loggingWorkoutName ||
+        "Unassigned";
+
+      const log = {
+        id: `lift-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        date: selectedDate.toISOString(),
+        weight, reps, sets,
+        note: elements.exerciseLogNote.value.trim(),
+        workout: currentAssignedWorkout,
+        scheduleDay: scheduleIndex + 1,
+        createdAt: new Date().toISOString()
+      };
+
+      if (!state.exerciseLogs || typeof state.exerciseLogs !== "object") state.exerciseLogs = {};
+      if (!Array.isArray(state.exerciseLogs[exerciseName])) state.exerciseLogs[exerciseName] = [];
+      state.exerciseLogs[exerciseName].push(log);
+      state.settings.progressExercise = exerciseName;
+
+      if (!state.daily[dateKey]) state.daily[dateKey] = createDailyRecord(dateKey);
+      if (!Array.isArray(state.daily[dateKey].liftLogIds)) state.daily[dateKey].liftLogIds = [];
+      state.daily[dateKey].liftLogIds.push(log.id);
+      state.daily[dateKey].updatedAt = new Date().toISOString();
+
+      if (!saveState()) {
+        state.exerciseLogs[exerciseName] = state.exerciseLogs[exerciseName].filter((x) => x.id !== log.id);
+        state.daily[dateKey].liftLogIds = state.daily[dateKey].liftLogIds.filter((id) => id !== log.id);
+        elements.exerciseLogStatus.textContent = "Save failed. Your previous data is unchanged.";
+        return;
+      }
+
+      if (!state.exerciseLogs[exerciseName]?.some((x) => x.id === log.id)) {
+        elements.exerciseLogStatus.textContent = "Save verification failed. Try again.";
+        return;
+      }
+
+      elements.exerciseLogStatus.textContent =
+        `${formatWeight(weight)} × ${reps} · ${sets} set${sets === 1 ? "" : "s"} saved to ${currentAssignedWorkout}.`;
+
+      loggingPastEntry = false;
+      loggingExerciseName = null;
+      loggingWorkoutName = null;
+      elements.exerciseLogForm.dataset.exerciseName = "";
+      elements.exerciseLogForm.dataset.workoutName = "";
+
+      renderAll();
+      setTimeout(() => {
+        if (elements.exerciseLogDialog.open) elements.exerciseLogDialog.close();
+      }, 350);
+    } finally {
+      exerciseLogSaveInProgress = false;
+      elements.exerciseLogSaveButton.disabled = false;
+    }
+  }
+
+  function saveExerciseLog(event) {
+    event?.preventDefault?.();
+    commitExerciseLog();
   }
 
   function getLatestExerciseLog(exerciseName) {
@@ -3945,88 +3937,100 @@
     elements.activityEntryDialog.showModal();
   }
 
-  function saveActivityEntry(event) {
-    event.preventDefault();
+  let activityEntrySaveInProgress = false;
 
-    const dialogDomain = String(elements.activityEntryActivity.value || elements.activityEntryDomain.textContent || "").trim();
-    const domain = dialogDomain || state.settings.archiveDomain;
-    const tracker = state.activityTrackers?.[domain];
-    if (!tracker) {
-      elements.activityEntryStatus.textContent = "Activity tracker is unavailable. Close and reopen the log.";
-      return;
-    }
+  function commitActivityEntry() {
+    if (activityEntrySaveInProgress) return;
+    activityEntrySaveInProgress = true;
+    elements.activityEntrySaveButton.disabled = true;
+    elements.activityEntryStatus.textContent = "Saving…";
 
-    const dateKey = elements.activityEntryDate.value;
-    const values = sessionFieldValues();
-    if (!dateKey) {
-      elements.activityEntryStatus.textContent = "Select a date.";
-      return;
-    }
+    try {
+      const domain = String(
+        elements.activityEntryActivity.value ||
+        elements.activityEntryDomain.textContent ||
+        state.settings.archiveDomain ||
+        ""
+      ).trim();
 
-    // Fill calculated metrics before save.
-    const derived = calculateDerivedActivityMetrics(domain, values);
-    Object.assign(values, derived);
-
-    const metricMap = new Map(getTrackerMetrics(domain).map((metric) => [metric.name, metric]));
-    const filledMetrics = Object.entries(values).filter(([, value]) => Number.isFinite(Number(value)));
-    if (!filledMetrics.length) {
-      elements.activityEntryStatus.textContent = "Enter at least one metric.";
-      return;
-    }
-
-    const sessionId = `session-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    const sessionDate = new Date(`${dateKey}T12:00:00`).toISOString();
-    const note = elements.activityEntryNote.value.trim();
-
-    filledMetrics.forEach(([metricName, value]) => {
-      const metric = metricMap.get(metricName) || { name: metricName, unit: "", type: "number" };
-      ensureTrackerMetric(tracker, metric);
-
-      const entry = {
-        id: `${sessionId}-${slugifyMetric(metricName)}`,
-        sessionId,
-        date: sessionDate,
-        metric: metricName,
-        value: Number(value),
-        unit: metric.unit || "",
-        note
-      };
-
-      if (metricName === "Heart rate") {
-        const zone = zoneForHeartRate(Number(value));
-        if (zone) {
-          entry.zone = zone.zone;
-          entry.zoneName = zone.name;
-        }
+      if (!domain) {
+        elements.activityEntryStatus.textContent = "Activity type is missing.";
+        return;
       }
 
-      tracker.entries.push(entry);
-    });
+      const tracker = ensureActivityTracker(domain);
+      if (!tracker) {
+        elements.activityEntryStatus.textContent = "Activity tracker is unavailable.";
+        return;
+      }
 
-    tracker.sessions = Array.isArray(tracker.sessions) ? tracker.sessions : [];
-    tracker.sessions.push({
-      id: sessionId,
-      date: sessionDate,
-      note,
-      metrics: Object.fromEntries(filledMetrics.map(([name, value]) => [name, Number(value)]))
-    });
+      const dateKey = elements.activityEntryDate.value || getTodayKey();
+      const values = sessionFieldValues();
+      const derived = calculateDerivedActivityMetrics(domain, values);
+      Object.assign(values, derived);
 
-    const saved = saveState();
-    if (saved === false) {
-      elements.activityEntryStatus.textContent = "The activity session could not be saved.";
-      return;
+      const metricMap = new Map(getTrackerMetrics(domain).map((metric) => [metric.name, metric]));
+      const filledMetrics = Object.entries(values).filter(([, value]) => Number.isFinite(Number(value)));
+      if (!filledMetrics.length) {
+        elements.activityEntryStatus.textContent = "Enter at least one metric.";
+        return;
+      }
+
+      const sessionId = `session-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const sessionDate = new Date(`${dateKey}T12:00:00`).toISOString();
+      const note = elements.activityEntryNote.value.trim();
+
+      filledMetrics.forEach(([metricName, value]) => {
+        const metric = metricMap.get(metricName) || { name: metricName, unit: "", type: "number" };
+        ensureTrackerMetric(tracker, metric);
+        tracker.entries.push({
+          id: `${sessionId}-${slugifyMetric(metricName)}`,
+          sessionId,
+          date: sessionDate,
+          metric: metricName,
+          value: Number(value),
+          unit: metric.unit || "",
+          note
+        });
+      });
+
+      tracker.sessions = Array.isArray(tracker.sessions) ? tracker.sessions : [];
+      tracker.sessions.push({
+        id: sessionId,
+        date: sessionDate,
+        note,
+        workout: state.settings.schedule[calculateCycleDay(new Date(`${dateKey}T12:00:00`)) - 1] || domain,
+        metrics: Object.fromEntries(filledMetrics.map(([name, value]) => [name, Number(value)]))
+      });
+
+      state.settings.archiveDomain = domain;
+
+      if (!saveState()) {
+        tracker.entries = tracker.entries.filter((x) => x.sessionId !== sessionId);
+        tracker.sessions = tracker.sessions.filter((x) => x.id !== sessionId);
+        elements.activityEntryStatus.textContent = "Save failed. Your previous data is unchanged.";
+        return;
+      }
+
+      if (!tracker.sessions.some((x) => x.id === sessionId)) {
+        elements.activityEntryStatus.textContent = "Save verification failed. Try again.";
+        return;
+      }
+
+      elements.activityEntryStatus.textContent = `${domain} session saved.`;
+      renderAll();
+      setTimeout(() => {
+        if (elements.activityEntryDialog.open) elements.activityEntryDialog.close();
+      }, 350);
+    } finally {
+      activityEntrySaveInProgress = false;
+      elements.activityEntrySaveButton.disabled = false;
     }
+  }
 
-    state.settings.archiveDomain = domain;
-    elements.activityEntryStatus.textContent = `${domain} session saved.`;
-
-    renderToday();
-    renderHistory();
-    renderActivityTracker();
-
-    setTimeout(() => {
-      if (elements.activityEntryDialog.open) elements.activityEntryDialog.close();
-    }, 180);
+  function saveActivityEntry(event) {
+    event?.preventDefault?.();
+    commitActivityEntry();
   }
 
   function activityTrendDays() {
@@ -4836,7 +4840,14 @@
     const value = elements.scheduleDialogInput.value.trim();
     if (!value) return;
 
+    const previousValue = state.settings.schedule[scheduleDialogIndex];
     state.settings.schedule[scheduleDialogIndex] = value;
+    const todayIndex = calculateCycleDay(new Date()) - 1;
+    if (scheduleDialogIndex === todayIndex && previousValue !== value) {
+      const today = getTodayRecord();
+      today.workoutComplete = false;
+      today.updatedAt = new Date().toISOString();
+    }
     elements.scheduleDialog.close();
     saveAndRender();
   }
