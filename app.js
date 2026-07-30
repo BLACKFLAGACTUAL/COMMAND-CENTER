@@ -175,7 +175,7 @@
     const box = document.getElementById("storageAlert");
     if (box) {
       box.hidden = false;
-      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v26`;
+      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v27`;
     }
   });
 
@@ -191,7 +191,7 @@
         if (elements.storageAlert) {
           elements.storageAlert.hidden = false;
           elements.storageAlert.textContent =
-            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v26`;
+            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v27`;
         }
         return false;
       }
@@ -208,7 +208,7 @@
     runStage("profile render", renderProfileSummary);
 
     if (elements.buildVersionBadge) {
-      elements.buildVersionBadge.textContent = "BUILD v26 · CONTROLS ACTIVE";
+      elements.buildVersionBadge.textContent = "BUILD v27 · CONTROLS ACTIVE";
     }
 
     if (shouldShowOnboarding()) showOnboarding(false, false);
@@ -262,7 +262,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge", "onboardingCustomScheduleLengthRow", "onboardingCustomScheduleLength", "scheduleCycleEyebrow", "scheduleCycleHelp", "quickBuilderHelp", "workoutBuilderCard", "genericTemplateChips", "savedTemplateChips", "clearHotSwapSelection", "hotSwapSelection", "hotSwapSelectedName", "hotSwapSelectedDetail", "hotSwapAssignButton", "hotSwapStatus", "hotSwapDayGrid", "exerciseLogSaveButton", "activityEntrySaveButton"].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge", "onboardingCustomScheduleLengthRow", "onboardingCustomScheduleLength", "scheduleCycleEyebrow", "scheduleCycleHelp", "quickBuilderHelp", "workoutBuilderCard", "genericTemplateChips", "savedTemplateChips", "clearHotSwapSelection", "hotSwapSelection", "hotSwapSelectedName", "hotSwapSelectedDetail", "hotSwapAssignButton", "hotSwapStatus", "hotSwapDayGrid", "exerciseLogSaveButton", "activityEntrySaveButton", "liftSetRows", "addLiftSetButton"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -1320,6 +1320,7 @@
     });
     elements.exerciseLogForm.addEventListener("submit", saveExerciseLog);
     elements.exerciseLogSaveButton.addEventListener("click", commitExerciseLog);
+    elements.addLiftSetButton.addEventListener("click", () => addLiftSetRow());
     elements.exerciseLogDialog.addEventListener("cancel", () => {
       loggingPastEntry = false;
       loggingExerciseName = null;
@@ -1782,7 +1783,7 @@
       const latest = getLatestExerciseLog(item);
       const sub = document.createElement("small");
       sub.textContent = latest
-        ? `Last: ${formatWeight(latest.weight)} × ${latest.reps} reps · ${formatShortDate(latest.date)}`
+        ? `Last: ${summarizeLiftSets(normalizeLogSetDetails(latest))} · ${formatShortDate(latest.date)}`
         : "No weight logged yet";
 
       copy.append(name, sub);
@@ -2348,6 +2349,115 @@
     saveAndRender();
   }
 
+
+  const LIFT_SET_TYPES = [
+    ["working", "Working"],
+    ["warmup", "Warm-up"],
+    ["drop", "Drop set"],
+    ["backoff", "Back-off"],
+    ["amrap", "AMRAP"],
+    ["failure", "To failure"],
+    ["technique", "Technique"]
+  ];
+
+  function addLiftSetRow(set = {}, index = null) {
+    const row = document.createElement("div");
+    row.className = "lift-set-row";
+
+    const number = document.createElement("span");
+    number.className = "lift-set-number";
+    number.textContent = String(index ?? (elements.liftSetRows.children.length + 1));
+
+    const weight = document.createElement("input");
+    weight.type = "number";
+    weight.min = "0";
+    weight.max = "2000";
+    weight.step = "0.5";
+    weight.inputMode = "decimal";
+    weight.placeholder = "Weight";
+    weight.dataset.setField = "weight";
+    weight.value = set.weight ?? "";
+
+    const reps = document.createElement("input");
+    reps.type = "number";
+    reps.min = "1";
+    reps.max = "1000";
+    reps.step = "1";
+    reps.inputMode = "numeric";
+    reps.placeholder = "Reps";
+    reps.dataset.setField = "reps";
+    reps.value = set.reps ?? "";
+
+    const type = document.createElement("select");
+    type.dataset.setField = "type";
+    LIFT_SET_TYPES.forEach(([value, label]) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      type.appendChild(option);
+    });
+    type.value = set.type || "working";
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "lift-set-remove";
+    remove.textContent = "×";
+    remove.setAttribute("aria-label", "Remove set");
+    remove.addEventListener("click", () => {
+      row.remove();
+      renumberLiftSetRows();
+      if (!elements.liftSetRows.children.length) addLiftSetRow();
+    });
+
+    row.append(number, weight, reps, type, remove);
+    elements.liftSetRows.appendChild(row);
+  }
+
+  function renumberLiftSetRows() {
+    [...elements.liftSetRows.querySelectorAll(".lift-set-row")].forEach((row, idx) => {
+      const label = row.querySelector(".lift-set-number");
+      if (label) label.textContent = String(idx + 1);
+    });
+  }
+
+  function readLiftSetRows() {
+    return [...elements.liftSetRows.querySelectorAll(".lift-set-row")]
+      .map((row, index) => {
+        const weight = Number(row.querySelector('[data-set-field="weight"]')?.value);
+        const reps = Number(row.querySelector('[data-set-field="reps"]')?.value);
+        const type = row.querySelector('[data-set-field="type"]')?.value || "working";
+        return { index: index + 1, weight, reps, type };
+      })
+      .filter((set) => Number.isFinite(set.weight) && set.weight >= 0 && Number.isInteger(set.reps) && set.reps > 0);
+  }
+
+  function normalizeLogSetDetails(log) {
+    if (Array.isArray(log?.setDetails) && log.setDetails.length) {
+      return log.setDetails.map((set, index) => ({
+        index: index + 1,
+        weight: Number(set.weight) || 0,
+        reps: Number(set.reps) || 0,
+        type: set.type || "working"
+      }));
+    }
+
+    const count = Math.max(1, Number(log?.sets) || 1);
+    return Array.from({ length: count }, (_, index) => ({
+      index: index + 1,
+      weight: Number(log?.weight) || 0,
+      reps: Number(log?.reps) || 0,
+      type: "working"
+    }));
+  }
+
+  function summarizeLiftSets(setDetails) {
+    if (!Array.isArray(setDetails) || !setDetails.length) return "";
+    const working = setDetails.filter((set) => set.type === "working");
+    const source = working.length ? working : setDetails;
+    const top = [...source].sort((a, b) => b.weight - a.weight)[0];
+    return `${setDetails.length} set${setDetails.length === 1 ? "" : "s"} · top ${formatWeight(top.weight)} × ${top.reps}`;
+  }
+
   function openExerciseLogDialog(exerciseName) {
     loggingPastEntry = false;
     loggingExerciseName = exerciseName;
@@ -2363,13 +2473,21 @@
     elements.exerciseLogName.textContent = exerciseName;
     elements.exerciseSelectField.hidden = true;
     elements.exerciseDateInput.value = getTodayKey();
-    elements.exerciseWeightInput.value = latest ? String(latest.weight) : "";
-    elements.exerciseRepsInput.value = latest ? String(latest.reps) : "";
-    elements.exerciseSetsInput.value = latest ? String(latest.sets || 1) : "1";
+    elements.liftSetRows.replaceChildren();
+
+    const previousSets = latest ? normalizeLogSetDetails(latest) : [];
+    if (previousSets.length) {
+      previousSets.forEach((set, index) => addLiftSetRow(set, index + 1));
+    } else {
+      addLiftSetRow({}, 1);
+    }
+
     elements.exerciseLogNote.value = "";
     elements.exerciseLogStatus.textContent = "";
     elements.exerciseLogDialog.showModal();
-    setTimeout(() => elements.exerciseWeightInput.focus(), 0);
+    setTimeout(() => {
+      elements.liftSetRows.querySelector('[data-set-field="weight"]')?.focus();
+    }, 0);
   }
 
   function openPastExerciseLogDialog() {
@@ -2383,9 +2501,8 @@
     populateExerciseNameSelect();
     elements.exerciseNameInput.value = elements.progressExerciseSelect.value || "";
     elements.exerciseDateInput.value = getTodayKey();
-    elements.exerciseWeightInput.value = "";
-    elements.exerciseRepsInput.value = "";
-    elements.exerciseSetsInput.value = "1";
+    elements.liftSetRows.replaceChildren();
+    addLiftSetRow({}, 1);
     elements.exerciseLogNote.value = "";
     elements.exerciseLogStatus.textContent = "";
     elements.exerciseLogDialog.showModal();
@@ -2426,13 +2543,11 @@
           ).trim();
 
       const dateKey = elements.exerciseDateInput.value || getTodayKey();
-      const weight = Number(elements.exerciseWeightInput.value);
-      const reps = Number(elements.exerciseRepsInput.value);
-      const sets = Number(elements.exerciseSetsInput.value);
+      const setDetails = readLiftSetRows();
 
-      if (!exerciseName || !dateKey || !Number.isFinite(weight) || weight < 0 ||
-          !Number.isInteger(reps) || reps < 1 || !Number.isInteger(sets) || sets < 1) {
-        elements.exerciseLogStatus.textContent = "Enter a valid weight, reps, and sets.";
+      if (!exerciseName || !dateKey || !setDetails.length) {
+        elements.exerciseLogStatus.textContent =
+          "Enter weight and reps for at least one set.";
         return;
       }
 
@@ -2449,10 +2564,21 @@
         loggingWorkoutName ||
         "Unassigned";
 
+      // Backward-compatible summary fields:
+      // weight/reps represent the heaviest working set (or heaviest set overall),
+      // while setDetails preserves the complete set-by-set session.
+      const workingSets = setDetails.filter((set) => set.type === "working");
+      const summarySource = workingSets.length ? workingSets : setDetails;
+      const topSet = [...summarySource].sort((a, b) => b.weight - a.weight)[0];
+
       const log = {
         id: `lift-${Date.now()}-${Math.random().toString(16).slice(2)}`,
         date: selectedDate.toISOString(),
-        weight, reps, sets,
+        weight: topSet.weight,
+        reps: topSet.reps,
+        sets: setDetails.length,
+        setDetails,
+        volume: setDetails.reduce((sum, set) => sum + (set.weight * set.reps), 0),
         note: elements.exerciseLogNote.value.trim(),
         workout: currentAssignedWorkout,
         scheduleDay: scheduleIndex + 1,
@@ -2482,7 +2608,7 @@
       }
 
       elements.exerciseLogStatus.textContent =
-        `${formatWeight(weight)} × ${reps} · ${sets} set${sets === 1 ? "" : "s"} saved to ${currentAssignedWorkout}.`;
+        `${summarizeLiftSets(setDetails)} saved to ${currentAssignedWorkout}.`;
 
       loggingPastEntry = false;
       loggingExerciseName = null;
@@ -2519,7 +2645,12 @@
     [...logs].reverse().slice(0, 8).forEach((log) => {
       const row = document.createElement("div");
       row.className = "progress-log-row";
-      row.innerHTML = `<span>${escapeHtml(formatShortDate(log.date))}</span><strong>${escapeHtml(formatWeight(log.weight))} × ${log.reps}</strong><small>${log.sets || 1} set${(log.sets || 1) === 1 ? "" : "s"}${log.note ? ` · ${escapeHtml(log.note)}` : ""}</small>`;
+      const setDetails = normalizeLogSetDetails(log);
+      const setText = setDetails.map((set) => {
+        const typeLabel = LIFT_SET_TYPES.find(([value]) => value === set.type)?.[1] || "Working";
+        return `${formatWeight(set.weight)} × ${set.reps}${set.type !== "working" ? ` ${typeLabel}` : ""}`;
+      }).join(" · ");
+      row.innerHTML = `<span>${escapeHtml(formatShortDate(log.date))}</span><strong>${escapeHtml(summarizeLiftSets(setDetails))}</strong><small>${escapeHtml(setText)}${log.note ? ` · ${escapeHtml(log.note)}` : ""}</small>`;
       elements.progressLogList.appendChild(row);
     });
     if (logs.length) drawProgressChart(logs);

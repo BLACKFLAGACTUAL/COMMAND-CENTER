@@ -9,7 +9,7 @@
   <title>My Command Center</title>
 
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./styles.css?v=26">
+  <link rel="stylesheet" href="./styles.css?v=27">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 </head>
 <body>
@@ -1027,11 +1027,21 @@
       </div>
       <label for="exerciseDateInput">Workout date</label>
       <input id="exerciseDateInput" type="date" required>
-      <div class="log-input-grid">
-        <div><label for="exerciseWeightInput">Weight</label><input id="exerciseWeightInput" type="number" min="0" max="2000" step="0.5" inputmode="decimal" required></div>
-        <div><label for="exerciseRepsInput">Reps</label><input id="exerciseRepsInput" type="number" min="1" max="1000" step="1" inputmode="numeric" required></div>
-        <div><label for="exerciseSetsInput">Sets</label><input id="exerciseSetsInput" type="number" min="1" max="100" step="1" inputmode="numeric" value="1" required></div>
+      <div class="set-builder-head">
+        <div>
+          <span class="data-label">SETS</span>
+          <p class="helper-text">Log each set separately. Use type for warm-ups, drop sets, AMRAPs, etc.</p>
+        </div>
+        <button id="addLiftSetButton" class="button secondary" type="button">+ Add set</button>
       </div>
+
+      <div id="liftSetRows" class="lift-set-rows"></div>
+
+      <!-- Legacy fields retained hidden for backward compatibility/imports -->
+      <input id="exerciseWeightInput" type="hidden">
+      <input id="exerciseRepsInput" type="hidden">
+      <input id="exerciseSetsInput" type="hidden" value="1">
+
       <label for="exerciseLogNote">Note (optional)</label>
       <input id="exerciseLogNote" type="text" maxlength="160" placeholder="PR, tempo, form note…">
       <p id="exerciseLogStatus" class="save-status" aria-live="polite"></p>
@@ -1142,13 +1152,13 @@
     </form>
   </dialog>
 
-  <script src="./app.js?v=26" defer></script>
+  <script src="./app.js?v=27" defer></script>
 
   <dialog id="systemConfirmDialog" class="command-menu-dialog">
     <div class="command-menu-shell">
       <div class="command-menu-head">
         <p class="category-kicker">COMMAND MENU</p>
-        <h2>Mode & System</h2><div id="buildVersionBadge" class="build-version-badge">BUILD v26</div>
+        <h2>Mode & System</h2><div id="buildVersionBadge" class="build-version-badge">BUILD v27</div>
         <p class="helper-text">Switch operating environments or open settings for the active mode.</p>
       </div>
 

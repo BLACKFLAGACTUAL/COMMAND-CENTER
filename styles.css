@@ -3055,3 +3055,76 @@ body[data-app-mode="work"] #brandTitle::after {
 
 #exerciseLogSaveButton:disabled,
 #activityEntrySaveButton:disabled { opacity:.55; pointer-events:none; }
+
+
+/* v27 — set-by-set lift logging */
+.set-builder-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: .75rem;
+  margin: .8rem 0 .55rem;
+}
+
+.set-builder-head p {
+  margin: .15rem 0 0;
+}
+
+.lift-set-rows {
+  display: grid;
+  gap: .45rem;
+  margin-bottom: .75rem;
+}
+
+.lift-set-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) minmax(0,.8fr) minmax(110px,1fr) 42px;
+  gap: .4rem;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  padding: .45rem;
+}
+
+.lift-set-number {
+  display: grid;
+  place-items: center;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.lift-set-row input,
+.lift-set-row select {
+  min-width: 0;
+  min-height: 42px;
+  margin: 0;
+}
+
+.lift-set-remove {
+  min-height: 42px;
+  border: 1px solid rgba(239,75,80,.45);
+  background: rgba(239,75,80,.09);
+  color: var(--accent);
+  font-size: 1.2rem;
+}
+
+@media (max-width: 520px) {
+  .lift-set-row {
+    grid-template-columns: 30px minmax(0,1fr) minmax(0,.8fr) 38px;
+  }
+
+  .lift-set-row select {
+    grid-column: 2 / 4;
+  }
+
+  .lift-set-remove {
+    grid-column: 4;
+    grid-row: 1;
+  }
+
+  .set-builder-head {
+    align-items: center;
+  }
+}
