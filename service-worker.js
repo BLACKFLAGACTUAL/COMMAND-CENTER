@@ -1,5 +1,5 @@
-const CACHE_NAME = "command-center-v22-lift-log-fix";
-const APP_SHELL = ["./","./index.html","./styles.css?v=22","./app.js?v=22","./manifest.json","./apple-touch-icon.png","./icon-192.png","./icon-512.png"];
+const CACHE_NAME = "command-center-v23-dashboard-log-routing";
+const APP_SHELL = ["./","./index.html","./styles.css?v=23","./app.js?v=23","./manifest.json","./apple-touch-icon.png","./icon-192.png","./icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));

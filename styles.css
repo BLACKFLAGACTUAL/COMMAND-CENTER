@@ -2863,3 +2863,17 @@ body[data-app-mode="work"] #brandTitle::after {
   border-left: 3px solid var(--accent);
   background: rgba(239,75,80,.06);
 }
+
+
+/* v23 — dashboard activity logging */
+.dashboard-activity-row small {
+  color: var(--muted);
+}
+
+#activityEntryStatus:not(:empty) {
+  display: block;
+  margin-top: .55rem;
+  padding: .5rem .65rem;
+  border-left: 3px solid var(--accent);
+  background: rgba(239,75,80,.06);
+}

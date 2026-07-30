@@ -175,7 +175,7 @@
     const box = document.getElementById("storageAlert");
     if (box) {
       box.hidden = false;
-      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v22`;
+      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v23`;
     }
   });
 
@@ -191,7 +191,7 @@
         if (elements.storageAlert) {
           elements.storageAlert.hidden = false;
           elements.storageAlert.textContent =
-            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v22`;
+            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v23`;
         }
         return false;
       }
@@ -208,7 +208,7 @@
     runStage("profile render", renderProfileSummary);
 
     if (elements.buildVersionBadge) {
-      elements.buildVersionBadge.textContent = "BUILD v22 · CONTROLS ACTIVE";
+      elements.buildVersionBadge.textContent = "BUILD v23 · CONTROLS ACTIVE";
     }
 
     if (shouldShowOnboarding()) showOnboarding(false, false);
@@ -1662,29 +1662,135 @@
     });
   }
 
+
+  const ACTIVITY_WORKOUT_ALIASES = [
+    ["MMA", /\bmma\b/i],
+    ["BJJ", /\b(bjj|jiu[\s-]?jitsu)\b/i],
+    ["Boxing", /\bbox(ing)?\b/i],
+    ["Running", /\b(run|running|cardio)\b/i],
+    ["Ruck", /\bruck(ing)?\b/i],
+    ["Swimming", /\b(swim|swimming)\b/i],
+    ["Surfing", /\b(surf|surfing)\b/i],
+    ["Mobility", /\b(mobility|recovery)\b/i]
+  ];
+
+  function activityDomainForWorkout(workoutName) {
+    const name = String(workoutName || "");
+    const match = ACTIVITY_WORKOUT_ALIASES.find(([, pattern]) => pattern.test(name));
+    return match ? match[0] : null;
+  }
+
+  function isActivityWorkout(workoutName) {
+    return Boolean(activityDomainForWorkout(workoutName));
+  }
+
+  function ensureActivityTracker(domain) {
+    if (!domain) return null;
+    if (!state.activityTrackers[domain]) {
+      state.activityTrackers[domain] = {
+        name: domain,
+        entries: [],
+        sessions: [],
+        metrics: inferActivityMetrics(domain)
+      };
+      saveState();
+    }
+    return state.activityTrackers[domain];
+  }
+
+  function openDashboardActivityLog(workoutName) {
+    const domain = activityDomainForWorkout(workoutName);
+    if (!domain) return false;
+
+    ensureActivityTracker(domain);
+    state.settings.archiveDomain = domain;
+
+    elements.activityEntryDomain.textContent = domain;
+    elements.activityEntryActivity.value = domain;
+    elements.activityEntryDate.value = getTodayKey();
+    elements.activityEntryNote.value = `Logged from Dashboard · ${workoutName}`;
+    elements.activityEntryStatus.textContent = "";
+    buildActivitySessionFields(domain);
+    elements.activityEntryDialog.showModal();
+
+    requestAnimationFrame(() => {
+      const firstField = elements.activitySessionFields.querySelector("input:not([readonly]), select");
+      firstField?.focus();
+    });
+
+    return true;
+  }
+
   function renderWorkoutDetails(workoutName) {
     const details = getWorkoutDetails(workoutName);
     elements.workoutDetails.replaceChildren();
+
+    const activityDomain = activityDomainForWorkout(workoutName);
+
+    if (activityDomain) {
+      const list = document.createElement("div");
+      list.className = "today-exercise-list";
+
+      const row = document.createElement("div");
+      row.className = "today-exercise-row dashboard-activity-row";
+
+      const copy = document.createElement("div");
+      const name = document.createElement("strong");
+      name.textContent = details[0] || `${activityDomain} session`;
+
+      const sub = document.createElement("small");
+      const tracker = state.activityTrackers?.[activityDomain];
+      const recentSession = Array.isArray(tracker?.sessions) && tracker.sessions.length
+        ? [...tracker.sessions].sort((a, b) => String(b.date).localeCompare(String(a.date)))[0]
+        : null;
+
+      sub.textContent = recentSession
+        ? `Last session: ${formatShortDate(recentSession.date)}`
+        : `Log ${activityDomain} session metrics`;
+
+      copy.append(name, sub);
+
+      const logButton = document.createElement("button");
+      logButton.type = "button";
+      logButton.className = "button secondary log-set-button";
+      logButton.textContent = "Log";
+      logButton.addEventListener("click", () => openDashboardActivityLog(workoutName));
+
+      row.append(copy, logButton);
+      list.appendChild(row);
+      elements.workoutDetails.appendChild(list);
+      return;
+    }
+
     const list = document.createElement("div");
     list.className = "today-exercise-list";
+
     details.forEach((item) => {
       const row = document.createElement("div");
       row.className = "today-exercise-row";
+
       const copy = document.createElement("div");
       const name = document.createElement("strong");
       name.textContent = item;
+
       const latest = getLatestExerciseLog(item);
       const sub = document.createElement("small");
-      sub.textContent = latest ? `Last: ${formatWeight(latest.weight)} × ${latest.reps} reps · ${formatShortDate(latest.date)}` : "No weight logged yet";
+      sub.textContent = latest
+        ? `Last: ${formatWeight(latest.weight)} × ${latest.reps} reps · ${formatShortDate(latest.date)}`
+        : "No weight logged yet";
+
       copy.append(name, sub);
+
       const logButton = document.createElement("button");
       logButton.type = "button";
       logButton.className = "button secondary log-set-button";
       logButton.textContent = "Log";
       logButton.addEventListener("click", () => openExerciseLogDialog(item));
+
       row.append(copy, logButton);
       list.appendChild(row);
     });
+
     elements.workoutDetails.appendChild(list);
   }
 
@@ -3778,9 +3884,13 @@
   function saveActivityEntry(event) {
     event.preventDefault();
 
-    const domain = state.settings.archiveDomain;
+    const dialogDomain = String(elements.activityEntryActivity.value || elements.activityEntryDomain.textContent || "").trim();
+    const domain = dialogDomain || state.settings.archiveDomain;
     const tracker = state.activityTrackers?.[domain];
-    if (!tracker) return;
+    if (!tracker) {
+      elements.activityEntryStatus.textContent = "Activity tracker is unavailable. Close and reopen the log.";
+      return;
+    }
 
     const dateKey = elements.activityEntryDate.value;
     const values = sessionFieldValues();
@@ -3837,10 +3947,22 @@
       metrics: Object.fromEntries(filledMetrics.map(([name, value]) => [name, Number(value)]))
     });
 
-    saveState();
-    elements.activityEntryDialog.close();
+    const saved = saveState();
+    if (saved === false) {
+      elements.activityEntryStatus.textContent = "The activity session could not be saved.";
+      return;
+    }
+
+    state.settings.archiveDomain = domain;
+    elements.activityEntryStatus.textContent = `${domain} session saved.`;
+
+    renderToday();
     renderHistory();
-    renderActivityProgress();
+    renderActivityTracker();
+
+    setTimeout(() => {
+      if (elements.activityEntryDialog.open) elements.activityEntryDialog.close();
+    }, 180);
   }
 
   function activityTrendDays() {
