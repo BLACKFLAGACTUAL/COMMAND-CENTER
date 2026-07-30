@@ -174,7 +174,7 @@
     const box = document.getElementById("storageAlert");
     if (box) {
       box.hidden = false;
-      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v19`;
+      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v20`;
     }
   });
 
@@ -190,7 +190,7 @@
         if (elements.storageAlert) {
           elements.storageAlert.hidden = false;
           elements.storageAlert.textContent =
-            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v19`;
+            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v20`;
         }
         return false;
       }
@@ -207,7 +207,7 @@
     runStage("profile render", renderProfileSummary);
 
     if (elements.buildVersionBadge) {
-      elements.buildVersionBadge.textContent = "BUILD v19 · CONTROLS ACTIVE";
+      elements.buildVersionBadge.textContent = "BUILD v20 · CONTROLS ACTIVE";
     }
 
     if (shouldShowOnboarding()) showOnboarding(false, false);
@@ -261,7 +261,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge"].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge", "onboardingCustomScheduleLengthRow", "onboardingCustomScheduleLength", "scheduleCycleEyebrow", "scheduleCycleHelp", "quickBuilderHelp", "workoutBuilderCard"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -925,12 +925,12 @@
   function shouldShowOnboarding(){ ensureProfileShape(); return !state.profile?.onboardingComplete && !hasMeaningfulExistingData(state); }
 
   function makeOnboardingDraft(template=false){
-    return { editing:false, systemName:"My Command Center", mission:template?"Become stronger, sharper, more disciplined, and more capable.":"", primaryGoal:template?"Execute consistently across Mind, Body, and Spirit.":"", mindTasks:template?[...DEFAULT_SETTINGS.mindTemplates]:["Read","Study"], bodyTasks:template?["Complete scheduled training","Reach protein goal"]:["Train"], spiritTasks:template?[...DEFAULT_SETTINGS.spiritTemplates]:["Reflect"], activities:template?["Weightlifting","Running","Ruck","MMA","Surfing"]:["Weightlifting","Running"], trainingMode:"template", proteinGoal:Number(state.settings?.proteinGoal)||170 };
+    return { editing:false, systemName:"My Command Center", mission:template?"Become stronger, sharper, more disciplined, and more capable.":"", primaryGoal:template?"Execute consistently across Mind, Body, and Spirit.":"", mindTasks:template?[...DEFAULT_SETTINGS.mindTemplates]:["Read","Study"], bodyTasks:template?["Complete scheduled training","Reach protein goal"]:["Train"], spiritTasks:template?[...DEFAULT_SETTINGS.spiritTemplates]:["Reflect"], activities:template?["Weightlifting","Running","Ruck","MMA","Surfing"]:["Weightlifting","Running"], trainingMode:"template", scheduleType:"14day", customScheduleLength:10, proteinGoal:Number(state.settings?.proteinGoal)||170 };
   }
 
   function showOnboarding(template=false, editing=false){
     onboardingDraft=makeOnboardingDraft(template); onboardingDraft.editing=editing;
-    if(editing && state.profile?.onboardingComplete){ onboardingDraft.systemName=state.profile.systemName||"My Command Center"; onboardingDraft.mission=state.profile.mission||""; onboardingDraft.primaryGoal=state.profile.primaryGoal||""; onboardingDraft.mindTasks=(state.settings.mindTemplates||[]).map((x)=>typeof x==="string"?x:x.text); onboardingDraft.spiritTasks=(state.settings.spiritTemplates||[]).map((x)=>typeof x==="string"?x:x.text); onboardingDraft.bodyTasks=[...(state.profile.bodyTasks||["Complete scheduled training","Reach protein goal"])]; onboardingDraft.activities=Object.keys(state.activityTrackers||{}); onboardingDraft.trainingMode=state.profile.trainingMode||"template"; }
+    if(editing && state.profile?.onboardingComplete){ onboardingDraft.systemName=state.profile.systemName||"My Command Center"; onboardingDraft.mission=state.profile.mission||""; onboardingDraft.primaryGoal=state.profile.primaryGoal||""; onboardingDraft.mindTasks=(state.settings.mindTemplates||[]).map((x)=>typeof x==="string"?x:x.text); onboardingDraft.spiritTasks=(state.settings.spiritTemplates||[]).map((x)=>typeof x==="string"?x:x.text); onboardingDraft.bodyTasks=[...(state.profile.bodyTasks||["Complete scheduled training","Reach protein goal"])]; onboardingDraft.activities=Array.isArray(state.profile.selectedActivities)&&state.profile.selectedActivities.length?[...state.profile.selectedActivities]:Object.keys(state.activityTrackers||{}); onboardingDraft.trainingMode=state.profile.trainingMode||"template"; onboardingDraft.scheduleType=state.profile.scheduleType||((state.settings.schedule||[]).length===7?"weekly":(state.settings.schedule||[]).length===14?"14day":"custom"); onboardingDraft.customScheduleLength=Number(state.profile.customScheduleLength)||Math.max(1,Math.min(30,(state.settings.schedule||[]).length||10)); }
     onboardingStep=editing?1:0; elements.onboardingScreen.hidden=false; document.body.classList.add("onboarding-active"); renderOnboarding();
   }
   function hideOnboarding(){ elements.onboardingScreen.hidden=true; document.body.classList.remove("onboarding-active"); }
@@ -945,7 +945,12 @@
     elements.onboardingNextButton.hidden=onboardingStep===5;
     elements.onboardingNextButton.textContent=onboardingStep===4?"Review":"Next";
     elements.onboardingSystemName.value=onboardingDraft.systemName; elements.onboardingMission.value=onboardingDraft.mission; elements.onboardingPrimaryGoal.value=onboardingDraft.primaryGoal; elements.onboardingProteinGoal.value=String(onboardingDraft.proteinGoal);
-    renderOnboardingTasks(); renderOnboardingActivities(); const radio=document.querySelector(`input[name="onboardingTrainingMode"][value="${onboardingDraft.trainingMode}"]`); if(radio) radio.checked=true; if(onboardingStep===5) renderOnboardingReview();
+    renderOnboardingTasks(); renderOnboardingActivities();
+    const radio=document.querySelector(`input[name="onboardingTrainingMode"][value="${onboardingDraft.trainingMode}"]`); if(radio) radio.checked=true;
+    const scheduleRadio=document.querySelector(`input[name="onboardingScheduleType"][value="${onboardingDraft.scheduleType||"14day"}"]`); if(scheduleRadio) scheduleRadio.checked=true;
+    elements.onboardingCustomScheduleLength.value=String(onboardingDraft.customScheduleLength||10);
+    elements.onboardingCustomScheduleLengthRow.hidden=(onboardingDraft.scheduleType!=="custom");
+    if(onboardingStep===5) renderOnboardingReview();
   }
 
   function renderOnboardingTasks(){
@@ -954,7 +959,16 @@
 
   function renderOnboardingActivities(){ elements.onboardingActivityChoices.replaceChildren(); [...new Set([...ONBOARDING_ACTIVITIES,...onboardingDraft.activities])].forEach((name)=>{ const label=document.createElement("label"); label.className="onboarding-activity-choice"; const input=document.createElement("input"); input.type="checkbox"; input.checked=onboardingDraft.activities.includes(name); input.addEventListener("change",()=>{ onboardingDraft.activities=input.checked?[...new Set([...onboardingDraft.activities,name])]:onboardingDraft.activities.filter((x)=>x!==name); }); const span=document.createElement("span"); span.innerHTML=`<strong>${escapeHtml(name)}</strong><small>Smart metrics included</small>`; label.append(input,span); elements.onboardingActivityChoices.appendChild(label); }); }
 
-  function syncOnboarding(){ onboardingDraft.systemName=elements.onboardingSystemName.value.trim()||"My Command Center"; onboardingDraft.mission=elements.onboardingMission.value.trim(); onboardingDraft.primaryGoal=elements.onboardingPrimaryGoal.value.trim(); onboardingDraft.proteinGoal=normalizeProteinGoal(elements.onboardingProteinGoal.value); onboardingDraft.trainingMode=document.querySelector('input[name="onboardingTrainingMode"]:checked')?.value||"template"; ["mindTasks","bodyTasks","spiritTasks"].forEach((f)=>onboardingDraft[f]=onboardingDraft[f].map((x)=>x.trim()).filter(Boolean)); }
+  function syncOnboarding(){
+    onboardingDraft.systemName=elements.onboardingSystemName.value.trim()||"My Command Center";
+    onboardingDraft.mission=elements.onboardingMission.value.trim();
+    onboardingDraft.primaryGoal=elements.onboardingPrimaryGoal.value.trim();
+    onboardingDraft.proteinGoal=normalizeProteinGoal(elements.onboardingProteinGoal.value);
+    onboardingDraft.trainingMode=document.querySelector('input[name="onboardingTrainingMode"]:checked')?.value||"template";
+    onboardingDraft.scheduleType=document.querySelector('input[name="onboardingScheduleType"]:checked')?.value||"14day";
+    onboardingDraft.customScheduleLength=clamp(Number(elements.onboardingCustomScheduleLength.value)||10,1,30);
+    ["mindTasks","bodyTasks","spiritTasks"].forEach((f)=>onboardingDraft[f]=onboardingDraft[f].map((x)=>x.trim()).filter(Boolean));
+  }
   function moveOnboarding(dir){
     syncOnboarding();
     if(dir<0 && onboardingStep===1){
@@ -965,7 +979,59 @@
     renderOnboarding();
   }
 
-  function renderOnboardingReview(){ syncOnboarding(); elements.onboardingReview.innerHTML=`<section><span class="data-label">SYSTEM</span><strong>${escapeHtml(onboardingDraft.systemName)}</strong><p>${escapeHtml(onboardingDraft.mission||onboardingDraft.primaryGoal||"Personal operating system")}</p></section><section><span class="data-label">MIND</span>${onboardingDraft.mindTasks.map((x)=>`<p>✓ ${escapeHtml(x)}</p>`).join("")||"<p>None</p>"}</section><section><span class="data-label">BODY</span>${onboardingDraft.bodyTasks.map((x)=>`<p>✓ ${escapeHtml(x)}</p>`).join("")||"<p>None</p>"}</section><section><span class="data-label">SPIRIT</span>${onboardingDraft.spiritTasks.map((x)=>`<p>✓ ${escapeHtml(x)}</p>`).join("")||"<p>None</p>"}</section><section><span class="data-label">ACTIVITIES</span><p>${onboardingDraft.activities.map(escapeHtml).join(" · ")||"None"}</p></section><section><span class="data-label">FULL FEATURES</span><p>Workout builder · AAR · Activity · Intel · Operations · Work Mode · AI SITREP</p></section>`; }
+
+  function getDraftScheduleLength(draft = onboardingDraft) {
+    if (!draft) return 14;
+    if (draft.scheduleType === "weekly") return 7;
+    if (draft.scheduleType === "custom") return clamp(Number(draft.customScheduleLength) || 10, 1, 30);
+    return 14;
+  }
+
+  function getTrainingScheduleLength() {
+    const stored = Number(state.profile?.scheduleLength);
+    if (Number.isFinite(stored) && stored >= 1 && stored <= 30) return Math.round(stored);
+    const actual = Array.isArray(state.settings?.schedule) ? state.settings.schedule.length : 14;
+    return clamp(actual || 14, 1, 30);
+  }
+
+  function getTrainingScheduleLabel() {
+    const length = getTrainingScheduleLength();
+    const type = state.profile?.scheduleType;
+    if (type === "weekly" || length === 7) return "WEEKLY";
+    if (type === "14day" || length === 14) return "14-DAY";
+    return `${length}-DAY CUSTOM`;
+  }
+
+  function resizeTrainingSchedule(targetLength, mode = "preserve") {
+    const length = clamp(Number(targetLength) || 14, 1, 30);
+    const current = Array.isArray(state.settings.schedule) ? [...state.settings.schedule] : [];
+    const defaults = Array.isArray(DEFAULT_SETTINGS.schedule) ? DEFAULT_SETTINGS.schedule : [];
+
+    if (mode === "blank") {
+      state.settings.schedule = Array(length).fill("Rest");
+      return;
+    }
+
+    const next = current.slice(0, length);
+    while (next.length < length) {
+      next.push(defaults[next.length % Math.max(defaults.length, 1)] || "Rest");
+    }
+    state.settings.schedule = next;
+  }
+
+  function openWorkoutBuilderAfterSetup() {
+    switchView("schedule");
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (elements.workoutBuilderCard) {
+          elements.workoutBuilderCard.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        setTimeout(() => elements.quickWorkoutName?.focus(), 350);
+      });
+    });
+  }
+
+  function renderOnboardingReview(){ syncOnboarding(); elements.onboardingReview.innerHTML=`<section><span class="data-label">SYSTEM</span><strong>${escapeHtml(onboardingDraft.systemName)}</strong><p>${escapeHtml(onboardingDraft.mission||onboardingDraft.primaryGoal||"Personal operating system")}</p></section><section><span class="data-label">MIND</span>${onboardingDraft.mindTasks.map((x)=>`<p>✓ ${escapeHtml(x)}</p>`).join("")||"<p>None</p>"}</section><section><span class="data-label">BODY</span>${onboardingDraft.bodyTasks.map((x)=>`<p>✓ ${escapeHtml(x)}</p>`).join("")||"<p>None</p>"}</section><section><span class="data-label">SPIRIT</span>${onboardingDraft.spiritTasks.map((x)=>`<p>✓ ${escapeHtml(x)}</p>`).join("")||"<p>None</p>"}</section><section><span class="data-label">ACTIVITIES</span><p>${onboardingDraft.activities.map(escapeHtml).join(" · ")||"None"}</p></section><section><span class="data-label">TRAINING</span><p>${escapeHtml(onboardingDraft.trainingMode)} · ${getDraftScheduleLength()}-day schedule · ${onboardingDraft.proteinGoal} g protein</p></section><section><span class="data-label">FULL FEATURES</span><p>Workout builder · AAR · Activity · Intel · Operations · Work Mode · AI SITREP</p></section>`; }
 
   function applyOnboardingDraft(){
     syncOnboarding();
@@ -996,7 +1062,10 @@
       primaryGoal:onboardingDraft.primaryGoal,
       bodyTasks:[...onboardingDraft.bodyTasks],
       selectedActivities:[...onboardingDraft.activities],
-      trainingMode:onboardingDraft.trainingMode
+      trainingMode:onboardingDraft.trainingMode,
+      scheduleType:onboardingDraft.scheduleType,
+      scheduleLength:getDraftScheduleLength(),
+      customScheduleLength:onboardingDraft.customScheduleLength
     };
 
     // The app's template engine expects strings, not objects.
@@ -1021,8 +1090,20 @@
       if(!state.activityTrackers[name]) state.activityTrackers[name]={name,entries:[],metrics:inferActivityMetrics(name)};
     });
 
-    if(onboardingDraft.trainingMode==="none" && !onboardingDraft.editing){
-      state.settings.schedule=Array(14).fill("Rest");
+    const targetScheduleLength=getDraftScheduleLength();
+    const lengthChanged=(state.settings.schedule||[]).length!==targetScheduleLength;
+
+    if(!onboardingDraft.editing){
+      if(onboardingDraft.trainingMode==="template"){
+        state.settings.schedule=[...DEFAULT_SETTINGS.schedule.slice(0,targetScheduleLength)];
+        while(state.settings.schedule.length<targetScheduleLength){
+          state.settings.schedule.push(DEFAULT_SETTINGS.schedule[state.settings.schedule.length%DEFAULT_SETTINGS.schedule.length]||"Rest");
+        }
+      }else{
+        resizeTrainingSchedule(targetScheduleLength,"blank");
+      }
+    }else if(lengthChanged){
+      resizeTrainingSchedule(targetScheduleLength,"preserve");
     }
 
     const wasEditing=Boolean(onboardingDraft.editing);
@@ -1035,8 +1116,12 @@
     hideOnboarding();
     onboardingDraft=null;
     renderAll();
-    switchView(state.profile.trainingMode==="build"?"schedule":"today");
-    alert(wasEditing ? "Command Center changes saved and applied to today." : "Your Command Center is ready.");
+    if(state.profile.trainingMode==="build"){
+      openWorkoutBuilderAfterSetup();
+    }else{
+      switchView("today");
+    }
+    alert(wasEditing ? "Command Center changes saved and applied." : "Your Command Center is ready.");
   }
 
   function renderProfileSummary(){
@@ -1055,6 +1140,13 @@
     elements.onboardingAddCustomActivity.addEventListener("click",()=>{const name=elements.onboardingCustomActivity.value.trim();if(!name)return;if(!onboardingDraft.activities.includes(name))onboardingDraft.activities.push(name);elements.onboardingCustomActivity.value="";renderOnboardingActivities();});
     document.querySelectorAll(".onboarding-add-task").forEach((b)=>b.addEventListener("click",()=>{onboardingDraft[`${b.dataset.onboardingDomain}Tasks`].push("");renderOnboardingTasks();}));
     document.querySelectorAll('input[name="onboardingTrainingMode"]').forEach((i)=>i.addEventListener("change",()=>onboardingDraft.trainingMode=i.value));
+    document.querySelectorAll('input[name="onboardingScheduleType"]').forEach((input)=>input.addEventListener("change",()=>{
+      onboardingDraft.scheduleType=input.value;
+      elements.onboardingCustomScheduleLengthRow.hidden=input.value!=="custom";
+    }));
+    elements.onboardingCustomScheduleLength.addEventListener("input",()=>{
+      onboardingDraft.customScheduleLength=clamp(Number(elements.onboardingCustomScheduleLength.value)||10,1,30);
+    });
     elements.editPersonalSetupButton.addEventListener("click",()=>showOnboarding(false,true));
 
     elements.startAiSitrepButton.addEventListener("click", openAiSitrep);
@@ -1317,13 +1409,20 @@
     if (!Array.isArray(state.settings.spiritTemplates)) {
       state.settings.spiritTemplates = [...DEFAULT_SETTINGS.spiritTemplates];
     }
-    if (!Array.isArray(state.settings.schedule)) {
+    if (!Array.isArray(state.settings.schedule) || !state.settings.schedule.length) {
       state.settings.schedule = [...DEFAULT_SETTINGS.schedule];
     } else {
-      state.settings.schedule = [...state.settings.schedule.slice(0, 14)];
-      while (state.settings.schedule.length < 14) {
-        state.settings.schedule.push(DEFAULT_SETTINGS.schedule[state.settings.schedule.length] || "Rest");
+      const requestedLength = clamp(Number(state.profile?.scheduleLength) || state.settings.schedule.length || 14, 1, 30);
+      state.settings.schedule = [...state.settings.schedule.slice(0, requestedLength)];
+      while (state.settings.schedule.length < requestedLength) {
+        state.settings.schedule.push(DEFAULT_SETTINGS.schedule[state.settings.schedule.length % DEFAULT_SETTINGS.schedule.length] || "Rest");
       }
+    }
+
+    if (!state.profile || typeof state.profile !== "object") state.profile = {};
+    if (!state.profile.scheduleLength) state.profile.scheduleLength = state.settings.schedule.length || 14;
+    if (!state.profile.scheduleType) {
+      state.profile.scheduleType = state.profile.scheduleLength === 7 ? "weekly" : state.profile.scheduleLength === 14 ? "14day" : "custom";
     }
 
     if (!state.daily || typeof state.daily !== "object") state.daily = {};
@@ -1445,6 +1544,9 @@
   }
 
   function renderHeader() {
+    if (elements.brandTitle && appMode === "personal") {
+      elements.brandTitle.textContent = String(state.profile?.systemName || "My Command Center").trim().toUpperCase();
+    }
     const now = new Date();
     const cycleDay = calculateCycleDay(now);
     const completion = calculateCompletion(getTodayRecord());
@@ -1455,7 +1557,7 @@
       day: "numeric",
       year: "numeric"
     });
-    elements.cycleDayHeader.textContent = `DAY ${cycleDay} / 14`;
+    elements.cycleDayHeader.textContent = `DAY ${cycleDay} / ${getTrainingScheduleLength()}`;
     elements.cycleDaySchedule.textContent = `DAY ${cycleDay}`;
     elements.overallPercentHeader.textContent = `${completion.overall}%`;
 
@@ -1590,6 +1692,11 @@
   }
 
   function renderSchedule() {
+    const scheduleLength = getTrainingScheduleLength();
+    const scheduleLabel = getTrainingScheduleLabel();
+    elements.scheduleCycleEyebrow.textContent = `${scheduleLabel} BATTLE RHYTHM`;
+    elements.scheduleCycleHelp.textContent = `This date is Day 1. The training schedule repeats every ${scheduleLength} day${scheduleLength === 1 ? "" : "s"}.`;
+    elements.quickBuilderHelp.textContent = `Create a workout, add exercises, and assign it directly to any of the ${scheduleLength} schedule days.`;
     elements.cycleStartDate.value = state.settings.cycleStartDate;
     applyScheduleVisibility();
     const currentDay = calculateCycleDay(new Date());
@@ -4807,7 +4914,8 @@
         : "OPERATION ARETE // PERSONAL OPERATING SYSTEM";
     }
     if (elements.brandTitle) {
-      elements.brandTitle.textContent = work ? "WORK COMMAND" : "MY COMMAND CENTER";
+      const personalName = String(state.profile?.systemName || "My Command Center").trim();
+      elements.brandTitle.textContent = work ? "WORK COMMAND" : personalName.toUpperCase();
     }
 
     document.body.dataset.appMode = appMode;
@@ -5263,7 +5371,7 @@
   }
 
   const SECTION_IDENTITIES = {
-    schedule: { title: "PROTOCOL", kicker: "14-DAY BATTLE RHYTHM // TRAINING PLAN" },
+    schedule: { title: "PROTOCOL", kicker: "TRAINING BATTLE RHYTHM // PROGRAM" },
     history: { title: "ARCHIVE", kicker: "WRITTEN RECORD // LESSONS LEARNED" },
     activity: { title: "ACTIVITY", kicker: "PERFORMANCE LOG // TRACKING" },
     intel: { title: "INTEL", kicker: "PATTERNS // TREND ANALYSIS" },
@@ -5339,7 +5447,7 @@
     const startUtc = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
     const targetUtc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
     const difference = Math.round((targetUtc - startUtc) / 86400000);
-    return modulo(difference, 14) + 1;
+    return modulo(difference, getTrainingScheduleLength()) + 1;
   }
 
   function calculateCompletion(day) {

@@ -2739,3 +2739,31 @@ body[data-app-mode="work"] #brandTitle::after {
   border:1px solid var(--line);color:var(--muted);font-size:.62rem;
   letter-spacing:.08em;text-transform:uppercase;
 }
+
+
+/* v20 — schedule type onboarding + builder handoff */
+.onboarding-schedule-type {
+  display: grid;
+  gap: .55rem;
+  margin: 1rem 0;
+  padding-top: .9rem;
+  border-top: 1px solid var(--line);
+}
+
+.onboarding-choice-card.compact-choice {
+  padding: .65rem .75rem;
+}
+
+.onboarding-custom-length {
+  border-left: 3px solid var(--accent);
+  padding: .7rem .8rem;
+  background: rgba(239,75,80,.045);
+}
+
+.onboarding-custom-length[hidden] {
+  display: none !important;
+}
+
+#workoutBuilderCard {
+  scroll-margin-top: 1rem;
+}
