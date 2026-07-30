@@ -9,7 +9,7 @@
   <title>My Command Center</title>
 
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./styles.css?v=24">
+  <link rel="stylesheet" href="./styles.css?v=25">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 </head>
 <body>
@@ -1036,7 +1036,7 @@
       <input id="exerciseLogNote" type="text" maxlength="160" placeholder="PR, tempo, form note…">
       <p id="exerciseLogStatus" class="save-status" aria-live="polite"></p>
       <div class="button-row">
-        <button class="button primary" type="submit">Save log</button>
+        <button id="exerciseLogSaveButton" class="button primary" type="submit">Save log</button>
         <button id="exerciseLogCancel" class="button secondary" type="button">Cancel</button>
       </div>
     </form>
@@ -1142,13 +1142,13 @@
     </form>
   </dialog>
 
-  <script src="./app.js?v=24" defer></script>
+  <script src="./app.js?v=25" defer></script>
 
   <dialog id="systemConfirmDialog" class="command-menu-dialog">
     <div class="command-menu-shell">
       <div class="command-menu-head">
         <p class="category-kicker">COMMAND MENU</p>
-        <h2>Mode & System</h2><div id="buildVersionBadge" class="build-version-badge">BUILD v24</div>
+        <h2>Mode & System</h2><div id="buildVersionBadge" class="build-version-badge">BUILD v25</div>
         <p class="helper-text">Switch operating environments or open settings for the active mode.</p>
       </div>
 

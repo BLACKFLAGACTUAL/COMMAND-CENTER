@@ -175,7 +175,7 @@
     const box = document.getElementById("storageAlert");
     if (box) {
       box.hidden = false;
-      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v24`;
+      box.textContent = `Startup error: ${event.message || "Unknown error"} · BUILD v25`;
     }
   });
 
@@ -191,7 +191,7 @@
         if (elements.storageAlert) {
           elements.storageAlert.hidden = false;
           elements.storageAlert.textContent =
-            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v24`;
+            `Command Center ${name} failed. Saved data was not intentionally cleared. BUILD v25`;
         }
         return false;
       }
@@ -208,7 +208,7 @@
     runStage("profile render", renderProfileSummary);
 
     if (elements.buildVersionBadge) {
-      elements.buildVersionBadge.textContent = "BUILD v24 · CONTROLS ACTIVE";
+      elements.buildVersionBadge.textContent = "BUILD v25 · CONTROLS ACTIVE";
     }
 
     if (shouldShowOnboarding()) showOnboarding(false, false);
@@ -262,7 +262,7 @@
       "activitySwipeTrack", "activitySwipeDots", "activitySwipePrev", "activitySwipeNext", "activityTrendWindow",
       "activityTrendSummary", "runningHeartRatePanel", "maxHeartRateInput", "heartRateZoneGrid", "heartRateZoneCurrent",
       "archiveCalendarPrev", "archiveCalendarNext", "archiveCalendarToday",
-      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge", "onboardingCustomScheduleLengthRow", "onboardingCustomScheduleLength", "scheduleCycleEyebrow", "scheduleCycleHelp", "quickBuilderHelp", "workoutBuilderCard", "genericTemplateChips", "savedTemplateChips", "clearHotSwapSelection", "hotSwapSelection", "hotSwapSelectedName", "hotSwapSelectedDetail", "hotSwapAssignButton", "hotSwapStatus", "hotSwapDayGrid"].forEach((id) => {
+      "archiveCalendarMonth", "archiveCalendarGrid", "editAarTitle", "editAarOperationContext", "systemMenuButton", "systemConfirmDialog", "systemConfirmYes", "systemConfirmCancel", "dashboardDirectivePanel", "sectionIdentityBanner", "sectionIdentityKicker", "sectionIdentityTitle", "brandEyebrow", "brandTitle", "personalNav", "workNav", "commandPersonalMode", "commandWorkMode", "commandGlobalBackup", "commandModeSystemLabel", "workCompletionPercent", "workCurrentOperationName", "workCurrentOperationMission", "workQuickAddTask", "workPriorityTasks", "workPriorityEmpty", "workActiveCount", "workDueTodayCount", "workWaitingCount", "workCompleteCount", "workAddTaskButton", "workTaskList", "workTaskEmpty", "workAddOperationButton", "workOperationList", "workOperationEmpty", "workAddLogButton", "workArchiveList", "workArchiveEmpty", "workIntelTotal", "workIntelComplete", "workIntelOnTime", "workIntelOps", "workIntelStatusBars", "workIntelRecent", "workDefaultCategory", "saveWorkSettings", "workSettingsStatus", "exportWorkDataButton", "resetWorkDataButton", "workTaskDialog", "workTaskForm", "workTaskDialogTitle", "workTaskId", "workTaskTitle", "workTaskPriority", "workTaskStatus", "workTaskDue", "workTaskCategory", "workTaskOperation", "workTaskNotes", "workTaskCancel", "workOperationDialog", "workOperationForm", "workOperationId", "workOperationName", "workOperationIntent", "workOperationMission", "workOperationObjectives", "workOperationCancel", "workLogDialog", "workLogForm", "workLogDate", "workLogCompleted", "workLogIssues", "workLogDecisions", "workLogFollowUp", "workLogNotes", "workLogCancel", "openGlobalRestoreButton", "globalRestoreInput", "backupStatus", "workRestoreInput", "workOpenGlobalRestoreButton", "workBackupStatus", "restorePreviewDialog", "restorePreviewTitle", "restorePreviewMeta", "restorePreviewStats", "restoreConfirmButton", "restoreCancelButton", "aiSitrepCard", "startAiSitrepButton", "aiSitrepDialog", "aiSitrepClose", "aiSitrepProgress", "aiSitrepVoiceStatus", "aiSitrepConversation", "aiSitrepInputArea", "aiSitrepMicButton", "aiSitrepMicLabel", "aiSitrepTextInput", "aiSitrepSendButton", "aiSitrepReview", "aiSitrepChangeCount", "aiSitrepProposalList", "aiSitrepSaveAll", "aiSitrepRestart", "aiSitrepContext", "onboardingScreen", "onboardingStepLabel", "onboardingProgressBar", "onboardingBeginButton", "onboardingTemplateButton", "onboardingRestoreInput", "onboardingSystemName", "onboardingMission", "onboardingPrimaryGoal", "onboardingMindTasks", "onboardingBodyTasks", "onboardingSpiritTasks", "onboardingActivityChoices", "onboardingCustomActivity", "onboardingAddCustomActivity", "onboardingProteinGoal", "onboardingReview", "onboardingCreateButton", "onboardingNavigation", "onboardingBackButton", "onboardingNextButton", "profileSummary", "editPersonalSetupButton", "commandNewCenter", "buildVersionBadge", "onboardingCustomScheduleLengthRow", "onboardingCustomScheduleLength", "scheduleCycleEyebrow", "scheduleCycleHelp", "quickBuilderHelp", "workoutBuilderCard", "genericTemplateChips", "savedTemplateChips", "clearHotSwapSelection", "hotSwapSelection", "hotSwapSelectedName", "hotSwapSelectedDetail", "hotSwapAssignButton", "hotSwapStatus", "hotSwapDayGrid", "exerciseLogSaveButton"].forEach((id) => {
       elements[id] = document.getElementById(id);
     });
   }
@@ -1314,13 +1314,25 @@
       loggingPastEntry = false;
       loggingExerciseName = null;
       loggingWorkoutName = null;
+      elements.exerciseLogForm.dataset.exerciseName = "";
+      elements.exerciseLogForm.dataset.workoutName = "";
       elements.exerciseLogDialog.close();
     });
     elements.exerciseLogForm.addEventListener("submit", saveExerciseLog);
+    elements.exerciseLogSaveButton.addEventListener("click", (event) => {
+      // iOS Safari occasionally fails to dispatch a form submit after dynamic
+      // schedule/view changes. Force the same validated submit path.
+      if (event.detail === 0) return;
+      if (!elements.exerciseLogForm.checkValidity()) return;
+      // Normal click will submit automatically; this listener exists as a
+      // stable bound control and intentionally does not mutate data directly.
+    });
     elements.exerciseLogDialog.addEventListener("cancel", () => {
       loggingPastEntry = false;
       loggingExerciseName = null;
       loggingWorkoutName = null;
+      elements.exerciseLogForm.dataset.exerciseName = "";
+      elements.exerciseLogForm.dataset.workoutName = "";
     });
     elements.progressExerciseSelect.addEventListener("change", () => {
       state.settings.progressExercise = elements.progressExerciseSelect.value;
@@ -2042,10 +2054,11 @@
     });
 
     const count = selectedDays.length;
-    saveState();
 
-    // Refresh the schedule and assignment grid, then clear selected days for fast repeat use.
-    renderSchedule();
+    // Persist and rebuild all dependent views. Dashboard workout name,
+    // exercise rows, activity routing, and log buttons all derive from schedule state.
+    saveAndRender();
+
     hotSwapTemplateName = selectedName;
     renderHotSwapTemplates();
 
@@ -2336,6 +2349,12 @@
     loggingExerciseName = exerciseName;
     const currentCycleDay = calculateCycleDay(new Date());
     loggingWorkoutName = state.settings.schedule[currentCycleDay - 1] || "Unassigned";
+
+    // Store context on the form as well as in memory so a render/view switch
+    // cannot invalidate the exercise being logged.
+    elements.exerciseLogForm.dataset.exerciseName = String(exerciseName || "");
+    elements.exerciseLogForm.dataset.workoutName = String(loggingWorkoutName || "Unassigned");
+
     const latest = getLatestExerciseLog(exerciseName);
     elements.exerciseLogName.textContent = exerciseName;
     elements.exerciseSelectField.hidden = true;
@@ -2353,6 +2372,8 @@
     loggingPastEntry = true;
     loggingExerciseName = null;
     loggingWorkoutName = null;
+    elements.exerciseLogForm.dataset.exerciseName = "";
+    elements.exerciseLogForm.dataset.workoutName = "";
     elements.exerciseLogName.textContent = "Historical strength entry";
     elements.exerciseSelectField.hidden = false;
     populateExerciseNameSelect();
@@ -2387,7 +2408,11 @@
 
     const exerciseName = loggingPastEntry
       ? elements.exerciseNameInput.value.trim()
-      : String(loggingExerciseName || "").trim();
+      : String(
+          elements.exerciseLogForm.dataset.exerciseName ||
+          loggingExerciseName ||
+          ""
+        ).trim();
     const dateKey = elements.exerciseDateInput.value;
     const weight = Number(elements.exerciseWeightInput.value);
     const reps = Number(elements.exerciseRepsInput.value);
@@ -2415,7 +2440,9 @@
     }
 
     const scheduleIndex = calculateCycleDay(selectedDate) - 1;
-    const workoutName = loggingWorkoutName ||
+    const workoutName =
+      elements.exerciseLogForm.dataset.workoutName ||
+      loggingWorkoutName ||
       state.settings.schedule[scheduleIndex] ||
       "Unassigned";
 
@@ -2471,14 +2498,13 @@
     loggingPastEntry = false;
     loggingExerciseName = null;
     loggingWorkoutName = null;
+    elements.exerciseLogForm.dataset.exerciseName = "";
+    elements.exerciseLogForm.dataset.workoutName = "";
 
-    // Re-render the Activity tracker so a brand-new exercise immediately
-    // appears in the progress selector/chart. Previously the code tried to
-    // select an option that did not exist yet, making a successful first log
-    // look like it never registered.
-    renderToday();
-    renderActivityTracker();
-    renderHistory();
+    // Rebuild all dependent views after a successful save.
+    // This guarantees the Dashboard "Last:" line, Activity progress,
+    // Archive, and Intel all see the same newly written log.
+    renderAll();
 
     setTimeout(() => {
       if (elements.exerciseLogDialog.open) {
@@ -5841,6 +5867,10 @@
       }
     });
 
+    if (target === "today") {
+      renderHeader();
+      renderToday();
+    }
     if (target === "history") renderHistory();
     if (target === "activity") renderActivityTracker();
     if (target === "intel") renderIntel();
